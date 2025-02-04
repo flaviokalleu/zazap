@@ -412,45 +412,7 @@ const FlowBuilder = () => {
                     <MoreVert
                       sx={{ color: "#ededed", width: "21px", height: "21px" }}
                     />
-                  </Button>
-                  {/* <IconButton
-                    size="small"
-                    onClick={() => hadleEditContact(contact.id, contact.name)}
-                  >
-                    <EditIcon style={{ color: "#ededed" }} />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={e => {
-                      setConfirmDuplicateOpen(true);
-                      setDeletingContact(contact);
-                    }}
-                  >
-                    <ContentCopy style={{ color: "#ededed" }} />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={() => history.push(`/flowbuilder/${contact.id}`)}
-                  >
-                    <Stack sx={{ width: 24 }}>
-                      <Build sx={{ width: 20, color: "#ededed" }} />
-                    </Stack>
-                  </IconButton>
-                  <Can
-                    role={user.profile}
-                    perform="contacts-page:deleteContact"
-                    yes={() => (
-                      <IconButton
-                        size="small"
-                        onClick={e => {
-                          setConfirmOpen(true);
-                          setDeletingContact(contact);
-                        }}
-                      >
-                        <DeleteOutlineIcon style={{ color: "#ededed" }} />
-                      </IconButton>
-                    )}
-                  /> */}
+                  </Button>                  
                 </Grid>
               </Grid>
             ))}

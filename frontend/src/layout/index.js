@@ -501,21 +501,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             />
           )}
          
-
-          {/* DESABILITADO POIS TEM BUGS */}
-          {/* <UserLanguageSelector /> */}
-          {/* <SoftPhone
-            callVolume={33} //Set Default callVolume
-            ringVolume={44} //Set Default ringVolume
-            connectOnStart={false} //Auto connect to sip
-            notifications={false} //Show Browser Notification of an incoming call
-            config={config} //Voip config
-            setConnectOnStartToLocalStorage={setConnectOnStartToLocalStorage} // Callback function
-            setNotifications={setNotifications} // Callback function
-            setCallVolume={setCallVolume} // Callback function
-            setRingVolume={setRingVolume} // Callback function
-            timelocale={'UTC-3'} //Set time local for call history
-          /> */}
           <IconButton edge="start" onClick={colorMode.toggleColorMode}>
             {theme.mode === "dark" ? (
               <Brightness7Icon style={{ color: "white" }} />

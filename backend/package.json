@@ -1,6 +1,6 @@
 {
   "name": "backend",
-  "version": "2.2.2v-26",
+  "version": "Origien-darkus",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -26,7 +26,7 @@
     "@socket.io/admin-ui": "0.5.1",
     "@supabase/supabase-js": "^2.33.2",
     "@types/fs-extra": "^11.0.4",
-    "@whiskeysockets/baileys": "github:zennn08/Baileys#profile-picture-url",
+    "@whiskeysockets/baileys": "v6.7.12",
     "async-mutex": "^0.5.0",
     "axios": "^1.5.0",
     "basic-auth": "^2.0.1",

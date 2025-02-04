@@ -6,133 +6,207 @@ import TextField from "@material-ui/core/TextField";
 import Link from "@material-ui/core/Link";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
+import { Grid } from "@material-ui/core";
 import { i18n } from "../../translate/i18n";
-import "./style.css";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import logo from "../../assets/logo.png";
-import { Grid } from "@material-ui/core";
-
-const Copyright = () => {
-  return (
-    <Typography variant="body2" color="primary" align="center">
-      {"Copyright "}
-      <Link color="primary" href="#">
-        PLW
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-};
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    width: "100vw",
-    height: "100vh",
-    background: "linear-gradient(to right, #0000FF , #0000CD , #00008B)",
-    backgroundRepeat: "no-repeat",
-    backgroundSize: "100% 100%",
-    backgroundPosition: "center",
+    minHeight: "100vh",
+    background: "linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%)",
+    position: "relative",
+    overflow: "hidden",
     display: "flex",
-    flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    textAlign: "center",
   },
-
+  decorativeCircle1: {
+    position: "absolute",
+    width: "500px",
+    height: "500px",
+    borderRadius: "50%",
+    background: "radial-gradient(circle, rgba(187,134,252,0.1) 0%, rgba(187,134,252,0) 70%)",
+    top: "-200px",
+    right: "-200px",
+  },
+  decorativeCircle2: {
+    position: "absolute",
+    width: "400px",
+    height: "400px",
+    borderRadius: "50%",
+    background: "radial-gradient(circle, rgba(3,218,198,0.1) 0%, rgba(3,218,198,0) 70%)",
+    bottom: "-150px",
+    left: "-150px",
+  },
   paper: {
-    backgroundColor: theme.palette.login, //DARK MODE PLW DESIGN//
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    padding: "55px 30px",
-    borderRadius: "12.5px",
+    background: "linear-gradient(145deg, rgba(37, 37, 37, 0.95) 0%, rgba(15, 15, 15, 0.95) 100%)",
+    borderRadius: "24px",
+    padding: theme.spacing(4),
+    width: "100%",
+    maxWidth: "500px",
+    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
+    position: "relative",
+    zIndex: 1,
   },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
+  logo: {
+    width: "180px",
+    marginBottom: theme.spacing(4),
+    display: "block",
+    margin: "0 auto",
   },
   form: {
-    width: "80%", // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
-    paddingTop: "20px",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
+    width: "100%",
+    marginTop: theme.spacing(2),
   },
   submit: {
-    "&.MuiButton-root": {
-      margin: "20px 0px 16px",
-      backgroundColor: "rgb(52, 137, 255)",
-      borderRadius: " 30px",
-    },
-    "&:hover": {
-      backgroundColor: "#285ec9",
-      // boxShadow: "none",
-    },
-
-    backgroundColor: "rgb(52, 137, 255)",
     margin: theme.spacing(3, 0, 2),
-    WebkitTextFillColor: "#FFF",
-    width: "50%",
-  },
-  powered: {
-    color: "white",
-  },
-  input: {
-    "& .MuiOutlinedInput-root": {
-      position: "relative",
-      borderRadius: "30px",
+    padding: theme.spacing(1.5),
+    background: "linear-gradient(45deg, #BB86FC 30%, #03DAC6 90%)",
+    color: "#000",
+    fontWeight: 600,
+    borderRadius: "12px",
+    fontSize: "1rem",
+    textTransform: "none",
+    "&:hover": {
+      background: "linear-gradient(45deg, #9965F4 30%, #00B5A5 90%)",
     },
+  },
+  textField: {
+    marginBottom: theme.spacing(2),
+    "& .MuiOutlinedInput-root": {
+      borderRadius: "12px",
+      backgroundColor: "rgba(255, 255, 255, 0.05)",
+      "& fieldset": {
+        borderColor: "rgba(255, 255, 255, 0.1)",
+      },
+      "&:hover fieldset": {
+        borderColor: "#BB86FC",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#BB86FC",
+      },
+    },
+    "& .MuiInputLabel-root": {
+      color: "rgba(255, 255, 255, 0.7)",
+    },
+    "& .MuiInputBase-input": {
+      color: "#fff",
+    },
+  },
+  links: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginTop: theme.spacing(2),
+  },
+  link: {
+    color: "#BB86FC",
+    textDecoration: "none",
+    "&:hover": {
+      textDecoration: "underline",
+    },
+  },
+  title: {
+    color: "#fff",
+    marginBottom: theme.spacing(3),
+    textAlign: "center",
+    fontWeight: 600,
+  },
+  subtitle: {
+    color: "rgba(255, 255, 255, 0.7)",
+    marginBottom: theme.spacing(4),
+    textAlign: "center",
+  },
+  footer: {
+    position: "absolute",
+    bottom: theme.spacing(2),
+    width: "100%",
+    textAlign: "center",
+    color: "rgba(255, 255, 255, 0.5)",
   },
 }));
 
 const Login = () => {
   const classes = useStyles();
-
   const [user, setUser] = useState({ email: "", password: "" });
-
   const { handleLogin } = useContext(AuthContext);
 
   const handleChangeInput = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
 
-  const handlSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     handleLogin(user);
   };
 
   return (
-    <div className="geral">
+    <div className={classes.root}>
       <CssBaseline />
-      <div className={"container-login"}>
-        <div className={"container-img"}>
-          <img alt={"Logo"} src={logo} className="img-login"></img>
-        </div>
-        <div className="container-footer">
-          <p>
-            Copyright ©{" "}
-            <a href={"https://www.instagram.com/flavio_germanio/"} target={"_blank"}>
-              Flavio Germanio{""}
-            </a>{" "}
-            2024{" "}
-          </p>
-          <p>
-            This site is protected by reCAPTCHA Enterprise and the Google{" "}
-            <a href={"https://policies.google.com/privacy"} target={"_blank"}>
-              Privacy Policy
-            </a>{" "}
-            and{" "}
-            <a href={"https://policies.google.com/terms"} target={"_blank"}>
-              Terms of Service
-            </a>
-          </p>
-        </div>
-      </div>
-      <div className={"container-right"}>
-        <div className={"box"}>
-          <div className={"container-header-box"}>
+      <div className={classes.decorativeCircle1} />
+      <div className={classes.decorativeCircle2} />
+      
+      <div className={classes.paper}>
+        <img src={logo} alt="Logo" className={classes.logo} />
+        
+        <Typography component="h1" variant="h4" className={classes.title}>
+          {i18n.t("login.title")}
+        </Typography>
+        
+        
+
+        <form className={classes.form} onSubmit={handleSubmit}>
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label={i18n.t("login.form.email")}
+            name="email"
+            autoComplete="email"
+            autoFocus
+            value={user.email}
+            onChange={handleChangeInput}
+            className={classes.textField}
+          />
+          
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label={i18n.t("login.form.password")}
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={user.password}
+            onChange={handleChangeInput}
+            className={classes.textField}
+          />
+<Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+            >
+              {i18n.t("login.buttons.submit")}
+            </Button>
+
+          <Grid container className={classes.links}>
+            <Grid item>
+            <Link
+                  href="#"
+                  variant="body2"
+                  component={RouterLink}
+                  to="/recovery-password"
+                >
+                  {i18n.t("Recuperar Senha?")}
+                </Link>
+            </Grid>
+            <Grid item>
             <Link
               // variant="body2"
               component={RouterLink}
@@ -145,102 +219,13 @@ const Login = () => {
             >
               <span className={"label-text"}>Criar conta</span>
             </Link>
-            <a
-              className={"link-enter"}
-              tabIndex={0}
-              role={"button"}
-              aria-disabled={"false"}
-              to="/login"
-              style={{ textDecoration: "none" }}
-            >
-              <span>Entrar</span>
-            </a>
-          </div>
-          <form className={classes.form} noValidate onSubmit={handlSubmit}>
-            <TextField
-              className={classes.input}
-              variant="outlined"
-              margin="dense"
-              required
-              fullWidth
-              id="email"
-              label={i18n.t("login.form.email")}
-              name="email"
-              value={user.email}
-              onChange={handleChangeInput}
-              autoComplete="email"
-              autoFocus
-              inputProps={{
-                style: {
-                  borderRadius: "50px",
-                  height: "30px",
-                  padding: "12px",
-                  backgroundColor: "#E8F0FE",
-                },
-              }}
-            />
-            <TextField
-              className={classes.input}
-              variant="outlined"
-              margin="dense"
-              required
-              fullWidth
-              name="password"
-              label={i18n.t("login.form.password")}
-              type="password"
-              id="password"
-              value={user.password}
-              onChange={handleChangeInput}
-              autoComplete="current-password"
-              inputProps={{
-                style: {
-                  borderRadius: "50px",
-                  height: "30px",
-                  padding: "12px",
-                  backgroundColor: "#E8F0FE",
-                },
-              }}
-            />
-
-            <Grid container justify="flex-end">
-              <Grid item>
-                <Link
-                  href="#"
-                  variant="body2"
-                  component={RouterLink}
-                  to="/recovery-password"
-                >
-                  {i18n.t("Recuperar Senha?")}
-                </Link>
-              </Grid>
             </Grid>
+          </Grid>
+        </form>
 
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-            >
-              {i18n.t("login.buttons.submit")}
-            </Button>
-
-
-
-          </form>
-          <div className={"container-footer-form"}>
-            <p>
-              Ao prosseguir, você concorda com nossos{" "}
-              <a className={"termo"} href={"/term"} target={"_blank"}>
-                Termos de Serviço{""}
-              </a>{" "}
-              e{" "}
-              <a className={"politica"} href={"/privacy"} target={"_blank"}>
-                Política de Privacidade
-              </a>
-            </p>
-          </div>
-        </div>
+        <Typography variant="body2" className={classes.footer}>
+          © {new Date().getFullYear()} ZAZAP.
+        </Typography>
       </div>
     </div>
   );
