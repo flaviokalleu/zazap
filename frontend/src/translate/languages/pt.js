@@ -1693,6 +1693,7 @@ const messages = {
         forward: "Encaminhar",
         toForward: "Encaminhar",
         talkTo: "Conversar Com",
+        react: "Reagir",
         confirmationModal: {
           title: "Apagar mensagem?",
           message: "Esta ação não pode ser revertida.",

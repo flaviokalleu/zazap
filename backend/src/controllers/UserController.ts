@@ -95,10 +95,12 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   if (!companyUser) {
 
-    const dataNowMoreTwoDays = new Date();
-    dataNowMoreTwoDays.setDate(dataNowMoreTwoDays.getDate() + 3);
+    const trialDays = parseInt(process.env.APP_TRIALEXPIRATION || "3", 10);
 
-    const date = dataNowMoreTwoDays.toISOString().split("T")[0];
+    const dataNowMoreTrialDays = new Date();
+    dataNowMoreTrialDays.setDate(dataNowMoreTrialDays.getDate() + trialDays);
+
+    const date = dataNowMoreTrialDays.toISOString().split("T")[0];
 
     const companyData = {
       name: companyName,

@@ -82,9 +82,7 @@ export default function CheckoutPage(props) {
 
       const { data } = await api.post("/subscription", newValues);
       setDatePayment(data)
-      
-      window.open(data.urlMcPg, '_blank');
-      actions.setSubmitting(true);
+      actions.setSubmitting(false);
       setActiveStep(activeStep + 1);
       toast.success("Assinatura realizada com sucesso!, aguardando a realização do pagamento");
     } catch (err) {

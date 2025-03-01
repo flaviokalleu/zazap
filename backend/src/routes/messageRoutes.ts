@@ -14,7 +14,7 @@ messageRoutes.post("/messages/:ticketId", isAuth, upload.array("medias"), Messag
 // messageRoutes.post("/forwardmessage",isAuth,MessageController.forwardmessage);
 messageRoutes.delete("/messages/:messageId", isAuth, MessageController.remove);
 messageRoutes.post("/messages/edit/:messageId", isAuth, MessageController.edit);
-
+messageRoutes.post('/messages/:messageId/reactions', isAuth, MessageController.addReaction);
 messageRoutes.get("/messages-allMe", isAuth, MessageController.allMe);
 messageRoutes.post('/message/forward', isAuth, MessageController.forwardMessage)
 

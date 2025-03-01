@@ -54,37 +54,39 @@ const useStyles = makeStyles((theme) => ({
     letterSpacing: '0.5px',
     lineHeight: 2.5,
     textTransform: 'uppercase',
-    fontFamily: "'Plus Jakarta Sans', sans-serif'",
+    fontFamily: "'Plus Jakarta Sans', sans-serif",
   },
   h4: {
-    fontFamily: "'Plus Jakarta Sans', sans-serif'",
+    fontFamily: "'Plus Jakarta Sans', sans-serif",
     fontWeight: 500,
     fontSize: '2rem',
     lineHeight: 1,
     color: "grey",
+    [theme.breakpoints.down("sm")]: {
+      fontSize: '1.75rem',
+    },
   },
   tab: {
     minWidth: "auto",
     width: "auto",
-    padding: theme.spacing(0.5, 1),
-    borderRadius: 8,
+    padding: theme.spacing(0.5, 1.5),
+    borderRadius: 12, // bordas mais arredondadas
     transition: "0.3s",
     borderWidth: "1px",
     borderStyle: "solid",
-    marginRight: theme.spacing(0.5),
-    marginLeft: theme.spacing(0.5),
-
+    margin: theme.spacing(0, 0.5),
     [theme.breakpoints.down("lg")]: {
       fontSize: "0.9rem",
-      padding: theme.spacing(0.4, 0.8),
-      marginRight: theme.spacing(0.4),
-      marginLeft: theme.spacing(0.4),
+      padding: theme.spacing(0.4, 1.2),
     },
     [theme.breakpoints.down("md")]: {
       fontSize: "0.8rem",
-      padding: theme.spacing(0.3, 0.6),
-      marginRight: theme.spacing(0.3),
-      marginLeft: theme.spacing(0.3),
+      padding: theme.spacing(0.3, 1),
+    },
+    [theme.breakpoints.down("sm")]: {
+      fontSize: "0.75rem",
+      padding: theme.spacing(0.3, 0.8),
+      margin: theme.spacing(0, 0.2),
     },
     "&:hover": {
       backgroundColor: "rgba(6, 81, 131, 0.3)",
@@ -99,39 +101,52 @@ const useStyles = makeStyles((theme) => ({
     borderStyle: "solid",
     height: 6,
     bottom: 0,
-    color: theme.mode === "light" ? theme.palette.primary.main : "#FFF",
+    color:
+      theme.palette.mode === "light"
+        ? theme.palette.primary.main
+        : "#FFF",
   },
   container: {
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.padding,
+    paddingTop: theme.spacing(4),
+    paddingBottom: theme.spacing(4),
     maxWidth: "1150px",
-    minWidth: "xs",
+    margin: "0 auto",
+    [theme.breakpoints.down("sm")]: {
+      padding: theme.spacing(2),
+      maxWidth: "100%",
+    },
   },
   nps: {
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.padding,
+    paddingTop: theme.spacing(2),
+    paddingBottom: theme.spacing(2),
   },
-  fixedHeightPaper: {
+  // Papel com altura fixa e bordas arredondadas
+  paper: {
     padding: theme.spacing(2),
     display: "flex",
     flexDirection: "column",
-    height: 240,
+    borderRadius: 12,
     overflowY: "auto",
+    height: 240,
     ...theme.scrollbarStyles,
+    [theme.breakpoints.down("sm")]: {
+      height: "auto",
+    },
   },
   cardAvatar: {
     fontSize: "55px",
-    color: grey[500],
+    color: theme.palette.grey[500],
     backgroundColor: "#ffffff",
     width: theme.spacing(7),
     height: theme.spacing(7),
+    borderRadius: "50%",
   },
   cardTitle: {
     fontSize: "18px",
-    color: blue[700],
+    color: theme.palette.info.main,
   },
   cardSubtitle: {
-    color: grey[600],
+    color: theme.palette.grey[600],
     fontSize: "14px",
   },
   alignRight: {
@@ -149,38 +164,34 @@ const useStyles = makeStyles((theme) => ({
     height: "calc(100vh - 64px)",
     border: "none",
   },
-  container: {
-    paddingTop: theme.spacing(4),
-    paddingBottom: theme.spacing(4),
-  },
-  fixedHeightPaper: {
+  // Versões customizadas do papel para diferentes contextos
+  customPaperSmall: {
     padding: theme.spacing(2),
     display: "flex",
-    overflow: "auto",
     flexDirection: "column",
-    height: 240,
-  },
-  customFixedHeightPaper: {
-    padding: theme.spacing(2),
-    display: "flex",
-    overflow: "auto",
-    flexDirection: "column",
+    borderRadius: 12,
     height: 120,
+    overflowY: "auto",
+    [theme.breakpoints.down("sm")]: {
+      height: "auto",
+    },
   },
-  customFixedHeightPaperLg: {
+  customPaperFull: {
     padding: theme.spacing(2),
     display: "flex",
-    overflow: "auto",
     flexDirection: "column",
+    borderRadius: 12,
     height: "100%",
+    overflowY: "auto",
   },
-  fixedHeightPaper2: {
+  paperNoFixedHeight: {
     padding: theme.spacing(2),
     display: "flex",
-    overflow: "auto",
     flexDirection: "column",
+    overflowY: "auto",
   },
 }));
+
 
 const Dashboard = () => {
   const theme = useTheme();

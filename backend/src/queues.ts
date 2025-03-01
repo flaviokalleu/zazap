@@ -1581,8 +1581,7 @@ async function handleWhatsapp() {
   jobW.start();
 }
 async function handleInvoiceCreate() {
-  logger.info("Iniciando geracao de boletos");
-  const job = new CronJob('*/5 * * * * *', async () => {
+  const job = new CronJob('0 * * * * *', async () => {
 
 
     const companies = await Company.findAll();
@@ -1613,34 +1612,34 @@ async function handleInvoiceCreate() {
             { type: QueryTypes.INSERT }
           );
 
-          /*           let transporter = nodemailer.createTransport({
-                      service: 'gmail',
-                      auth: {
-                        user: 'email@gmail.com',
-                        pass: 'senha'
-                      }
-                    });
- 
-                    const mailOptions = {
-                      from: 'heenriquega@gmail.com', // sender address
-                      to: `${c.email}`, // receiver (use array of string for a list)
-                      subject: 'Fatura gerada - Sistema', // Subject line
-                      html: `Olá ${c.name} esté é um email sobre sua fatura!<br>
-          <br>
-          Vencimento: ${vencimento}<br>
-          Valor: ${plan.value}<br>
-          Link: ${process.env.FRONTEND_URL}/financeiro<br>
-          <br>
-          Qualquer duvida estamos a disposição!
-                      `// plain text body
-                    };
- 
-                    transporter.sendMail(mailOptions, (err, info) => {
-                      if (err)
-                        console.log(err)
-                      else
-                        console.log(info);
-                    }); */
+/*           let transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+              user: 'email@gmail.com',
+              pass: 'senha'
+            }
+          });
+
+          const mailOptions = {
+            from: 'heenriquega@gmail.com', // sender address
+            to: `${c.email}`, // receiver (use array of string for a list)
+            subject: 'Fatura gerada - Sistema', // Subject line
+            html: `Olá ${c.name} esté é um email sobre sua fatura!<br>
+<br>
+Vencimento: ${vencimento}<br>
+Valor: ${plan.value}<br>
+Link: ${process.env.FRONTEND_URL}/financeiro<br>
+<br>
+Qualquer duvida estamos a disposição!
+            `// plain text body
+          };
+
+          transporter.sendMail(mailOptions, (err, info) => {
+            if (err)
+              console.log(err)
+            else
+              console.log(info);
+          }); */
 
         }
 
@@ -1654,7 +1653,10 @@ async function handleInvoiceCreate() {
   });
   job.start()
 }
+
+
 handleInvoiceCreate()
+
 handleWhatsapp();
 handleProcessLanes();
 handleCloseTicketsAutomatic();

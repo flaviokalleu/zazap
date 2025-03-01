@@ -1,219 +1,286 @@
 import React, { useState, useContext } from "react";
+import PropTypes from "prop-types";
 
-import MenuItem from "@material-ui/core/MenuItem";
+import AddCircleOutlineIcon from '@material-ui/icons/Add';
 
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import ConfirmationModal from "../ConfirmationModal";
-import { Menu } from "@material-ui/core";
+import { Menu, MenuItem, MenuList, Grid, Popover, IconButton, makeStyles } from "@material-ui/core";
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
+import EditMessageModal from "../EditMessageModal";
 import { ForwardMessageContext } from "../../context/ForwarMessage/ForwardMessageContext";
-import { EditMessageContext } from "../../context/EditingMessage/EditingMessageContext";
-
-import { TicketsContext } from "../../context/Tickets/TicketsContext";
-// import { v4 as uuidv4 } from "uuid";
-
+import ForwardModal from "../../components/ForwardMessageModal";
+import {toast} from "react-toastify";
 import toastError from "../../errors/toastError";
-import { useHistory } from "react-router-dom";
-import { AuthContext } from "../../context/Auth/AuthContext";
-import ForwardModal from "../ForwardMessageModal";
-import ShowTicketOpen from "../ShowTicketOpenModal";
-import AcceptTicketWithoutQueue from "../AcceptTicketWithoutQueueModal";
 
-const MessageOptionsMenu = ({
-  message,
-  menuOpen,
-  handleClose,
-  anchorEl,
-  isGroup,
-  queueId,
-  whatsappId
-}) => {
-  const { setReplyingMessage } = useContext(ReplyMessageContext);
-  const [confirmationOpen, setConfirmationOpen] = useState(false);
-  const { user } = useContext(AuthContext);
-  const editingContext = useContext(EditMessageContext);
-  const setEditingMessage = editingContext ? editingContext.setEditingMessage : null;
-  const { setTabOpen } = useContext(TicketsContext);
-  const history = useHistory();
+const useStyles = makeStyles((theme) => ({
+	iconButton: {
+	  padding: '4px', // Ajuste o valor conforme necessário
+	},
+	gridContainer: {
+	  padding: '10px',
+	  justifyContent: 'center',
+	},
+	addCircleButton: {
+	  padding: '8px',
+	  fontSize: '2rem', // Aumentar o tamanho do ícone
+	  backgroundColor: 'rgb(242 242 247);',
+	},
+	popoverContent: {
+	  maxHeight: '300px', // Ajuste conforme necessário
+	  overflowY: 'auto',
+	  '&::-webkit-scrollbar': {
+		width: '0.4em',
+		height: '0.4em',
+	  },
+	  '&::-webkit-scrollbar-thumb': {
+		backgroundColor: 'rgba(0,0,0,.1)',
+		borderRadius: '50px',
+	  },
+	  '&::-webkit-scrollbar-track': {
+		boxShadow: 'inset 0 0 6px rgba(0,0,0,0.00)',
+		webkitBoxShadow: 'inset 0 0 6px rgba(0,0,0,0.00)',
+	  },
+	},
+	hideScrollbar: {
+	  maxHeight: '300px',
+	  overflow: 'hidden',
+	},
+  }));
 
-  const [openAlert, setOpenAlert] = useState(false);
-  const [userTicketOpen, setUserTicketOpen] = useState("");
-  const [queueTicketOpen, setQueueTicketOpen] = useState("");
-  const [acceptTicketWithouSelectQueueOpen, setAcceptTicketWithouSelectQueueOpen] = useState(false);
+const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
+	const classes = useStyles();
+	const { setReplyingMessage } = useContext(ReplyMessageContext);
+	const [confirmationOpen, setConfirmationOpen] = useState(false);
+	const [confirmationEditOpen, setEditMessageOpenModal] = useState(false);
+	const [messageEdit, setMessageEdit] = useState(false);
+	const [reactionAnchorEl, setReactionAnchorEl] = useState(null);
+	const [moreAnchorEl, setMoreAnchorEl] = useState(null);
+	const {
+		showSelectMessageCheckbox,
+		setShowSelectMessageCheckbox,
+		selectedMessages,
+		forwardMessageModalOpen,
+		setForwardMessageModalOpen } = useContext(ForwardMessageContext);
+		
 
-  const [ticketOpen, setTicketOpen] = useState(null);
+	const handleDeleteMessage = async () => {
+		try {
+			await api.delete(`/messages/${message.id}`);
+		} catch (err) {
+			toastError(err);
+		}
+	};
 
-  const { showSelectMessageCheckbox,
-    setShowSelectMessageCheckbox,
-    selectedMessages,
-    forwardMessageModalOpen,
-    setForwardMessageModalOpen } = useContext(ForwardMessageContext);
+	const openReactionsMenu = (event) => {
+		setReactionAnchorEl(event.currentTarget);
+		handleClose();
+	};
+	
+	const closeReactionsMenu = () => {
+		setReactionAnchorEl(null);
+	};
 
-  const handleSaveTicket = async (contactId) => {
-    if (!contactId) return;
+	const openMoreReactionsMenu = (event) => {
+		setMoreAnchorEl(event.currentTarget);
+		closeReactionsMenu();  // Fechar o primeiro popover
+	};
 
-    try {
-      const { data: ticket } = await api.post("/tickets", {
-        contactId: contactId,
-        userId: user?.id,
-        status: "open",
-        queueId: queueId,
-        whatsappId: whatsappId
-      });
+	const closeMoreReactionsMenu = () => {
+		setMoreAnchorEl(null);
+	};
 
-      setTicketOpen(ticket);
-      if (ticket.queueId === null) {
-        setAcceptTicketWithouSelectQueueOpen(true);
-      } else {
-        setTabOpen("open");
-        history.push(`/tickets/${ticket.uuid}`);
-      }
-    } catch (err) {
-      const ticket = JSON.parse(err.response.data.error);
+	const closeAllMenus = () => {
+		handleClose();
+		closeReactionsMenu();
+		closeMoreReactionsMenu();
+	};
 
-      if (ticket.userId !== user?.id) {
-        setOpenAlert(true);
-        setUserTicketOpen(ticket.user.name);
-        setQueueTicketOpen(ticket.queue.name);
-      } else {
-        setOpenAlert(false);
-        setUserTicketOpen("");
-        setQueueTicketOpen("");
+	const handleReactToMessage = async (reactionType) => {
+		try {
+			await api.post(`/messages/${message.id}/reactions`, { type: reactionType });
+			toast.success(i18n.t("Reação Enviada Com sucesso"));
+		} catch (err) {
+			toastError(err);
+		}
+		// Fechar todos os menus após enviar a reação
+		closeAllMenus();
+	};
 
-        // handleSelectTicket(ticket);
-        setTabOpen(ticket.status);
-        history.push(`/tickets/${ticket.uuid}`);
-      }
-    }
-    //setLoading(false);
-    handleClose();
-  };
+	// Array de emojis
+    const availableReactions = [
+		'😀', '😂', '❤️', '👍', '🎉', '😢', '😮', '😡', '👏', '🔥',
+        '🥳', '😎', '🤩', '😜', '🤔', '🙄', '😴', '😇', '🤯', '💩',
+        '🤗', '🤫', '🤭', '🤓', '🤪', '🤥', '🤡', '🤠', '🤢', '🤧',
+        '😷', '🤕', '🤒', '👻', '💀', '☠️', '👽', '👾', '🤖', '🎃',
+        '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾', '🙈',
+        '🙉', '🙊', '🐵', '🐒', '🦍', '🐶', '🐕', '🐩', '🐺', '🦊',
+        '🦝', '🐱', '🐈', '🦁', '🐯', '🐅', '🐆', '🐴', '🐎', '🦄'
+	];	
 
-  const handleCloseAlert = () => {
-    setOpenAlert(false);
-    setOpenAlert(false);
-    setUserTicketOpen("");
-    setQueueTicketOpen("");
-  };
+	const handleSetShowSelectCheckbox = () => {
+		setShowSelectMessageCheckbox(!showSelectMessageCheckbox);
+		handleClose();
+	};
 
-  const handleSetShowSelectCheckbox = () => {
-    setShowSelectMessageCheckbox(!showSelectMessageCheckbox);
-    handleClose();
-  };
+	const handleEditMessage = async () => {
+		try {
+			await api.put(`/messages/${message.id}`);
+		} catch (err) {
+			toastError(err);
+		}
+	}
 
-  const handleDeleteMessage = async () => {
-    try {
-      await api.delete(`/messages/${message.id}`);
-    } catch (err) {
-      toastError(err);
-    }
-  };
+	const hanldeReplyMessage = () => {
+		setReplyingMessage(message);
+		handleClose();
+	};
 
-  const handleEditMessage = async () => {
-    setEditingMessage(message);
-    handleClose();
-  }
-  // const handleForwardMessage = (msg) => {
-  //   setForwardModalOpen(true);
-  //   setForwardMessage(msg);
-  //   handleClose();
-  // };
-  // const handleCloseForwardModal = () => {
+	const handleOpenConfirmationModal = e => {
+		setConfirmationOpen(true);
+		handleClose();
+	};
 
-  //   //setSelectedSchedule(null);
-  //   setForwardModalOpen(false);
-  //   handleClose();
-  // };
+	const handleOpenEditMessageModal = e => {
+		setEditMessageOpenModal(true);
+		setMessageEdit(message)
+		handleClose();
+	};
 
-  const hanldeReplyMessage = () => {
-    setReplyingMessage(message);
-    handleClose();
-  };
-
-  const isWithinFifteenMinutes = () => {
-    const fifteenMinutesInMilliseconds = 15 * 60 * 1000; // 15 minutos em milissegundos
-    const currentTime = new Date();
-    const messageTime = new Date(message.createdAt);
-
-    // Verifica se a diferença entre o tempo atual e o tempo da mensagem é menor que 15 minutos
-    return currentTime - messageTime <= fifteenMinutesInMilliseconds;
-  };
-
-  const handleOpenConfirmationModal = (e) => {
-    setConfirmationOpen(true);
-    handleClose();
-  };
-
-  return (
-    <>
-      <AcceptTicketWithoutQueue
-        modalOpen={acceptTicketWithouSelectQueueOpen}
-        onClose={(e) => setAcceptTicketWithouSelectQueueOpen(false)}
-        ticket={ticketOpen}
-        ticketId={ticketOpen?.id}
-      />
-      <ShowTicketOpen
-        isOpen={openAlert}
-        handleClose={handleCloseAlert}
-        user={userTicketOpen}
-        queue={queueTicketOpen}
-      />
-      <ConfirmationModal
-        title={i18n.t("messageOptionsMenu.confirmationModal.title")}
-        open={confirmationOpen}
-        onClose={setConfirmationOpen}
-        onConfirm={handleDeleteMessage}
-      >
-        {i18n.t("messageOptionsMenu.confirmationModal.message")}
-      </ConfirmationModal>
-
-      <ForwardModal
-        modalOpen={forwardMessageModalOpen}
-        messages={selectedMessages}
-        onClose={(e) => {
-          setForwardMessageModalOpen(false);
-          setShowSelectMessageCheckbox(false);
-        }}
-      />
-      <Menu
-        anchorEl={anchorEl}
-        getContentAnchorEl={null}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "right",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
-        open={menuOpen}
-        onClose={handleClose}
-      >
-        {message.fromMe && (
-          <MenuItem key="delete" onClick={handleOpenConfirmationModal}>
-            {i18n.t("messageOptionsMenu.delete")}
-          </MenuItem>
-        )}
-        {message.fromMe && isWithinFifteenMinutes() && (
-          <MenuItem key="edit" onClick={handleEditMessage}>
-            {i18n.t("messageOptionsMenu.edit")}
-          </MenuItem>
-        )}
-        <MenuItem onClick={hanldeReplyMessage}>
-          {i18n.t("messageOptionsMenu.reply")}
-        </MenuItem>
-        <MenuItem onClick={handleSetShowSelectCheckbox}>
-          {i18n.t("messageOptionsMenu.forward")}
-        </MenuItem>
-        {!message.fromMe && isGroup && (
-          <MenuItem onClick={() => handleSaveTicket(message?.contact?.id)}>
-            {i18n.t("messageOptionsMenu.talkTo")}
-          </MenuItem>
-        )}
-      </Menu>
-    </>
-  );
+	return (
+		<>
+			<ForwardModal
+			modalOpen={forwardMessageModalOpen}
+			messages={selectedMessages}
+			onClose={(e) => {
+				setForwardMessageModalOpen(false);
+				setShowSelectMessageCheckbox(false);
+			}}
+				/>
+			<ConfirmationModal
+				title={i18n.t("messageOptionsMenu.confirmationModal.title")}
+				open={confirmationOpen}
+				onClose={setConfirmationOpen}
+				onConfirm={handleDeleteMessage}
+			>
+				{i18n.t("messageOptionsMenu.confirmationModal.message")}
+			</ConfirmationModal>
+			<EditMessageModal
+				title={i18n.t("messageOptionsMenu.editMessageModal.title")}
+				open={confirmationEditOpen}
+				onClose={setEditMessageOpenModal}
+				onSave={handleEditMessage}
+				message={message}
+			>
+				{i18n.t("messageOptionsMenu.confirmationModal.message")}
+			</EditMessageModal>
+			<Menu
+				anchorEl={anchorEl}
+				getContentAnchorEl={null}
+				anchorOrigin={{
+					vertical: "bottom",
+					horizontal: "right",
+				}}
+				transformOrigin={{
+					vertical: "top",
+					horizontal: "right",
+				}}
+				open={menuOpen}
+				onClose={handleClose}
+			>
+				<MenuItem onClick={handleSetShowSelectCheckbox}>
+					{i18n.t("messageOptionsMenu.forward")}
+				</MenuItem>
+				{message.fromMe && (
+					<MenuItem onClick={handleOpenEditMessageModal}>
+						{i18n.t("messageOptionsMenu.edit")}
+					</MenuItem>
+				)}
+				{message.fromMe && (
+					<MenuItem onClick={handleOpenConfirmationModal}>
+						{i18n.t("messageOptionsMenu.delete")}
+					</MenuItem>
+				)}
+				<MenuItem onClick={hanldeReplyMessage}>
+					{i18n.t("messageOptionsMenu.reply")}
+				</MenuItem>
+				<MenuItem onClick={openReactionsMenu}>
+				{i18n.t("messageOptionsMenu.react")}
+				</MenuItem>
+			</Menu>
+			<Popover
+					open={Boolean(reactionAnchorEl)}
+					anchorEl={reactionAnchorEl}
+					onClose={closeReactionsMenu}
+					anchorOrigin={{
+						vertical: 'bottom',
+						horizontal: 'right',
+					}}
+					transformOrigin={{
+						vertical: 'top',
+						horizontal: 'right',
+					}}
+					PaperProps={{
+						style: { width: 'auto', maxWidth: '380px', borderRadius: '50px'  }
+					}}
+				>
+					<div className={classes.hideScrollbar}>
+					<Grid container spacing={1} className={classes.gridContainer}>
+						{availableReactions.slice(0, 6).map(reaction => (
+							<Grid item key={reaction}>
+								<IconButton className={classes.iconButton} onClick={() => handleReactToMessage(reaction)}>
+									{reaction}
+								</IconButton>
+							</Grid>
+						))}
+						<Grid item>
+						<IconButton className={classes.addCircleButton} onClick={openMoreReactionsMenu}>
+								<AddCircleOutlineIcon fontSize="normal" />
+							</IconButton>
+						</Grid>
+					</Grid>
+					</div>
+				</Popover>
+				<Popover
+					open={Boolean(moreAnchorEl)}
+					anchorEl={moreAnchorEl}
+					onClose={closeMoreReactionsMenu}
+					anchorOrigin={{
+						vertical: 'bottom',
+						horizontal: 'center',
+					}}
+					transformOrigin={{
+						vertical: 'top',
+						horizontal: 'center',
+					}}
+					PaperProps={{
+						style: { width: 'auto', maxWidth: '400px', borderRadius: '6px' }
+					}}
+				>
+					<div className={classes.popoverContent}>
+					<Grid container spacing={1} className={classes.gridContainer}>
+						{availableReactions.map(reaction => (
+							<Grid item key={reaction}>
+								<IconButton className={classes.iconButton} onClick={() => handleReactToMessage(reaction)}>
+									{reaction}
+								</IconButton>
+							</Grid>
+						))}
+					</Grid>
+					</div>
+				</Popover>
+		</>
+	);
 };
+
+MessageOptionsMenu.propTypes = {
+    message: PropTypes.object,
+    menuOpen: PropTypes.bool.isRequired,
+    handleClose: PropTypes.func.isRequired,
+    anchorEl: PropTypes.object,
+    onReaction: PropTypes.func, // Callback opcional chamado após uma reação
+    availableReactions: PropTypes.arrayOf(PropTypes.string) // Lista opcional de reações disponíveis
+}
 
 export default MessageOptionsMenu;

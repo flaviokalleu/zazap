@@ -48,7 +48,6 @@ import { Can } from "../../components/Can";
 import NewTicketModal from "../../components/NewTicketModal";
 import { TagsFilter } from "../../components/TagsFilter";
 import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
-import formatSerializedId from '../../utils/formatSerializedId';
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -61,6 +60,103 @@ import { Menu, MenuItem } from "@material-ui/core";
 import ContactImportWpModal from "../../components/ContactImportWpModal";
 import useCompanySettings from "../../hooks/useSettings/companySettings";
 import { TicketsContext } from "../../context/Tickets/TicketsContext";
+
+// Phone number validation and formatting functions
+const isValidBrazilianPhoneNumber = (number) => {
+  if (!number) return false;
+  
+  // Remove all non-numeric characters
+  const cleanNumber = number.replace(/\D/g, '');
+  
+  // Check if the number is empty or too short
+  if (!cleanNumber || cleanNumber.length < 10) return false;
+  
+  // Brazilian numbers typically have 10-11 digits (with area code)
+  // DDD (area code) in Brazil is 2 digits (11-99)
+  if (cleanNumber.length > 13) return false;
+  
+  // Check if starts with country code 55 (Brazil) or has valid area code
+  const hasBrazilCountryCode = cleanNumber.startsWith('55');
+  const numberWithoutCountryCode = hasBrazilCountryCode ? cleanNumber.slice(2) : cleanNumber;
+  
+  // Extract area code (DDD)
+  const areaCode = numberWithoutCountryCode.slice(0, 2);
+  
+  // Validate the area code (Brazilian DDDs range from 11 to 99)
+  const areaCodeNum = parseInt(areaCode, 10);
+  if (areaCodeNum < 11 || areaCodeNum > 99) return false;
+  
+  // Check the length of the remaining phone number
+  const phoneNumberWithoutAreaCode = numberWithoutCountryCode.slice(2);
+  
+  // Brazilian mobile numbers have 9 digits, landlines have 8
+  const isValidLength = phoneNumberWithoutAreaCode.length === 8 || phoneNumberWithoutAreaCode.length === 9;
+  
+  // Mobile numbers in Brazil start with 9
+  const isMobileValid = phoneNumberWithoutAreaCode.length === 9 && phoneNumberWithoutAreaCode.startsWith('9');
+  
+  // Landline numbers should have 8 digits
+  const isLandlineValid = phoneNumberWithoutAreaCode.length === 8;
+  
+  return isValidLength && (isMobileValid || isLandlineValid);
+};
+
+// Function to format the Brazilian phone number for display
+const formatBrazilianPhoneNumber = (number) => {
+  if (!isValidBrazilianPhoneNumber(number)) return null;
+  
+  // Remove all non-numeric characters
+  const cleanNumber = number.replace(/\D/g, '');
+  
+  // Handle numbers with country code
+  const hasBrazilCountryCode = cleanNumber.startsWith('55');
+  const numberWithoutCountryCode = hasBrazilCountryCode ? cleanNumber.slice(2) : cleanNumber;
+  
+  // Get area code
+  const areaCode = numberWithoutCountryCode.slice(0, 2);
+  
+  // Get the phone part
+  const phoneNumber = numberWithoutCountryCode.slice(2);
+  
+  // Format based on mobile (9 digits) or landline (8 digits)
+  if (phoneNumber.length === 9) {
+    // Mobile format: (XX) 9XXXX-XXXX
+    return `🇧🇷 (${areaCode}) ${phoneNumber.slice(0, 1)}${phoneNumber.slice(1, 5)}-${phoneNumber.slice(5)}`;
+  } else {
+    // Landline format: (XX) XXXX-XXXX
+    return `🇧🇷 (${areaCode}) ${phoneNumber.slice(0, 4)}-${phoneNumber.slice(4)}`;
+  }
+};
+
+// Format phone number with LGPD masking when needed
+const formatPhoneNumber = (number, isGroup, shouldHide = false, userProfile = "") => {
+  // Handle group numbers differently
+  if (isGroup) return number;
+  
+  // Check if it's a valid Brazilian phone number
+  const isValidBrNumber = isValidBrazilianPhoneNumber(number);
+  
+  // If not valid, return null instead of a warning message
+  if (!isValidBrNumber) return null;
+  
+  // If LGPD is enabled and number should be hidden for user profile
+  if (shouldHide && userProfile === "user") {
+    const formattedNumber = formatBrazilianPhoneNumber(number);
+    if (!formattedNumber) return null;
+    
+    // Ensure proper masking of the phone number
+    const parts = formattedNumber.split(' ');
+    if (parts.length >= 3) {
+      const lastPart = parts[parts.length - 1];
+      const [firstHalf, secondHalf] = lastPart.split('-');
+      return `🇧🇷 ${parts[1]} ${firstHalf.slice(0, -2)}**-**${secondHalf.slice(-2)}`;
+    }
+    return formattedNumber;
+  }
+  
+  // Return properly formatted Brazilian phone number
+  return formatBrazilianPhoneNumber(number) || null;
+};
 
 const reducer = (state, action) => {
     if (action.type === "LOAD_CONTACTS") {
@@ -122,7 +218,6 @@ const Contacts = () => {
     //   const socketManager = useContext(SocketContext);
     const { user, socket } = useContext(AuthContext);
 
-
     const [loading, setLoading] = useState(false);
     const [pageNumber, setPageNumber] = useState(1);
     const [searchParam, setSearchParam] = useState("");
@@ -145,7 +240,6 @@ const Contacts = () => {
     const [selectedTags, setSelectedTags] = useState([]);
     const { setCurrentTicket } = useContext(TicketsContext);
 
-
     const { getAll: getAllSettings } = useCompanySettings();
     const [hideNum, setHideNum] = useState(false);
     const [enableLGPD, setEnableLGPD] = useState(false);
@@ -161,10 +255,6 @@ const Contacts = () => {
                 if (key === "lgpdHideNumber") setHideNum(value === "enabled");
                 
               }
-
-            // if (settingHideNumber.lgpdHideNumber === "enabled") {
-            //     setHideNum(true);
-            // }
         }
         fetchData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -228,7 +318,7 @@ const Contacts = () => {
         return () => {
             socket.off(`company-${companyId}-contact`, onContactEvent);
         };
-    }, [socket]);
+    }, [socket, user.companyId]);
 
     const handleSelectTicket = (ticket) => {
         const code = uuidv4();
@@ -338,28 +428,7 @@ const Contacts = () => {
         }
     };
 
-    // function getDateLastMessage(contact) {
-    //     if (!contact) return null;
-    //     if (!contact.tickets) return null;
-
-    //     if (contact.tickets.length > 0) {
-    //         const date = new Date(contact.tickets[contact.tickets.length - 1].updatedAt);
-
-    //         const day = date.getDate() > 9 ? date.getDate() : `0${date.getDate()}`;
-    //         const month = date.getMonth() + 1 > 9 ? date.getMonth() + 1 : `0${date.getMonth() + 1}`;
-    //         const year = date.getFullYear();
-    //         const hours = date.getHours() > 9 ? date.getHours() : `0${date.getHours()}`;
-    //         const minutes = date.getMinutes() > 9 ? date.getMinutes() : `0${date.getMinutes()}`;
-
-    //         return `${day}/${month}/${year} ${hours}:${minutes}`;
-    //     }
-
-    //     return null;
-    // }
-
-
     return (
-
         <MainContainer className={classes.mainContainer}>
             <NewTicketModal
                 modalOpen={newTicketModalOpen}
@@ -486,35 +555,6 @@ const Contacts = () => {
                                         {i18n.t("contacts.menu.importToExcel")}
 
                                     </MenuItem>
-                                    {/* {<MenuItem>
-                        
-                                       <CSVLink
-                                            className={classes.csvbtn}
-                                            separator=";"
-                                            filename={'contacts.csv'}
-                                            data={
-                                                contacts.map((contact) => ({
-                                                    number: hideNum && user.profile === "user" ? contact.isGroup ? contact.number : formatSerializedId(contact.number).slice(0,-6)+"**-**"+ contact.number.slice(-2): contact.isGroup ? contact.number : formatSerializedId(contact.number),
-                                                    firstName: contact.name.split(' ')[0],
-                                                    lastname: String(contact.name).replace(contact.name.split(' ')[0],''),
-                                                    tags: contact?.tags?.name
-                                                }))
-
-                                            }
-                                            
-                                            >
-                                        
-                                        <CloudDownload fontSize="small"
-                                            color="primary"
-                                            style={{
-                                                marginRight: 10,
-                                            
-                                                }}                                                
-                                        />        
-                                        Exportar Excel                                
-                                   </CSVLink>
-                                        
-                                    </MenuItem> } */}
                                 </Menu>
                             </React.Fragment>
                         )}
@@ -569,9 +609,6 @@ const Contacts = () => {
                             <TableCell align="center">
                                 {i18n.t("contacts.table.email")}
                             </TableCell>
-                            {/* <TableCell align="center">
-                                {i18n.t("contacts.table.lastMessage")}
-                            </TableCell> */}
                             <TableCell align="center">
                                 {i18n.t("contacts.table.whatsapp")}
                             </TableCell>
@@ -583,108 +620,111 @@ const Contacts = () => {
                     </TableHead>
                     <TableBody>
                         <>
-                            {contacts.map((contact) => (
-                                <TableRow key={contact.id}>
-                                    <TableCell style={{ paddingRight: 0 }}>
-                                        {<Avatar src={`${contact?.urlPicture}`} />}
-                                    </TableCell>
-                                    <TableCell>{contact.name}</TableCell>
-                                    <TableCell align="center">
-                                        {((enableLGPD && hideNum && user.profile === "user")
-                                            ? contact.isGroup
-                                                ? contact.number :
-                                                formatSerializedId(contact?.number) === null ? contact.number.slice(0, -6) + "**-**" + contact?.number.slice(-2) :
-                                                    formatSerializedId(contact?.number)?.slice(0, -6) + "**-**" + contact?.number?.slice(-2) :
-                                                    contact.isGroup ? contact.number : formatSerializedId(contact?.number)
-                                        )}
-                                    </TableCell>
-                                    <TableCell align="center">
-                                        {contact.email}
-                                    </TableCell>
-                                    {/* <TableCell align="center">
-                                        {getDateLastMessage(contact)}
-                                    </TableCell> */}
-                                    <TableCell>{contact?.whatsapp?.name}</TableCell>
-                                    <TableCell align="center">
-                                        {contact.active ? (
-                                            <CheckCircleIcon
-                                                style={{ color: "green" }}
-                                                fontSize="small"
-                                            />
-                                        ) : (
-                                            <CancelIcon
-                                                style={{ color: "red" }}
-                                                fontSize="small"
-                                            />
-                                        )}
-                                    </TableCell>
-                                    <TableCell align="center">
-                                        <IconButton
-                                            size="small"
-                                            disabled={!contact.active}
-                                            onClick={() => {
-                                                setContactTicket(contact);
-                                                setNewTicketModalOpen(true);
-                                                // handleSaveTicket(contact.id);
-                                            }}
-                                        >
-                                            {contact.channel === "whatsapp" && (<WhatsApp style={{ color: "green" }} />)}
-                                            {contact.channel === "instagram" && (<Instagram style={{ color: "purple" }} />)}
-                                            {contact.channel === "facebook" && (<Facebook style={{ color: "blue" }} />)}
-                                        </IconButton>
-
-                                        <IconButton
-                                            size="small"
-                                            onClick={() =>
-                                                hadleEditContact(contact.id)
-                                            }
-                                        >
-                                            <EditIcon color="secondary" />
-                                        </IconButton>
-                                        <IconButton
-                                            size="small"
-                                            onClick={
-                                                contact.active
-                                                    ? () => {
-                                                        setConfirmOpen(true);
-                                                        setBlockingContact(
-                                                            contact
-                                                        );
-                                                    }
-                                                    : () => {
-                                                        setConfirmOpen(true);
-                                                        setUnBlockingContact(
-                                                            contact
-                                                        );
-                                                    }
-                                            }
-                                        >
+                            {contacts.map((contact) => {
+                                // Skip rendering contacts with invalid phone numbers
+                                const formattedNumber = formatPhoneNumber(
+                                    contact.number,
+                                    contact.isGroup,
+                                    enableLGPD && hideNum,
+                                    user.profile
+                                );
+                                
+                                // If the number is invalid (null or undefined), don't render this row
+                                if (!formattedNumber) return null;
+                                
+                                return (
+                                    <TableRow key={contact.id}>
+                                        <TableCell style={{ paddingRight: 0 }}>
+                                            {<Avatar src={`${contact?.urlPicture}`} />}
+                                        </TableCell>
+                                        <TableCell>{contact.name}</TableCell>
+                                        <TableCell align="center">
+                                            {formattedNumber}
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            {contact.email}
+                                        </TableCell>
+                                        <TableCell>{contact?.whatsapp?.name}</TableCell>
+                                        <TableCell align="center">
                                             {contact.active ? (
-                                                <BlockIcon color="secondary" />
+                                                <CheckCircleIcon
+                                                    style={{ color: "green" }}
+                                                    fontSize="small"
+                                                />
                                             ) : (
-                                                <CheckCircleIcon color="secondary" />
+                                                <CancelIcon
+                                                    style={{ color: "red" }}
+                                                    fontSize="small"
+                                                />
                                             )}
-                                        </IconButton>
-                                        <Can
-                                            role={user.profile}
-                                            perform="contacts-page:deleteContact"
-                                            yes={() => (
-                                                <IconButton
-                                                    size="small"
-                                                    onClick={(e) => {
-                                                        setConfirmOpen(true);
-                                                        setDeletingContact(
-                                                            contact
-                                                        );
-                                                    }}
-                                                >
-                                                    <DeleteOutlineIcon color="secondary" />
-                                                </IconButton>
-                                            )}
-                                        />
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <IconButton
+                                                size="small"
+                                                disabled={!contact.active || !isValidBrazilianPhoneNumber(contact.number)}
+                                                onClick={() => {
+                                                    setContactTicket(contact);
+                                                    setNewTicketModalOpen(true);
+                                                }}
+                                            >
+                                                {contact.channel === "whatsapp" && (<WhatsApp style={{ color: "green" }} />)}
+                                                {contact.channel === "instagram" && (<Instagram style={{ color: "purple" }} />)}
+                                                {contact.channel === "facebook" && (<Facebook style={{ color: "blue" }} />)}
+                                            </IconButton>
+
+                                            <IconButton
+                                                size="small"
+                                                onClick={() =>
+                                                    hadleEditContact(contact.id)
+                                                }
+                                            >
+                                                <EditIcon color="secondary" />
+                                            </IconButton>
+                                            <IconButton
+                                                size="small"
+                                                onClick={
+                                                    contact.active
+                                                        ? () => {
+                                                            setConfirmOpen(true);
+                                                            setBlockingContact(
+                                                                contact
+                                                            );
+                                                        }
+                                                        : () => {
+                                                            setConfirmOpen(true);
+                                                            setUnBlockingContact(
+                                                                contact
+                                                            );
+                                                        }
+                                                }
+                                            >
+                                                {contact.active ? (
+                                                    <BlockIcon color="secondary" />
+                                                ) : (
+                                                    <CheckCircleIcon color="secondary" />
+                                                )}
+                                            </IconButton>
+                                            <Can
+                                                role={user.profile}
+                                                perform="contacts-page:deleteContact"
+                                                yes={() => (
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={(e) => {
+                                                            setConfirmOpen(true);
+                                                            setDeletingContact(
+                                                                contact
+                                                            );
+                                                        }}
+                                                    >
+                                                        <DeleteOutlineIcon color="secondary" />
+                                                    </IconButton>
+                                                )}
+                                            />
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
                             {loading && <TableRowSkeleton avatar columns={6} />}
                         </>
                     </TableBody>

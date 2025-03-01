@@ -39,6 +39,7 @@ type UpdateInvoiceData = {
   id?: string;
 };
 
+
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { searchParam, pageNumber } = req.query as IndexQuery;
 
@@ -49,6 +50,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
   return res.json({ invoices, count, hasMore });
 };
+
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { id } = req.params;
@@ -68,24 +70,10 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 };
 
 export const list = async (req: Request, res: Response): Promise<Response> => {
-  try {
-    const { companyId } = req.params;
+  const { companyId } = req.user;
+  const invoice: Invoices[] = await FindAllInvoiceService(companyId);
 
-    if (!companyId || isNaN(+companyId)) {
-      return res.status(400).json({ message: "Invalid company ID." });
-    }
-
-    const invoices: Invoices[] = await FindAllInvoiceService(+companyId);
-
-    if (invoices.length === 0) {
-      return res.status(404).json({ message: "No invoices found for this company." });
-    }
-
-    return res.status(200).json(invoices);
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "An error occurred while fetching invoices." });
-  }
+  return res.status(200).json(invoice);
 };
 
 export const update = async (

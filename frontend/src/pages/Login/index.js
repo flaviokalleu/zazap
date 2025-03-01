@@ -1,59 +1,54 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import Button from "@material-ui/core/Button";
-import CssBaseline from "@material-ui/core/CssBaseline";
-import TextField from "@material-ui/core/TextField";
-import Link from "@material-ui/core/Link";
-import Typography from "@material-ui/core/Typography";
+import {
+  Button,
+  CssBaseline,
+  TextField,
+  Link,
+  Grid,
+  Box,
+  Typography,
+  Container,
+  Paper
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { Grid } from "@material-ui/core";
+import { versionSystem, nomeEmpresa } from "../../../package.json";
 import { i18n } from "../../translate/i18n";
+import api from "../../services/api";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import logo from "../../assets/logo.png";
+
+const Copyright = () => (
+  <Typography variant="body2" color="primary" align="center">
+    {"Copyright "}
+    <Link color="primary" href="https://www.firstin.com.br/" target="_blank" rel="noopener noreferrer">
+      {nomeEmpresa} - v{versionSystem}
+    </Link>{" "}
+    {new Date().getFullYear()}
+    {"."}
+  </Typography>
+);
 
 const useStyles = makeStyles((theme) => ({
   root: {
     minHeight: "100vh",
-    background: "linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%)",
-    position: "relative",
-    overflow: "hidden",
     display: "flex",
+    flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-  },
-  decorativeCircle1: {
-    position: "absolute",
-    width: "500px",
-    height: "500px",
-    borderRadius: "50%",
-    background: "radial-gradient(circle, rgba(187,134,252,0.1) 0%, rgba(187,134,252,0) 70%)",
-    top: "-200px",
-    right: "-200px",
-  },
-  decorativeCircle2: {
-    position: "absolute",
-    width: "400px",
-    height: "400px",
-    borderRadius: "50%",
-    background: "radial-gradient(circle, rgba(3,218,198,0.1) 0%, rgba(3,218,198,0) 70%)",
-    bottom: "-150px",
-    left: "-150px",
+    background: "linear-gradient(to right, #4da735, #4da735, #4da735)",
   },
   paper: {
-    background: "linear-gradient(145deg, rgba(37, 37, 37, 0.95) 0%, rgba(15, 15, 15, 0.95) 100%)",
-    borderRadius: "24px",
-    padding: theme.spacing(4),
-    width: "100%",
-    maxWidth: "500px",
-    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
-    position: "relative",
-    zIndex: 1,
+    backgroundColor: theme.palette.login,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    padding: theme.spacing(6, 4),
+    borderRadius: theme.spacing(1.5),
+    boxShadow: "0px 3px 15px rgba(0, 0, 0, 0.2)",
   },
   logo: {
-    width: "180px",
-    marginBottom: theme.spacing(4),
-    display: "block",
-    margin: "0 auto",
+    margin: theme.spacing(2, 0),
+    width: "80%",
   },
   form: {
     width: "100%",
@@ -61,131 +56,87 @@ const useStyles = makeStyles((theme) => ({
   },
   submit: {
     margin: theme.spacing(3, 0, 2),
-    padding: theme.spacing(1.5),
-    background: "linear-gradient(45deg, #BB86FC 30%, #03DAC6 90%)",
-    color: "#000",
-    fontWeight: 600,
-    borderRadius: "12px",
-    fontSize: "1rem",
-    textTransform: "none",
-    "&:hover": {
-      background: "linear-gradient(45deg, #9965F4 30%, #00B5A5 90%)",
-    },
+    padding: theme.spacing(1.2),
+    borderRadius: theme.spacing(0.5),
   },
-  textField: {
+  forgotPassword: {
+    textAlign: "right",
+    marginTop: theme.spacing(1),
     marginBottom: theme.spacing(2),
-    "& .MuiOutlinedInput-root": {
-      borderRadius: "12px",
-      backgroundColor: "rgba(255, 255, 255, 0.05)",
-      "& fieldset": {
-        borderColor: "rgba(255, 255, 255, 0.1)",
-      },
-      "&:hover fieldset": {
-        borderColor: "#BB86FC",
-      },
-      "&.Mui-focused fieldset": {
-        borderColor: "#BB86FC",
-      },
-    },
-    "& .MuiInputLabel-root": {
-      color: "rgba(255, 255, 255, 0.7)",
-    },
-    "& .MuiInputBase-input": {
-      color: "#fff",
-    },
   },
-  links: {
-    display: "flex",
-    justifyContent: "space-between",
+  registerButton: {
     marginTop: theme.spacing(2),
-  },
-  link: {
-    color: "#BB86FC",
-    textDecoration: "none",
-    "&:hover": {
-      textDecoration: "underline",
-    },
-  },
-  title: {
-    color: "#fff",
-    marginBottom: theme.spacing(3),
     textAlign: "center",
-    fontWeight: 600,
-  },
-  subtitle: {
-    color: "rgba(255, 255, 255, 0.7)",
-    marginBottom: theme.spacing(4),
-    textAlign: "center",
-  },
-  footer: {
-    position: "absolute",
-    bottom: theme.spacing(2),
-    width: "100%",
-    textAlign: "center",
-    color: "rgba(255, 255, 255, 0.5)",
-  },
+  }
 }));
 
 const Login = () => {
   const classes = useStyles();
-  const [user, setUser] = useState({ email: "", password: "" });
+  const [credentials, setCredentials] = useState({ email: "", password: "" });
   const { handleLogin } = useContext(AuthContext);
 
-  const handleChangeInput = (e) => {
-    setUser({ ...user, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setCredentials((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    handleLogin(user);
+    handleLogin(credentials);
   };
+
+  const logoUrl = `${process.env.REACT_APP_BACKEND_URL}/public/logotipos/login.png`;
+  const logoWithCache = `${logoUrl}?r=${Math.random()}`;
 
   return (
     <div className={classes.root}>
-      <CssBaseline />
-      <div className={classes.decorativeCircle1} />
-      <div className={classes.decorativeCircle2} />
-      
-      <div className={classes.paper}>
-        <img src={logo} alt="Logo" className={classes.logo} />
-        
-        <Typography component="h1" variant="h4" className={classes.title}>
-          {i18n.t("login.title")}
-        </Typography>
-        
-        
-
-        <form className={classes.form} onSubmit={handleSubmit}>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label={i18n.t("login.form.email")}
-            name="email"
-            autoComplete="email"
-            autoFocus
-            value={user.email}
-            onChange={handleChangeInput}
-            className={classes.textField}
-          />
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
+        <Paper className={classes.paper} elevation={3}>
+          <div>
+            <img 
+              className={classes.logo} 
+              src={logoWithCache} 
+              alt={process.env.REACT_APP_NAME_SYSTEM || "Logo"} 
+            />
+          </div>
           
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label={i18n.t("login.form.password")}
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            value={user.password}
-            onChange={handleChangeInput}
-            className={classes.textField}
-          />
-<Button
+          <form className={classes.form} onSubmit={handleSubmit}>
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label={i18n.t("login.form.email")}
+              name="email"
+              value={credentials.email}
+              onChange={handleChange}
+              autoComplete="email"
+              autoFocus
+            />
+            
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label={i18n.t("login.form.password")}
+              type="password"
+              id="password"
+              value={credentials.password}
+              onChange={handleChange}
+              autoComplete="current-password"
+            />
+            
+            <div className={classes.forgotPassword}>
+              <Link component={RouterLink} to="/forgetpsw" variant="body2">
+                Esqueceu sua senha?
+              </Link>
+            </div>
+            
+            <Button
               type="submit"
               fullWidth
               variant="contained"
@@ -194,39 +145,25 @@ const Login = () => {
             >
               {i18n.t("login.buttons.submit")}
             </Button>
-
-          <Grid container className={classes.links}>
-            <Grid item>
-            <Link
-                  href="#"
-                  variant="body2"
+            
+            <Grid container justifyContent="center">
+              <Grid item className={classes.registerButton}>
+                <Link
                   component={RouterLink}
-                  to="/recovery-password"
+                  to="/signup"
+                  variant="body2"
                 >
-                  {i18n.t("Recuperar Senha?")}
+                  {i18n.t("login.buttons.register")}
                 </Link>
+              </Grid>
             </Grid>
-            <Grid item>
-            <Link
-              // variant="body2"
-              component={RouterLink}
-              className={"link-create-count"}
-              tabIndex={0}
-              role={"button"}
-              aria-disabled={"false"}
-              to="/signup"
-              style={{ textDecoration: "none" }}
-            >
-              <span className={"label-text"}>Criar conta</span>
-            </Link>
-            </Grid>
-          </Grid>
-        </form>
-
-        <Typography variant="body2" className={classes.footer}>
-          © {new Date().getFullYear()} ZAZAP.
-        </Typography>
-      </div>
+          </form>
+        </Paper>
+        
+        <Box mt={4}>
+          <Copyright />
+        </Box>
+      </Container>
     </div>
   );
 };

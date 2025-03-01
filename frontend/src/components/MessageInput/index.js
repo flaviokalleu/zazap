@@ -73,7 +73,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    borderTop: "1px solid rgba(0, 0, 0, 0.12)",
+    borderTop: "1px solid rgba(255, 0, 0, 0.12)",
     [theme.breakpoints.down("sm")]: {
       position: "fixed",
       bottom: 0,

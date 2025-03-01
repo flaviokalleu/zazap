@@ -14,38 +14,36 @@ import List from "@material-ui/core/List";
 import Tooltip from "@material-ui/core/Tooltip";
 import Typography from "@material-ui/core/Typography";
 
-import DashboardOutlinedIcon from "@material-ui/icons/DashboardOutlined";
-import WhatsAppIcon from "@material-ui/icons/WhatsApp";
-import SyncAltIcon from "@material-ui/icons/SyncAlt";
-import SettingsOutlinedIcon from "@material-ui/icons/SettingsOutlined";
-import PeopleAltOutlinedIcon from "@material-ui/icons/PeopleAltOutlined";
-import ContactPhoneOutlinedIcon from "@material-ui/icons/ContactPhoneOutlined";
-import AccountTreeOutlinedIcon from "@material-ui/icons/AccountTreeOutlined";
-import FlashOnIcon from "@material-ui/icons/FlashOn";
-import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
-import CodeRoundedIcon from "@material-ui/icons/CodeRounded";
-import ViewKanban from "@mui/icons-material/ViewKanban";
-import Schedule from "@material-ui/icons/Schedule";
-import LocalOfferIcon from "@material-ui/icons/LocalOffer";
-import EventAvailableIcon from "@material-ui/icons/EventAvailable";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import PeopleIcon from "@material-ui/icons/People";
-import ListIcon from "@material-ui/icons/ListAlt";
-import AnnouncementIcon from "@material-ui/icons/Announcement";
-import ForumIcon from "@material-ui/icons/Forum";
-import LocalAtmIcon from "@material-ui/icons/LocalAtm";
-import BusinessIcon from "@material-ui/icons/Business";
-import {
-  AllInclusive,
-  AttachFile,
-  Dashboard,
-  Description,
-  DeviceHubOutlined,
-  GridOn,
-  ListAlt,
-  PhonelinkSetup,
-} from "@material-ui/icons";
+// Import Lucide icons
+import { 
+  LayoutDashboard, 
+  MessageSquare, 
+  Zap, 
+  Kanban, 
+  Phone, 
+  Calendar, 
+  Tag,
+  MessageCircle,
+  HelpCircle,
+  Users, 
+  GitBranch, 
+  RefreshCw, 
+  Settings, 
+  Paperclip, 
+  DollarSign, 
+  Building,
+  Clock,
+  List as ListIcon,
+  ChevronUp,
+  ChevronDown,
+  UserCircle,
+  Megaphone,
+  Code,
+  Infinity,
+  Share2,
+  Smartphone,
+  Grid
+} from "lucide-react";
 
 import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
 import { AuthContext } from "../context/Auth/AuthContext";
@@ -59,7 +57,6 @@ import toastError from "../errors/toastError";
 import usePlans from "../hooks/usePlans";
 import useVersion from "../hooks/useVersion";
 import { i18n } from "../translate/i18n";
-import { Campaign, ShapeLine, Webhook } from "@mui/icons-material";
 
 const useStyles = makeStyles((theme) => ({
   listItem: {
@@ -210,7 +207,6 @@ const MainListItems = ({ collapsed, drawerClose }) => {
 
   const [connectionWarning, setConnectionWarning] = useState(false);
   const [openCampaignSubmenu, setOpenCampaignSubmenu] = useState(false);
-  const [openFlowSubmenu, setOpenFlowSubmenu] = useState(false);
   const [openDashboardSubmenu, setOpenDashboardSubmenu] = useState(false);
   const [showCampaigns, setShowCampaigns] = useState(false);
   const [showKanban, setShowKanban] = useState(false);
@@ -229,12 +225,10 @@ const MainListItems = ({ collapsed, drawerClose }) => {
   const [version, setVersion] = useState(false);
   const [managementHover, setManagementHover] = useState(false);
   const [campaignHover, setCampaignHover] = useState(false);
-  const [flowHover, setFlowHover] = useState(false)
-  const { list } = useHelps();  // INSERIR
+  const { list } = useHelps();
   const [hasHelps, setHasHelps] = useState(false);
 
-
-  useEffect(() => {   // INSERIR ESSE EFFECT INTEIRO
+  useEffect(() => {
     async function checkHelps() {
       const helps = await list();
       setHasHelps(helps.length > 0);
@@ -249,10 +243,6 @@ const MainListItems = ({ collapsed, drawerClose }) => {
     location.pathname === "/campaigns" ||
     location.pathname.startsWith("/contact-lists") ||
     location.pathname.startsWith("/campaigns-config");
-
-  const isFlowbuilderRouteActive = 
-    location.pathname.startsWith("/phrase-lists")
-    location.pathname.startsWith("/flowbuilders")
 
   useEffect(() => {
     if (location.pathname.startsWith("/tickets")) {
@@ -344,12 +334,6 @@ const MainListItems = ({ collapsed, drawerClose }) => {
     }
   }, [chats, user.id]);
 
-  // useEffect(() => {
-  //   if (localStorage.getItem("cshow")) {
-  //     setShowCampaigns(true);
-  //   }
-  // }, []);
-
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (whatsApps.length > 0) {
@@ -406,7 +390,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                   <Avatar
                     className={`${classes.iconHoverActive} ${isManagementActive || managementHover ? "active" : ""}`}
                   >
-                    <Dashboard />
+                    <LayoutDashboard size={20} />
                   </Avatar>
                 </ListItemIcon>
                 <ListItemText
@@ -416,7 +400,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                     </Typography>
                   }
                 />
-                {openDashboardSubmenu ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                {openDashboardSubmenu ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
               </ListItem>
             </Tooltip>
             <Collapse
@@ -436,14 +420,14 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                       small
                       to="/"
                       primary="Dashboard"
-                      icon={<DashboardOutlinedIcon />}
+                      icon={<LayoutDashboard size={20} />}
                       tooltip={collapsed}
                     />
                     <ListItemLink
                       small
                       to="/reports"
                       primary={i18n.t("mainDrawer.listItems.reports")}
-                      icon={<Description />}
+                      icon={<Grid size={20} />}
                       tooltip={collapsed}
                     />
                   </>
@@ -456,7 +440,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                   <ListItemLink
                     to="/moments"
                     primary={i18n.t("mainDrawer.listItems.chatsTempoReal")}
-                    icon={<GridOn />}
+                    icon={<Grid size={20} />}
                     tooltip={collapsed}
                   />
                 )}
@@ -468,14 +452,14 @@ const MainListItems = ({ collapsed, drawerClose }) => {
       <ListItemLink
         to="/tickets"
         primary={i18n.t("mainDrawer.listItems.tickets")}
-        icon={<WhatsAppIcon />}
+        icon={<MessageSquare size={20} />}
         tooltip={collapsed}
       />
 
       <ListItemLink
         to="/quick-messages"
         primary={i18n.t("mainDrawer.listItems.quickMessages")}
-        icon={<FlashOnIcon />}
+        icon={<Zap size={20} />}
         tooltip={collapsed}
       />
 
@@ -484,7 +468,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
           <ListItemLink
             to="/kanban"
             primary={i18n.t("mainDrawer.listItems.kanban")}
-            icon={<ViewKanban />}
+            icon={<Kanban size={20} />}
             tooltip={collapsed}
           />
         </>
@@ -493,7 +477,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
       <ListItemLink
         to="/contacts"
         primary={i18n.t("mainDrawer.listItems.contacts")}
-        icon={<ContactPhoneOutlinedIcon />}
+        icon={<Phone size={20} />}
         tooltip={collapsed}
       />
 
@@ -502,7 +486,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
           <ListItemLink
             to="/schedules"
             primary={i18n.t("mainDrawer.listItems.schedules")}
-            icon={<Schedule />}
+            icon={<Calendar size={20} />}
             tooltip={collapsed}
           />
         </>
@@ -511,7 +495,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
       <ListItemLink
         to="/tags"
         primary={i18n.t("mainDrawer.listItems.tags")}
-        icon={<LocalOfferIcon />}
+        icon={<Tag size={20} />}
         tooltip={collapsed}
       />
 
@@ -522,7 +506,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
             primary={i18n.t("mainDrawer.listItems.chats")}
             icon={
               <Badge color="secondary" variant="dot" invisible={invisible}>
-                <ForumIcon />
+                <MessageCircle size={20} />
               </Badge>
             }
             tooltip={collapsed}
@@ -530,16 +514,11 @@ const MainListItems = ({ collapsed, drawerClose }) => {
         </>
       )}
 
-      {/* <ListItemLink
-        to="/todolist"
-        primary={i18n.t("ToDoList")}
-        icon={<EventAvailableIcon />}
-      /> */}
       {hasHelps && (
         <ListItemLink
           to="/helps"
           primary={i18n.t("mainDrawer.listItems.helps")}
-          icon={<HelpOutlineIcon />}
+          icon={<HelpCircle size={20} />}
           tooltip={collapsed}
         />
       )}
@@ -569,7 +548,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                             className={`${classes.iconHoverActive} ${isCampaignRouteActive || campaignHover ? "active" : ""
                               }`}
                           >
-                            <EventAvailableIcon />
+                            <Calendar size={20} />
                           </Avatar>
                         </ListItemIcon>
                         <ListItemText
@@ -579,7 +558,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                             </Typography>
                           }
                         />
-                        {openCampaignSubmenu ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                        {openCampaignSubmenu ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                       </ListItem>
                     </Tooltip>
                     <Collapse
@@ -594,19 +573,19 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                         <ListItemLink
                           to="/campaigns"
                           primary={i18n.t("campaigns.subMenus.list")}
-                          icon={<ListIcon />}
+                          icon={<ListIcon size={20} />}
                           tooltip={collapsed}
                         />
                         <ListItemLink
                           to="/contact-lists"
                           primary={i18n.t("campaigns.subMenus.listContacts")}
-                          icon={<PeopleIcon />}
+                          icon={<Users size={20} />}
                           tooltip={collapsed}
                         />
                         <ListItemLink
                           to="/campaigns-config"
                           primary={i18n.t("campaigns.subMenus.settings")}
-                          icon={<SettingsOutlinedIcon />}
+                          icon={<Settings size={20} />}
                           tooltip={collapsed}
                         />
                       </List>
@@ -616,72 +595,11 @@ const MainListItems = ({ collapsed, drawerClose }) => {
               />
             )}
 
-            {/* FLOWBUILDER */}
-            <Can
-              role={user.profile}
-              perform="dashboard:view"
-              yes={() => (
-                <>
-                  <Tooltip title={collapsed ? i18n.t("mainDrawer.listItems.campaigns") : ""} placement="right">
-                    <ListItem
-                      dense
-                      button
-                      onClick={() => setOpenFlowSubmenu((prev) => !prev)}
-                      onMouseEnter={() => setFlowHover(true)}
-                      onMouseLeave={() => setFlowHover(false)}
-                    >
-                      <ListItemIcon>
-                        <Avatar
-                          className={`${classes.iconHoverActive} ${isFlowbuilderRouteActive || flowHover ? "active" : ""
-                            }`}
-                        >
-                          <Webhook />
-                        </Avatar>
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={
-                          <Typography className={classes.listItemText}>
-                            {i18n.t("Flowbuilder")}
-                          </Typography>
-                        }
-                      />
-                      {openFlowSubmenu ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                    </ListItem>
-                  </Tooltip>
-
-                  <Collapse
-                    in={openFlowSubmenu}
-                    timeout="auto"
-                    unmountOnExit
-                    style={{
-                      backgroundColor: theme.mode === "light" ? "rgba(120,120,120,0.1)" : "rgba(120,120,120,0.5)",
-                    }}
-                  >
-                    <List dense component="div" disablePadding>
-                      <ListItemLink
-                        to="/phrase-lists"
-                        primary={"Fluxo de Campanha"}
-                        icon={<EventAvailableIcon />}
-                        tooltip={collapsed}
-                      />
-
-                      <ListItemLink
-                        to="/flowbuilders"
-                        primary={'Fluxo de conversa'}
-                        icon={<ShapeLine />}
-                      />
-                    </List>
-                  </Collapse>
-                </>
-              )}
-            />
-
-
             {user.super && (
               <ListItemLink
                 to="/announcements"
                 primary={i18n.t("mainDrawer.listItems.annoucements")}
-                icon={<AnnouncementIcon />}
+                icon={<Megaphone size={20} />}
                 tooltip={collapsed}
               />
             )}
@@ -695,7 +613,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                     <ListItemLink
                       to="/messages-api"
                       primary={i18n.t("mainDrawer.listItems.messagesAPI")}
-                      icon={<CodeRoundedIcon />}
+                      icon={<Code size={20} />}
                       tooltip={collapsed}
                     />
                   )}
@@ -709,7 +627,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                 <ListItemLink
                   to="/users"
                   primary={i18n.t("mainDrawer.listItems.users")}
-                  icon={<PeopleAltOutlinedIcon />}
+                  icon={<UserCircle size={20} />}
                   tooltip={collapsed}
                 />
               )}
@@ -721,7 +639,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                 <ListItemLink
                   to="/queues"
                   primary={i18n.t("mainDrawer.listItems.queues")}
-                  icon={<AccountTreeOutlinedIcon />}
+                  icon={<GitBranch size={20} />}
                   tooltip={collapsed}
                 />
               )}
@@ -735,7 +653,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                   <ListItemLink
                     to="/prompts"
                     primary={i18n.t("mainDrawer.listItems.prompts")}
-                    icon={<AllInclusive />}
+                    icon={<Infinity size={20} />}
                     tooltip={collapsed}
                   />
                 )}
@@ -750,7 +668,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                   <ListItemLink
                     to="/queue-integration"
                     primary={i18n.t("mainDrawer.listItems.queueIntegration")}
-                    icon={<DeviceHubOutlined />}
+                    icon={<Share2 size={20} />}
                     tooltip={collapsed}
                   />
                 )}
@@ -763,7 +681,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                 <ListItemLink
                   to="/connections"
                   primary={i18n.t("mainDrawer.listItems.connections")}
-                  icon={<SyncAltIcon />}
+                  icon={<RefreshCw size={20} />}
                   showBadge={connectionWarning}
                   tooltip={collapsed}
                 />
@@ -773,7 +691,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
               <ListItemLink
                 to="/allConnections"
                 primary={i18n.t("mainDrawer.listItems.allConnections")}
-                icon={<PhonelinkSetup />}
+                icon={<Smartphone size={20} />}
                 tooltip={collapsed}
               />
             )}
@@ -784,7 +702,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                 <ListItemLink
                   to="/files"
                   primary={i18n.t("mainDrawer.listItems.files")}
-                  icon={<AttachFile />}
+                  icon={<Paperclip size={20} />}
                   tooltip={collapsed}
                 />
               )}
@@ -796,7 +714,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                 <ListItemLink
                   to="/financeiro"
                   primary={i18n.t("mainDrawer.listItems.financeiro")}
-                  icon={<LocalAtmIcon />}
+                  icon={<DollarSign size={20} />}
                   tooltip={collapsed}
                 />
               )}
@@ -808,39 +726,26 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                 <ListItemLink
                   to="/settings"
                   primary={i18n.t("mainDrawer.listItems.settings")}
-                  icon={<SettingsOutlinedIcon />}
+                  icon={<Settings size={20} />}
                   tooltip={collapsed}
                 />
               )}
             />
-            {/* {user.super && (
-              <ListSubheader inset>
-                {i18n.t("mainDrawer.listItems.administration")}
-              </ListSubheader>
-            )} */}
 
             {user.super && (
               <ListItemLink
                 to="/companies"
                 primary={i18n.t("mainDrawer.listItems.companies")}
-                icon={<BusinessIcon />}
+                icon={<Building size={20} />}
                 tooltip={collapsed}
               />
             )}
-
           </>
-
         )}
       />
       {!collapsed && (
         <React.Fragment>
           <Divider />
-          {/* 
-              // IMAGEM NO MENU
-              <Hidden only={['sm', 'xs']}>
-                <img style={{ width: "100%", padding: "10px" }} src={logo} alt="image" />            
-              </Hidden> 
-              */}
           <Typography
             style={{
               fontSize: "12px",

@@ -27,7 +27,25 @@ import { isNil } from "lodash";
 import { toast } from "react-toastify";
 import { Done, HighlightOff, Replay, SwapHoriz } from "@material-ui/icons";
 import useCompanySettings from "../../hooks/useSettings/companySettings";
-import { Avatar, Badge, ListItemAvatar, ListItem, ListItemSecondaryAction, ListItemText, Typography } from "@material-ui/core";
+import { 
+    Avatar, 
+    Badge, 
+    ListItemAvatar, 
+    ListItem, 
+    ListItemSecondaryAction, 
+    ListItemText, 
+    Typography, 
+    Dialog, 
+    DialogTitle, 
+    DialogContent, 
+    IconButton, 
+    Paper, 
+    Divider 
+} from "@material-ui/core";
+import { blue } from "@material-ui/core/colors";
+import VisibilityIcon from "@material-ui/icons/Visibility";
+import CloseIcon from "@material-ui/icons/Close";
+import MessageIcon from "@material-ui/icons/Message";
 
 const useStyles = makeStyles((theme) => ({
     ticket: {
@@ -43,8 +61,6 @@ const useStyles = makeStyles((theme) => ({
         marginRight: 1,
         padding: 1,
         fontWeight: 'bold',
-        // paddingLeft: 5,
-        // paddingRight: 5,
         borderRadius: 3,
         fontSize: "0.5em",
         whiteSpace: "nowrap"
@@ -69,7 +85,7 @@ const useStyles = makeStyles((theme) => ({
     },
     noTicketsText: {
         textAlign: "center",
-        color: "rgb(104, 121, 146)",
+        color: "rgb(146, 104, 104)",
         fontSize: "14px",
         lineHeight: "1.4",
     },
@@ -79,11 +95,8 @@ const useStyles = makeStyles((theme) => ({
         marginRight: 1,
         padding: 1,
         fontWeight: 'bold',
-        // paddingLeft: 5,
-        // paddingRight: 5,
         borderRadius: 3,
         fontSize: "0.6em",
-        // whiteSpace: "nowrap"
     },
     noTicketsTitle: {
         textAlign: "center",
@@ -151,7 +164,6 @@ const useStyles = makeStyles((theme) => ({
 
     ticketQueueColor: {
         flex: "none",
-        // width: "8px",
         height: "100%",
         position: "absolute",
         top: "0%",
@@ -164,13 +176,10 @@ const useStyles = makeStyles((theme) => ({
     },
     secondaryContentSecond: {
         display: 'flex',
-        // marginBottom: 2,
-        // marginLeft: "5px",
         alignItems: "flex-start",
         flexWrap: "nowrap",
         flexDirection: "row",
         alignContent: "flex-start",
-        // height: "10px"
     },
     ticketInfo1: {
         position: "relative",
@@ -191,6 +200,86 @@ const useStyles = makeStyles((theme) => ({
     },
     connectionIcon: {
         marginRight: theme.spacing(1)
+    },
+    dialogTitle: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        backgroundColor: theme.palette.primary.main,
+        color: "white",
+        paddingBottom: theme.spacing(1),
+    },
+    closeButton: {
+        color: "white",
+    },
+    messagesContainer: {
+        height: "60vh", // Use viewport height instead of fixed pixels
+        maxHeight: "600px", // Set a maximum height
+        overflowY: "auto",
+        padding: theme.spacing(2),
+        scrollBehavior: "smooth", // Add smooth scrolling
+    },
+    scrollToBottomBtn: {
+        position: "absolute",
+        bottom: theme.spacing(2),
+        right: theme.spacing(2),
+        zIndex: 1000,
+        backgroundColor: theme.palette.primary.main,
+        color: "white",
+        "&:hover": {
+            backgroundColor: theme.palette.primary.dark,
+        },
+    },
+    messageItem: {
+        padding: theme.spacing(1),
+        margin: theme.spacing(1, 0),
+        borderRadius: theme.spacing(1),
+        maxWidth: "80%",
+        position: "relative",
+    },
+    fromMe: {
+        backgroundColor: "#dcf8c6",
+        marginLeft: "auto",
+    },
+    fromThem: {
+        backgroundColor: "#f5f5f5",
+    },
+    messageTime: {
+        fontSize: "0.75rem",
+        color: grey[500],
+        position: "absolute",
+        bottom: "2px",
+        right: "8px",
+    },
+    messageText: {
+        marginBottom: theme.spacing(2),
+        wordBreak: "break-word",
+    },
+    emptyMessages: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100%",
+        color: grey[500],
+    },
+    messagesHeader: {
+        display: "flex",
+        alignItems: "center",
+        padding: theme.spacing(1, 2),
+        backgroundColor: theme.palette.grey[100],
+    },
+    messageAvatar: {
+        marginRight: theme.spacing(1),
+    },
+    messageIcon: {
+        marginRight: theme.spacing(1),
+        color: theme.palette.primary.main,
+    },
+    loadingMessages: {
+        display: "flex",
+        justifyContent: "center",
+        padding: theme.spacing(3),
     }
 }));
 
@@ -205,6 +294,11 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
     const [openAlert, setOpenAlert] = useState(false);
     const [userTicketOpen, setUserTicketOpen] = useState("");
     const [queueTicketOpen, setQueueTicketOpen] = useState("");
+    const [openTicketMessageDialog, setOpenTicketMessageDialog] = useState(false);
+    
+    // New states for the ticket messages
+    const [ticketMessages, setTicketMessages] = useState([]);
+    const [loadingMessages, setLoadingMessages] = useState(false);
 
     const { ticketId } = useParams();
     const isMounted = useRef(true);
@@ -217,7 +311,7 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
         console.log("======== TicketListItemCustom ===========")
         console.log(ticket)
         console.log("=========================================")
-    }, [ticket])
+    }, [ticket]);
 
     useEffect(() => {
         return () => {
@@ -226,7 +320,6 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
     }, []);
 
     const handleOpenAcceptTicketWithouSelectQueue = useCallback(() => {
-        // console.log(ticket)
         setAcceptTicketWithouSelectQueueOpen(true);
     }, []);
 
@@ -277,7 +370,6 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
 
             history.push(`/tickets/`);
         }
-
     };
 
     const handleCloseIgnoreTicket = async (id) => {
@@ -323,10 +415,7 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
             setLoading(false);
         }
         handleSelectTicket(ticket);
-        // history.push('/tickets');
-        // setTimeout(() => {
         history.push(`/tickets/${ticket.uuid}`);
-        // }, 0);
     }
 
     const handleAcepptTicket = async (id) => {
@@ -346,10 +435,7 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                     setLoading(false);
                     setTabOpen(ticket.isGroup ? "group" : "open");
                     handleSelectTicket(otherTicket.data);
-                    // history.push('/tickets');
-                    // setTimeout(() => {
                     history.push(`/tickets/${otherTicket.uuid}`);
-                    // }, 0);
                 }
             } else {
                 let setting;
@@ -371,10 +457,7 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
 
                 setTabOpen(ticket.isGroup ? "group" : "open");
                 handleSelectTicket(ticket);
-                // history.push('/tickets');
-                // setTimeout(() => {
                 history.push(`/tickets/${ticket.uuid}`);
-                // }, 0);
             }
         } catch (err) {
             setLoading(false);
@@ -382,9 +465,7 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
         }
     };
 
-
     const handleSendMessage = async (id) => {
-
         let setting;
 
         try {
@@ -395,7 +476,7 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
             toastError(err);
         }
 
-        const msg = `${setting.greetingAcceptedMessage}`; //`{{ms}} *{{name}}*, ${i18n.t("mainDrawer.appBar.user.myName")} *${user?.name}* ${i18n.t("mainDrawer.appBar.user.continuity")}.`;
+        const msg = `${setting.greetingAcceptedMessage}`;
         const message = {
             read: 1,
             fromMe: true,
@@ -418,6 +499,30 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
         const code = uuidv4();
         const { id, uuid } = ticket;
         setCurrentTicket({ id, uuid, code });
+    };
+
+    // Function to fetch messages for the ticket
+    const fetchTicketMessages = async (ticketId) => {
+        if (!ticketId) return;
+        
+        setLoadingMessages(true);
+        try {
+            const { data } = await api.get(`/messages/${ticketId}`);
+            if (isMounted.current) {
+                setTicketMessages(data.messages);
+            }
+        } catch (err) {
+            toastError(err);
+        } finally {
+            setLoadingMessages(false);
+        }
+    };
+
+    // Handle opening the message dialog
+    const handleOpenMessageDialog = (e) => {
+        e.stopPropagation();
+        setOpenTicketMessageDialog(true);
+        fetchTicketMessages(ticket.id);
     };
 
     return (
@@ -446,11 +551,84 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                     ticket={ticket}
                 />
             )}
-            {/* <TicketMessagesDialog
-                open={openTicketMessageDialog}
-                handleClose={() => setOpenTicketMessageDialog(false)}
-                ticketId={ticket.id}
-            /> */}
+            
+            {/* Improved Message Dialog */}
+            <Dialog 
+                open={openTicketMessageDialog} 
+                onClose={() => setOpenTicketMessageDialog(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle disableTypography className={classes.dialogTitle}>
+                    <Typography variant="h6">
+                        Espiando a conversa
+                    </Typography>
+                    <IconButton 
+                        aria-label="close" 
+                        className={classes.closeButton} 
+                        onClick={() => setOpenTicketMessageDialog(false)}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                
+                <div className={classes.messagesHeader}>
+                    <Avatar 
+                        src={ticket?.contact?.urlPicture}
+                        className={classes.messageAvatar}
+                    />
+                    <div>
+                        <Typography variant="subtitle1">
+                            {ticket.contact?.name}
+                        </Typography>
+                        <Typography variant="caption" color="textSecondary">
+                            {ticket.whatsapp?.name || ticket.channel}
+                        </Typography>
+                    </div>
+                </div>
+                
+                <Divider />
+                
+                <DialogContent className={classes.messagesContainer}>
+                    {loadingMessages ? (
+                        <div className={classes.loadingMessages}>
+                            <Typography>Carregando mensagens...</Typography>
+                        </div>
+                    ) : ticketMessages.length === 0 ? (
+                        <div className={classes.emptyMessages}>
+                            <MessageIcon fontSize="large" />
+                            <Typography variant="body1">
+                                {i18n.t("ticketsList.noMessages")}
+                            </Typography>
+                        </div>
+                    ) : (
+                        ticketMessages.map((message) => (
+                            <Paper 
+                                key={message.id} 
+                                className={clsx(
+                                    classes.messageItem, 
+                                    message.fromMe ? classes.fromMe : classes.fromThem
+                                )}
+                                elevation={0}
+                            >
+                                <Typography className={classes.messageText}>
+                                    {message.body.includes('data:image/png;base64') ? (
+                                        <MarkdownWrapper>Localização</MarkdownWrapper>
+                                    ) : message.body.includes('BEGIN:VCARD') ? (
+                                        <MarkdownWrapper>Contato</MarkdownWrapper>
+                                    ) : (
+                                        <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                                    )}
+                                </Typography>
+                                <Typography variant="caption" className={classes.messageTime}>
+                                    {format(parseISO(message.createdAt), "HH:mm")}
+                                </Typography>
+                            </Paper>
+                        ))
+                    )}
+                </DialogContent>
+            </Dialog>
+            
             <ListItem
                 button
                 dense
@@ -491,41 +669,32 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                                 noWrap
                                 component="span"
                                 variant="body2"
-                            // color="textPrimary"
                             >
                                 {ticket.isGroup && ticket.channel === "whatsapp" && <GroupIcon fontSize="small" style={{ color: grey[700], marginBottom: '-1px', marginLeft: '5px' }} />} &nbsp;
                                 {ticket.channel && <ConnectionIcon width="20" height="20" className={classes.connectionIcon} connectionType={ticket.channel} />} &nbsp;
                                 {truncate(ticket.contact?.name, 60)}
-                                {/* {profile === "admin"  && ( */}
-                                {/* <Tooltip title="Espiar Conversa">
-                                        <VisibilityIcon
-                                            onClick={() => setOpenTicketMessageDialog(true)}
-                                            fontSize="small"
-                                            style={{
-                                                color: blue[700],
-                                                cursor: "pointer",
-                                                marginLeft: 10,
-                                                verticalAlign: "middle"
-                                            }}
-                                        />
-                                    </Tooltip> */}
-                                {/* )} */}
+                                <Tooltip title="Espiar Conversa">
+                                    <VisibilityIcon
+                                        onClick={handleOpenMessageDialog}
+                                        fontSize="small"
+                                        style={{
+                                            color: blue[700],
+                                            cursor: "pointer",
+                                            marginLeft: 10,
+                                            verticalAlign: "middle"
+                                        }}
+                                    />
+                                </Tooltip>
                             </Typography>
-                            {/* <ListItemSecondaryAction>
-                                <Box className={classes.ticketInfo1}>{renderTicketInfo()}</Box>
-                            </ListItemSecondaryAction> */}
                         </span>
                     }
                     secondary={
                         <span className={classes.contactNameWrapper}>
-
                             <Typography
                                 className={Number(ticket.unreadMessages) > 0 ? classes.contactLastMessageUnread : classes.contactLastMessage}
                                 noWrap
                                 component="span"
                                 variant="body2"
-                            // color="textSecondary"
-                            // style={console.log('ticket.lastMessage', ticket.lastMessage)}
                             >
                                 {ticket.lastMessage ? (
                                     <>
@@ -565,7 +734,6 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                             />
                         </span>
                     }
-
                 />
                 <ListItemSecondaryAction>
                     {ticket.lastMessage && (
@@ -575,7 +743,6 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                                 className={Number(ticket.unreadMessages) > 0 ? classes.lastMessageTimeUnread : classes.lastMessageTime}
                                 component="span"
                                 variant="body2"
-                            // color="textSecondary"
                             >
 
                                 {isSameDay(parseISO(ticket.updatedAt), new Date()) ? (
@@ -595,7 +762,6 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                     <span className={classes.secondaryContentSecond}>
                         {(ticket.status === "pending" && (ticket.queueId === null || ticket.queueId === undefined)) && (
                             <ButtonWithSpinner
-                                //color="primary"
                                 style={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none', color: theme.mode === "light" ? "#0872B9" : "#FFF", padding: '0px', borderRadius: "50%", right: '51px', fontSize: '0.6rem', bottom: '-30px', minWidth: '2em', width: 'auto' }}
                                 variant="contained"
                                 className={classes.acceptButton}
@@ -612,7 +778,6 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                     <span className={classes.secondaryContentSecond} >
                         {(ticket.status === "pending" && ticket.queueId !== null) && (
                             <ButtonWithSpinner
-                                //color="primary"
                                 style={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none', color: theme.mode === "light" ? "#0872B9" : "#FFF", padding: '0px', borderRadius: "50%", right: '51px', fontSize: '0.6rem', bottom: '-30px', minWidth: '2em', width: 'auto' }}
                                 variant="contained"
                                 className={classes.acceptButton}
@@ -629,7 +794,6 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                     <span className={classes.secondaryContentSecond1} >
                         {(ticket.status === "pending" || ticket.status === "open" || ticket.status === "group") && (
                             <ButtonWithSpinner
-                                //color="primary"
                                 style={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none', color: theme.mode === "light" ? "#0872B9" : "#FFF", padding: '0px', borderRadius: "50%", right: '26px', position: 'absolute', fontSize: '0.6rem', bottom: '-30px', minWidth: '2em', width: 'auto' }}
                                 variant="contained"
                                 className={classes.acceptButton}
@@ -637,7 +801,6 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                                 loading={loading}
                                 onClick={handleOpenTransferModal}
                             >
-                                {/* {i18n.t("ticketsList.buttons.transfer")} */}
                                 <Tooltip title={`${i18n.t("ticketsList.buttons.transfer")}`}>
                                     <SwapHoriz />
                                 </Tooltip>
@@ -647,7 +810,6 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                     <span className={classes.secondaryContentSecond} >
                         {(ticket.status === "open" || ticket.status === "group") && (
                             <ButtonWithSpinner
-                                //color="primary"
                                 style={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none', color: theme.mode === "light" ? "#0872B9" : "#FFF", padding: '0px', bottom: '0px', borderRadius: "50%", right: '1px', fontSize: '0.6rem', bottom: '-30px', minWidth: '2em', width: 'auto' }}
                                 variant="contained"
                                 className={classes.acceptButton}
@@ -657,7 +819,6 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                             >
                                 <Tooltip title={`${i18n.t("ticketsList.buttons.closed")}`}>
                                     <HighlightOff />
-                                    {/*  */}
                                 </Tooltip>
                             </ButtonWithSpinner>
                         )}
@@ -665,7 +826,6 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                     <span className={classes.secondaryContentSecond} >
                         {((ticket.status === "pending" || ticket.status === "lgpd") && (user.userClosePendingTicket === "enabled" || user.profile === "admin")) && (
                             <ButtonWithSpinner
-                                //color="primary"
                                 style={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none', color: theme.mode === "light" ? "#0872B9" : "#FFF", padding: '0px', bottom: '0px', borderRadius: "50%", right: '1px', fontSize: '0.6rem', bottom: '-30px', minWidth: '2em', width: 'auto' }}
                                 variant="contained"
                                 className={classes.acceptButton}
@@ -680,7 +840,7 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                         )}
                     </span>
                     <span className={classes.secondaryContentSecond} >
-                        {(ticket.status === "closed" && (ticket.queueId === null || ticket.queueId === undefined)) && (
+                    {(ticket.status === "closed" && (ticket.queueId === null || ticket.queueId === undefined)) && (
                             <ButtonWithSpinner
                                 //color="primary"
                                 style={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none', color: theme.mode === "light" ? "#0872B9" : "#FFF", padding: '0px', bottom: '0px', borderRadius: "50%", right: '1px', fontSize: '0.6rem', bottom: '-30px', minWidth: '2em', width: 'auto' }}
