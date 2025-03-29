@@ -11,6 +11,7 @@ const companySettingsRoutes = express.Router();
 
 companySettingsRoutes.get("/companySettings/:companyId", isAuth, CompanySettingsController.show);
 companySettingsRoutes.get("/companySettingOne/", isAuth, CompanySettingsController.showOne);
+companySettingsRoutes.get("/companySettingOnePayment/", isAuth, CompanySettingsController.showOnePayment);
 companySettingsRoutes.put("/companySettings/", isAuth, CompanySettingsController.update);
 
 export default companySettingsRoutes;

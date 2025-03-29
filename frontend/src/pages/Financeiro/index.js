@@ -1,89 +1,64 @@
-import React, { useState, useEffect, useReducer } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import Paper from "@material-ui/core/Paper";
-import Button from "@material-ui/core/Button";
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
+import React, { useState, useEffect, useReducer, useContext } from "react";
+import { 
+  CreditCard, Receipt, CheckCircle, AlertCircle, Hourglass, 
+  Users, Smartphone, Layers, DollarSign, Calendar, Info 
+} from "lucide-react";
+import moment from "moment";
+
+// Components
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import Title from "../../components/Title";
 import SubscriptionModal from "../../components/SubscriptionModal";
-import api from "../../services/api";
 import TableRowSkeleton from "../../components/TableRowSkeleton";
+
+// Services e Contexts
+import api from "../../services/api";
+import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 
-import moment from "moment";
-
 const reducer = (state, action) => {
-  if (action.type === "LOAD_INVOICES") {
-    const invoices = action.payload;
-    const newUsers = [];
-
-    invoices.forEach((user) => {
-      const userIndex = state.findIndex((u) => u.id === user.id);
+  switch (action.type) {
+    case "LOAD_INVOICES":
+      const invoices = action.payload;
+      const newInvoices = invoices.filter(i => !state.some(existing => existing.id === i.id));
+      return [...state, ...newInvoices];
+    case "UPDATE_USERS":
+      const user = action.payload;
+      const userIndex = state.findIndex(u => u.id === user.id);
       if (userIndex !== -1) {
         state[userIndex] = user;
-      } else {
-        newUsers.push(user);
+        return [...state];
       }
-    });
-
-    return [...state, ...newUsers];
-  }
-
-  if (action.type === "UPDATE_USERS") {
-    const user = action.payload;
-    const userIndex = state.findIndex((u) => u.id === user.id);
-
-    if (userIndex !== -1) {
-      state[userIndex] = user;
-      return [...state];
-    } else {
       return [user, ...state];
-    }
-  }
-
-  if (action.type === "DELETE_USER") {
-    const userId = action.payload;
-
-    const userIndex = state.findIndex((u) => u.id === userId);
-    if (userIndex !== -1) {
-      state.splice(userIndex, 1);
-    }
-    return [...state];
-  }
-
-  if (action.type === "RESET") {
-    return [];
+    case "DELETE_USER":
+      return state.filter(u => u.id !== action.payload);
+    case "RESET":
+      return [];
+    default:
+      return state;
   }
 };
 
-const useStyles = makeStyles((theme) => ({
-  mainPaper: {
-    flex: 1,
-    padding: theme.spacing(1),
-    overflowY: "scroll",
-    ...theme.scrollbarStyles,
-  },
-}));
-
 const Invoices = () => {
-  const classes = useStyles();
-
+  const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [hasMore, setHasMore] = useState(false);
-  const [searchParam, ] = useState("");
+  const [searchParam] = useState("");
   const [invoices, dispatch] = useReducer(reducer, []);
-  const [storagePlans, setStoragePlans] = React.useState([]);
+  const [storagePlans, setStoragePlans] = useState([]);
   const [selectedContactId, setSelectedContactId] = useState(null);
   const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [companyPlan, setCompanyPlan] = useState(null);
 
-  const handleOpenContactModal = (invoices) => {
-    setStoragePlans(invoices);
+  // Handlers
+  const handleOpenContactModal = (invoice) => {
+    const invoiceWithPlanValue = {
+      ...invoice,
+      value: companyPlan?.amount ? parseFloat(companyPlan.amount) : invoice.value
+    };
+    setStoragePlans(invoiceWithPlanValue);
     setSelectedContactId(null);
     setContactModalOpen(true);
   };
@@ -92,10 +67,30 @@ const Invoices = () => {
     setSelectedContactId(null);
     setContactModalOpen(false);
   };
+
+  // Effects
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
   }, [searchParam]);
+
+  useEffect(() => {
+    const fetchCompanyPlan = async () => {
+      try {
+        if (user?.companyId) {
+          const companyResponse = await api.get(`/companies/${user.companyId}`);
+          const company = companyResponse.data;
+          if (company?.planId) {
+            const planResponse = await api.get(`/plans/${company.planId}`);
+            setCompanyPlan(planResponse.data);
+          }
+        }
+      } catch (err) {
+        toastError(err);
+      }
+    };
+    fetchCompanyPlan();
+  }, [user]);
 
   useEffect(() => {
     setLoading(true);
@@ -105,12 +100,12 @@ const Invoices = () => {
           const { data } = await api.get("/invoices/all", {
             params: { searchParam, pageNumber },
           });
-
           dispatch({ type: "LOAD_INVOICES", payload: data });
           setHasMore(data.hasMore);
-          setLoading(false);
         } catch (err) {
           toastError(err);
+        } finally {
+          setLoading(false);
         }
       };
       fetchInvoices();
@@ -118,140 +113,236 @@ const Invoices = () => {
     return () => clearTimeout(delayDebounceFn);
   }, [searchParam, pageNumber]);
 
-  const loadMore = () => {
-    setPageNumber((prevState) => prevState + 1);
-  };
+  const loadMore = () => setPageNumber(prev => prev + 1);
 
   const handleScroll = (e) => {
     if (!hasMore || loading) return;
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    if (scrollHeight - (scrollTop + 100) < clientHeight) {
-      loadMore();
+    if (scrollHeight - (scrollTop + 100) < clientHeight) loadMore();
+  };
+
+  // Helpers
+  const getInvoiceStatus = (record) => {
+    const hoje = moment().format("DD/MM/yyyy");
+    const vencimento = moment(record.dueDate).format("DD/MM/yyyy");
+    const diff = moment(vencimento, "DD/MM/yyyy").diff(moment(hoje, "DD/MM/yyyy"));
+    const dias = moment.duration(diff).asDays();
+    
+    if (record.status === "paid") {
+      return { text: "Pago", color: "bg-green-500", icon: <CheckCircle className="w-4 h-4" /> };
     }
+    if (dias < 0) {
+      return { text: "Vencido", color: "bg-red-500", icon: <AlertCircle className="w-4 h-4" /> };
+    }
+    return { text: "Em Aberto", color: "bg-yellow-500", icon: <Hourglass className="w-4 h-4" /> };
+  };
+
+  const renderDaysLeft = (record) => {
+    const hoje = moment().format("DD/MM/yyyy");
+    const vencimento = moment(record.dueDate).format("DD/MM/yyyy");
+    const diff = moment(vencimento, "DD/MM/yyyy").diff(moment(hoje, "DD/MM/yyyy"));
+    const dias = moment.duration(diff).asDays();
+    
+    if (record.status === "paid") return null;
+    if (dias < 0) return `Vencido há ${Math.abs(Math.floor(dias))} dias`;
+    if (dias === 0) return "Vence hoje";
+    return `Vence em ${Math.floor(dias)} dias`;
   };
 
   const rowStyle = (record) => {
-    const hoje = moment(moment()).format("DD/MM/yyyy");
+    const hoje = moment().format("DD/MM/yyyy");
     const vencimento = moment(record.dueDate).format("DD/MM/yyyy");
-    var diff = moment(vencimento, "DD/MM/yyyy").diff(moment(hoje, "DD/MM/yyyy"));
-    var dias = moment.duration(diff).asDays();
-    if (dias < 0 && record.status !== "paid") {
-      return { backgroundColor: "#ffbcbc9c" };
-    }
+    const diff = moment(vencimento, "DD/MM/yyyy").diff(moment(hoje, "DD/MM/yyyy"));
+    const dias = moment.duration(diff).asDays();
+    return dias < 0 && record.status !== "paid" ? "bg-red-50" : "";
   };
 
-  const rowStatus = (record) => {
-    const hoje = moment(moment()).format("DD/MM/yyyy");
-    const vencimento = moment(record.dueDate).format("DD/MM/yyyy");
-    var diff = moment(vencimento, "DD/MM/yyyy").diff(moment(hoje, "DD/MM/yyyy"));
-    var dias = moment.duration(diff).asDays();
-    const status = record.status;
-    if (status === "paid") {
-      return "Pago";
+  // Mobile Cards
+  const renderMobileCards = () => {
+    if (loading && !invoices.length) {
+      return <div className="flex justify-center my-4"><div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div></div>;
     }
-    if (dias < 0) {
-      return "Vencido";
-    } else {
-      return "Em Aberto"
-    }
-  }
-  
-  const renderUseWhatsapp = (row) => { return row.status === false ? "Não" : "Sim" };
-  const renderUseFacebook = (row) => { return row.status === false ? "Não" : "Sim" };
-  const renderUseInstagram = (row) => { return row.status === false ? "Não" : "Sim" };
-  const renderUseCampaigns = (row) => { return row.status === false ? "Não" : "Sim" };
-  const renderUseSchedules = (row) => { return row.status === false ? "Não" : "Sim" };
-  const renderUseInternalChat = (row) => { return row.status === false ? "Não" : "Sim" };
-  const renderUseExternalApi = (row) => { return row.status === false ? "Não" : "Sim" };
+
+    return (
+      <div className="grid grid-cols-1 gap-4 md:hidden p-4">
+        {invoices.map((invoice) => {
+          const statusInfo = getInvoiceStatus(invoice);
+          return (
+            <div key={invoice.id} className="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-all">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="bg-blue-500 p-2 rounded-full">
+                    <Receipt className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-800">{invoice.detail}</h3>
+                    <p className="text-xs text-gray-500">ID: {invoice.id}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-between items-center mb-3">
+                <span className={`${statusInfo.color} text-white px-2 py-1 rounded-full text-xs flex items-center gap-1`}>
+                  {statusInfo.icon} {statusInfo.text}
+                </span>
+                <span className="text-xs text-gray-600">{renderDaysLeft(invoice)}</span>
+              </div>
+              <div className="border-t pt-3 grid grid-cols-2 gap-2">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-blue-500" />
+                  <span className="text-sm">{companyPlan?.users} usuários</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Smartphone className="w-4 h-4 text-blue-500" />
+                  <span className="text-sm">{companyPlan?.connections} conexões</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-blue-500" />
+                  <span className="text-sm">{companyPlan?.queues} filas</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-blue-500" />
+                  <span className="text-sm">{moment(invoice.dueDate).format("DD/MM/YYYY")}</span>
+                </div>
+              </div>
+              <div className="mt-4">
+                <div className="flex items-center gap-2 text-blue-600 font-bold">
+                  <DollarSign className="w-5 h-5" />
+                  {companyPlan?.amount 
+                    ? parseFloat(companyPlan.amount).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })
+                    : invoice.value.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}
+                </div>
+              </div>
+              <div className="mt-4 flex justify-end">
+                {statusInfo.text !== "Pago" ? (
+                  <button
+                    onClick={() => handleOpenContactModal(invoice)}
+                    className="bg-gradient-to-r from-blue-500 to-blue-400 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:from-blue-600 hover:to-blue-500 transition-all"
+                  >
+                    <CreditCard className="w-4 h-4" /> Pagar Agora
+                  </button>
+                ) : (
+                  <button className="border border-green-500 text-green-500 px-4 py-2 rounded-full flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4" /> Pago
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
-    <MainContainer>
+    <MainContainer className="bg-gray-100 min-h-screen p-4">
       <SubscriptionModal
         open={contactModalOpen}
         onClose={handleCloseContactModal}
-        aria-labelledby="form-dialog-title"
         Invoice={storagePlans}
         contactId={selectedContactId}
-
-      ></SubscriptionModal>
-      <MainHeader>
-        <Title>Faturas ({invoices.length})</Title>
+      />
+      
+      <MainHeader className="mb-6">
+        <div className="flex items-center gap-2">
+          <Receipt className="w-8 h-8 text-blue-500" />
+          <Title>Faturas</Title>
+          <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm">{invoices.length}</span>
+        </div>
       </MainHeader>
-      <Paper
-        className={classes.mainPaper}
-        variant="outlined"
+
+      <div 
+        className="flex-1 bg-white rounded-xl shadow-md overflow-hidden max-h-[calc(100vh-150px)]"
         onScroll={handleScroll}
       >
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              {/* <TableCell align="center">Id</TableCell> */}
-              <TableCell align="center">Detalhes</TableCell>
+        {/* Mobile View */}
+        {renderMobileCards()}
 
-              <TableCell align="center">Usuários</TableCell>
-              <TableCell align="center">Conexões</TableCell>
-              <TableCell align="center">Filas</TableCell>
-              {/* <TableCell align="center">Whatsapp</TableCell>
-              <TableCell align="center">Facebook</TableCell>
-              <TableCell align="center">Instagram</TableCell> */}
-              {/* <TableCell align="center">Campanhas</TableCell>
-              <TableCell align="center">Agendamentos</TableCell>
-              <TableCell align="center">Chat Interno</TableCell>
-              <TableCell align="center">Rest PI</TableCell> */}
-
-              <TableCell align="center">Valor</TableCell>
-              <TableCell align="center">Data Venc.</TableCell>
-              <TableCell align="center">Status</TableCell>
-              <TableCell align="center">Ação</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            <>
-              {invoices.map((invoices) => (
-                <TableRow style={rowStyle(invoices)} key={invoices.id}>
-                  {/* <TableCell align="center">{invoices.id}</TableCell> */}
-                  <TableCell align="center">{invoices.detail}</TableCell>
-
-                  <TableCell align="center">{invoices.users}</TableCell>
-                  <TableCell align="center">{invoices.connections}</TableCell>
-                  <TableCell align="center">{invoices.queues}</TableCell>
-                  {/* <TableCell align="center">{renderUseWhatsapp(invoices.useWhatsapp)}</TableCell>
-                  <TableCell align="center">{renderUseFacebook(invoices.useFacebook)}</TableCell>
-                  <TableCell align="center">{renderUseInstagram(invoices.useInstagram)}</TableCell> */}
-                  {/* <TableCell align="center">{renderUseCampaigns(invoices.useCampaigns)}</TableCell>
-                  <TableCell align="center">{renderUseSchedules(invoices.useSchedules)}</TableCell>
-                  <TableCell align="center">{renderUseInternalChat(invoices.useInternalChat)}</TableCell>
-                  <TableCell align="center">{renderUseExternalApi(invoices.useExternalApi)}</TableCell> */}
-
-                  <TableCell style={{ fontWeight: 'bold' }} align="center">{invoices.value.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</TableCell>
-                  <TableCell align="center">{moment(invoices.dueDate).format("DD/MM/YYYY")}</TableCell>
-                  <TableCell style={{ fontWeight: 'bold' }} align="center">{rowStatus(invoices)}</TableCell>
-                  <TableCell align="center">
-                    {rowStatus(invoices) !== "Pago" ?
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        color="secondary"
-                        onClick={() => handleOpenContactModal(invoices)}
-                      >
-                        PAGAR
-                      </Button> :
-                      <Button
-                        size="small"
-                        variant="outlined"
-                      // color="secondary"
-                      >
-                        PAGO
-                      </Button>}
-
-                  </TableCell>
-                </TableRow>
-              ))}
-              {loading && <TableRowSkeleton columns={4} />}
-            </>
-          </TableBody>
-        </Table>
-      </Paper>
+        {/* Desktop View */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b sticky top-0">
+              <tr>
+                <th className="p-4 text-left text-gray-600 font-semibold">
+                  <div className="flex items-center gap-2">
+                    <Info className="w-4 h-4" /> Detalhes
+                  </div>
+                </th>
+                <th className="p-4 text-center text-gray-600 font-semibold">
+                  <div className="flex items-center justify-center gap-2">
+                    <Users className="w-4 h-4" /> Usuários
+                  </div>
+                </th>
+                <th className="p-4 text-center text-gray-600 font-semibold">
+                  <div className="flex items-center justify-center gap-2">
+                    <Smartphone className="w-4 h-4" /> Conexões
+                  </div>
+                </th>
+                <th className="p-4 text-center text-gray-600 font-semibold">
+                  <div className="flex items-center justify-center gap-2">
+                    <Layers className="w-4 h-4" /> Filas
+                  </div>
+                </th>
+                <th className="p-4 text-center text-gray-600 font-semibold">
+                  <div className="flex items-center justify-center gap-2">
+                    <DollarSign className="w-4 h-4" /> Valor
+                  </div>
+                </th>
+                <th className="p-4 text-center text-gray-600 font-semibold">
+                  <div className="flex items-center justify-center gap-2">
+                    <Calendar className="w-4 h-4" /> Vencimento
+                  </div>
+                </th>
+                <th className="p-4 text-center text-gray-600 font-semibold">Status</th>
+                <th className="p-4 text-center text-gray-600 font-semibold">Ação</th>
+              </tr>
+            </thead>
+            <tbody>
+              {invoices.map((invoice) => {
+                const statusInfo = getInvoiceStatus(invoice);
+                return (
+                  <tr key={invoice.id} className={`hover:bg-gray-50 transition-colors border-b ${rowStyle(invoice)}`}>
+                    <td className="p-4 text-gray-800">{invoice.detail}</td>
+                    <td className="p-4 text-center text-gray-600">{companyPlan?.users}</td>
+                    <td className="p-4 text-center text-gray-600">{companyPlan?.connections}</td>
+                    <td className="p-4 text-center text-gray-600">{companyPlan?.queues}</td>
+                    <td className="p-4 text-center text-gray-600 font-bold">
+                      {companyPlan?.amount 
+                        ? parseFloat(companyPlan.amount).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })
+                        : invoice.value.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}
+                    </td>
+                    <td className="p-4 text-center text-gray-600">
+                      <div className="flex flex-col items-center">
+                        <span>{moment(invoice.dueDate).format("DD/MM/YYYY")}</span>
+                        <span className="text-xs text-gray-500">{renderDaysLeft(invoice)}</span>
+                      </div>
+                    </td>
+                    <td className="p-4 text-center">
+                      <span className={`${statusInfo.color} text-white px-2 py-1 rounded-full text-xs flex items-center justify-center gap-1`}>
+                        {statusInfo.icon} {statusInfo.text}
+                      </span>
+                    </td>
+                    <td className="p-4 text-center">
+                      {statusInfo.text !== "Pago" ? (
+                        <button
+                          onClick={() => handleOpenContactModal(invoice)}
+                          className="bg-gradient-to-r from-blue-500 to-blue-400 text-white px-3 py-1 rounded-full flex items-center gap-1 hover:from-blue-600 hover:to-blue-500 transition-all"
+                        >
+                          <CreditCard className="w-4 h-4" /> Pagar
+                        </button>
+                      ) : (
+                        <button className="border border-green-500 text-green-500 px-3 py-1 rounded-full flex items-center gap-1">
+                          <CheckCircle className="w-4 h-4" /> Pago
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+              {loading && <TableRowSkeleton columns={8} />}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </MainContainer>
   );
 };

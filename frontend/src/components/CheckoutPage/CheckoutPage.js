@@ -1,12 +1,5 @@
 import React, { useContext, useState } from "react";
-import {
-  Stepper,
-  Step,
-  StepLabel,
-  Button,
-  Typography,
-  CircularProgress,
-} from "@material-ui/core";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { Formik, Form } from "formik";
 
 import AddressForm from "./Forms/AddressForm";
@@ -23,42 +16,40 @@ import validationSchema from "./FormModel/validationSchema";
 import checkoutFormModel from "./FormModel/checkoutFormModel";
 import formInitialValues from "./FormModel/formInitialValues";
 
-import useStyles from "./styles";
-
-export default function CheckoutPage(props) {
+const CheckoutPage = (props) => {
   const steps = ["Dados", "Personalizar", "Revisar"];
   const { formId, formField } = checkoutFormModel;
 
-  const classes = useStyles();
   const [activeStep, setActiveStep] = useState(1);
   const [datePayment, setDatePayment] = useState(null);
-  const [invoiceId, setinvoiceId] = useState(props.Invoice.id);
+  const [invoiceId] = useState(props.Invoice.id);
   const currentValidationSchema = validationSchema[activeStep];
   const isLastStep = activeStep === steps.length - 1;
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
 
-  function _renderStepContent(step, setFieldValue, setActiveStep, values) {
-
+  const renderStepContent = (step, setFieldValue, setActiveStep, values) => {
     switch (step) {
       case 0:
         return <AddressForm formField={formField} values={values} setFieldValue={setFieldValue} />;
       case 1:
-        return <PaymentForm
-          formField={formField}
-          setFieldValue={setFieldValue}
-          setActiveStep={setActiveStep}
-          activeStep={step}
-          invoiceId={invoiceId}
-          values={values}
-        />;
+        return (
+          <PaymentForm
+            formField={formField}
+            setFieldValue={setFieldValue}
+            setActiveStep={setActiveStep}
+            activeStep={step}
+            invoiceId={invoiceId}
+            values={values}
+          />
+        );
       case 2:
         return <ReviewOrder />;
       default:
-        return <div>Not Found</div>;
+        return <div className="text-gray-500">Não encontrado</div>;
     }
-  }
+  };
 
-  async function _submitForm(values, actions) {
+  const submitForm = async (values, actions) => {
     try {
       const plan = JSON.parse(values.plan);
       const newValues = {
@@ -77,92 +68,102 @@ export default function CheckoutPage(props) {
         price: plan.price,
         users: plan.users,
         connections: plan.connections,
-        invoiceId: invoiceId
-      }
+        invoiceId: invoiceId,
+      };
 
       const { data } = await api.post("/subscription", newValues);
-      setDatePayment(data)
+      setDatePayment(data);
       actions.setSubmitting(false);
       setActiveStep(activeStep + 1);
       toast.success("Assinatura realizada com sucesso!, aguardando a realização do pagamento");
     } catch (err) {
       toastError(err);
     }
-  }
+  };
 
-  function _handleSubmit(values, actions) {
+  const handleSubmit = (values, actions) => {
     if (isLastStep) {
-      _submitForm(values, actions);
+      submitForm(values, actions);
     } else {
       setActiveStep(activeStep + 1);
       actions.setTouched({});
       actions.setSubmitting(false);
     }
-  }
+  };
 
-  function _handleBack() {
+  const handleBack = () => {
     setActiveStep(activeStep - 1);
-  }
+  };
 
   return (
-    <React.Fragment>
-      <Typography component="h1" variant="h4" align="center">
-        Falta pouco!
-      </Typography>
-      <Stepper activeStep={activeStep} className={classes.stepper}>
-        {steps.map((label) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">Falta pouco!</h1>
+      
+      {/* Stepper */}
+      <div className="flex justify-between items-center mb-8 max-w-2xl mx-auto">
+        {steps.map((label, index) => (
+          <div key={label} className="flex flex-col items-center">
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+                index <= activeStep
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-600"
+              }`}
+            >
+              {index + 1}
+            </div>
+            <span className="text-sm mt-2 text-gray-700">{label}</span>
+          </div>
         ))}
-      </Stepper>
-      <React.Fragment>
-        {activeStep === steps.length ? (
-          <CheckoutSuccess pix={datePayment} />
-        ) : (
-          <Formik
-            initialValues={{
-              ...user,
-              ...formInitialValues
-            }}
-            validationSchema={currentValidationSchema}
-            onSubmit={_handleSubmit}
-          >
-            {({ isSubmitting, setFieldValue, values }) => (
-              <Form id={formId}>
-                {_renderStepContent(activeStep, setFieldValue, setActiveStep, values)}
+      </div>
 
-                <div className={classes.buttons}>
-                  {activeStep !== 1 && activeStep !== 0 && (
-                    <Button onClick={_handleBack} className={classes.button}>
-                      VOLTAR
-                    </Button>
-                  )}
-                  <div className={classes.wrapper}>
-                    {activeStep !== 1 && (
-                      <Button
-                        disabled={isSubmitting}
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        className={classes.button}
-                      >
-                        {isLastStep ? "PAGAR" : "PRÓXIMO"}
-                      </Button>
+      {activeStep === steps.length ? (
+        <CheckoutSuccess pix={datePayment} />
+      ) : (
+        <Formik
+          initialValues={{ ...user, ...formInitialValues }}
+          validationSchema={currentValidationSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ isSubmitting, setFieldValue, values }) => (
+            <Form id={formId} className="space-y-6">
+              {renderStepContent(activeStep, setFieldValue, setActiveStep, values)}
+
+              <div className="flex justify-between items-center mt-8">
+                {activeStep !== 1 && activeStep !== 0 && (
+                  <button
+                    type="button"
+                    onClick={handleBack}
+                    className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+                  >
+                    <ChevronLeft className="w-5 h-5" /> Voltar
+                  </button>
+                )}
+                {activeStep !== 1 && (
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-colors ${
+                      isSubmitting
+                        ? "bg-blue-400 cursor-not-allowed"
+                        : "bg-blue-500 hover:bg-blue-600"
+                    }`}
+                  >
+                    {isSubmitting ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <ChevronRight className="w-5 h-5" />
                     )}
-                    {isSubmitting && (
-                      <CircularProgress
-                        size={24}
-                        className={classes.buttonProgress}
-                      />
-                    )}
-                  </div>
-                </div>
-              </Form>
-            )}
-          </Formik>
-        )}
-      </React.Fragment>
-    </React.Fragment>
+                    {isLastStep ? "Pagar" : "Próximo"}
+                  </button>
+                )}
+              </div>
+            </Form>
+          )}
+        </Formik>
+      )}
+    </div>
   );
-}
+};
+
+export default CheckoutPage;

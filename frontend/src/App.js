@@ -31,8 +31,6 @@ const App = () => {
   const [appLogoFavicon, setAppLogoFavicon] = useState(defaultLogoFavicon);
   const [appName, setAppName] = useState(appNameLocalStorage);
   const { getPublicSetting } = useSettings();
-  // Estado para controlar o prompt de instalação do PWA
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
 
   const colorMode = useMemo(
     () => ({
@@ -119,49 +117,6 @@ const App = () => {
     [appLogoLight, appLogoDark, appLogoFavicon, appName, locale, mode, primaryColorDark, primaryColorLight]
   );
 
-  // Detecta quando o navegador está pronto para mostrar o prompt de instalação do PWA
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e) => {
-      // Previne o comportamento padrão do navegador
-      e.preventDefault();
-      // Armazena o evento para uso posterior
-      setDeferredPrompt(e);
-      
-      // Mostra o prompt de instalação imediatamente
-      setTimeout(() => {
-        showInstallPrompt();
-      }, 2000); // Pequeno delay para garantir que a página já carregou
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-  }, []);
-
-  // Função para mostrar o prompt de instalação
-  const showInstallPrompt = () => {
-    if (deferredPrompt) {
-      // Verifica se o PWA já está instalado
-      if (!window.matchMedia('(display-mode: standalone)').matches) {
-        // Mostra o prompt de instalação
-        deferredPrompt.prompt();
-        
-        // Espera pela resposta do usuário
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('Usuário aceitou instalar o app');
-          } else {
-            console.log('Usuário recusou instalar o app');
-          }
-          // Limpa o prompt armazenado, só pode ser usado uma vez
-          setDeferredPrompt(null);
-        });
-      }
-    }
-  };
-
   useEffect(() => {
     const i18nlocale = localStorage.getItem("i18nextLng");
     const browserLocale = i18nlocale.substring(0, 2) + i18nlocale.substring(3, 5);
@@ -218,11 +173,11 @@ const App = () => {
       });
     getPublicSetting("appName")
       .then((name) => {
-        setAppName(name || "WORKZAP");
+        setAppName(name || "Multizap Plus");
       })
       .catch((error) => {
         console.log("!==== Erro ao carregar temas: ====!", error);
-        setAppName("WORKZAP");
+        setAppName("Multizap Plus");
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

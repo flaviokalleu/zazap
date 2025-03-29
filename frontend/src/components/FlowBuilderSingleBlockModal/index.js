@@ -28,7 +28,7 @@ import {
   MenuItem,
   Select,
   Stack,
-  Typography
+  Typography,
 } from "@mui/material";
 import {
   AccessTime,
@@ -39,28 +39,29 @@ import {
   KeyboardArrowUp,
   Message,
   MicNone,
-  Videocam
+  Videocam,
 } from "@mui/icons-material";
 import { capitalize } from "../../utils/capitalize";
+import { Box, Divider } from "@material-ui/core";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
-    flexWrap: "wrap"
+    flexWrap: "wrap",
   },
   textField: {
     marginRight: theme.spacing(1),
-    flex: 1
+    flex: 1,
   },
 
   extraAttr: {
     display: "flex",
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
 
   btnWrapper: {
-    position: "relative"
+    position: "relative",
   },
 
   buttonProgress: {
@@ -69,8 +70,8 @@ const useStyles = makeStyles(theme => ({
     top: "50%",
     left: "50%",
     marginTop: -12,
-    marginLeft: -12
-  }
+    marginLeft: -12,
+  },
 }));
 
 const FlowBuilderSingleBlockModal = ({
@@ -78,7 +79,7 @@ const FlowBuilderSingleBlockModal = ({
   onSave,
   onUpdate,
   data,
-  close
+  close,
 }) => {
   const classes = useStyles();
   const isMounted = useRef(true);
@@ -129,21 +130,25 @@ const FlowBuilderSingleBlockModal = ({
 
   const [arrayOption, setArrayOption] = useState([]);
 
+  const [variables, setVariables] = useState([]);
+
   const [labels, setLabels] = useState({
     title: "Adicionar conteúdo ao fluxo",
-    btn: "Adicionar"
+    btn: "Adicionar",
   });
 
-  const handleElements = newNameFiles => {
+  const handleElements = (newNameFiles) => {
     let elementsSequence = [];
 
-    const newArrMessage = elementsSeq.filter(item => item.includes("message"));
-    const newArrInterval = elementsSeq.filter(item =>
+    const newArrMessage = elementsSeq.filter((item) =>
+      item.includes("message")
+    );
+    const newArrInterval = elementsSeq.filter((item) =>
       item.includes("interval")
     );
-    const newArrImg = elementsSeq.filter(item => item.includes("img"));
-    const newArrAudio = elementsSeq.filter(item => item.includes("audio"));
-    const newArrVideo = elementsSeq.filter(item => item.includes("video"));
+    const newArrImg = elementsSeq.filter((item) => item.includes("img"));
+    const newArrAudio = elementsSeq.filter((item) => item.includes("audio"));
+    const newArrVideo = elementsSeq.filter((item) => item.includes("video"));
 
     //Todas as mensagens
     for (let i = 0; i < numberMessages; i++) {
@@ -158,9 +163,9 @@ const FlowBuilderSingleBlockModal = ({
       elementsSequence.push({
         type: "message",
         value: value,
-        number: newArrMessage[i]
+        number: newArrMessage[i],
       });
-      console.log('text')
+      console.log("text");
     }
     //Todos os intervalos
     for (let i = 0; i < numberInterval; i++) {
@@ -175,9 +180,9 @@ const FlowBuilderSingleBlockModal = ({
       elementsSequence.push({
         type: "interval",
         value: value,
-        number: newArrInterval[i]
+        number: newArrInterval[i],
       });
-      console.log('int')
+      console.log("int");
     }
 
     //Todas as imagens
@@ -185,32 +190,32 @@ const FlowBuilderSingleBlockModal = ({
       const onlyImg =
         newNameFiles !== null &&
         newNameFiles.filter(
-          file =>
+          (file) =>
             file.includes("png") ||
             file.includes("jpg") ||
             file.includes("jpeg")
         );
       const onlyImgNameOriginal = medias.filter(
-        file =>
+        (file) =>
           file.name.includes("png") ||
           file.name.includes("jpg") ||
           file.name.includes("jpeg")
-      );      
+      );
       if (elementsSeqEdit.includes(newArrImg[i])) {
         const itemSelectedEdit = elementsEdit.filter(
-          item => item.number === newArrImg[i]
+          (item) => item.number === newArrImg[i]
         )[0];
         elementsSequence.push({
           type: "img",
           value: itemSelectedEdit.value,
           original: itemSelectedEdit.original,
-          number: itemSelectedEdit.number
+          number: itemSelectedEdit.number,
         });
       } else {
         let indexElem = 0;
-        if (elementsSeqEdit.filter(item => item.includes("img")).length > 0) {
+        if (elementsSeqEdit.filter((item) => item.includes("img")).length > 0) {
           indexElem =
-            elementsSeqEdit.filter(item => item.includes("img")).length - i;
+            elementsSeqEdit.filter((item) => item.includes("img")).length - i;
         } else {
           indexElem = i;
         }
@@ -218,7 +223,7 @@ const FlowBuilderSingleBlockModal = ({
           type: "img",
           value: onlyImg[indexElem],
           original: onlyImgNameOriginal[indexElem].name,
-          number: newArrImg[i]
+          number: newArrImg[i],
         });
       }
     }
@@ -227,36 +232,40 @@ const FlowBuilderSingleBlockModal = ({
       const onlyAudio =
         newNameFiles !== null &&
         newNameFiles.filter(
-          file =>
+          (file) =>
             file.includes("mp3") ||
             file.includes("ogg") ||
             file.includes("mpeg") ||
             file.includes("opus")
         );
       const onlyAudioNameOriginal = medias.filter(
-        file =>
+        (file) =>
           file.name.includes("mp3") ||
           file.name.includes("ogg") ||
           file.name.includes("mpeg") ||
           file.name.includes("opus")
       );
-      
+
       if (elementsSeqEdit.includes(newArrAudio[i])) {
         const itemSelectedEdit = elementsEdit.filter(
-          item => item.number === newArrAudio[i]
+          (item) => item.number === newArrAudio[i]
         )[0];
         elementsSequence.push({
           type: "audio",
           value: itemSelectedEdit.value,
           original: itemSelectedEdit.original,
           number: itemSelectedEdit.number,
-          record: document.querySelector(`.check${newArrAudio[i]}`).querySelector(".PrivateSwitchBase-input").checked
+          record: document
+            .querySelector(`.check${newArrAudio[i]}`)
+            .querySelector(".PrivateSwitchBase-input").checked,
         });
       } else {
         let indexElem = 0;
-        if (elementsSeqEdit.filter(item => item.includes("audio")).length > 0) {
+        if (
+          elementsSeqEdit.filter((item) => item.includes("audio")).length > 0
+        ) {
           indexElem =
-            elementsSeqEdit.filter(item => item.includes("audio")).length - i;
+            elementsSeqEdit.filter((item) => item.includes("audio")).length - i;
         } else {
           indexElem = i;
         }
@@ -265,8 +274,10 @@ const FlowBuilderSingleBlockModal = ({
           value: onlyAudio[indexElem],
           original: onlyAudioNameOriginal[indexElem].name,
           number: newArrAudio[i],
-          record: document.querySelector(`.check${newArrAudio[i]}`).querySelector(".PrivateSwitchBase-input").checked
-        });        
+          record: document
+            .querySelector(`.check${newArrAudio[i]}`)
+            .querySelector(".PrivateSwitchBase-input").checked,
+        });
       }
     }
     //Todos os videos
@@ -274,26 +285,28 @@ const FlowBuilderSingleBlockModal = ({
       const onlyVideo =
         newNameFiles !== null &&
         newNameFiles.filter(
-          file => file.includes("mp4") || file.includes("avi")
+          (file) => file.includes("mp4") || file.includes("avi")
         );
       const onlyVideoNameOriginal = medias.filter(
-        file => file.name.includes("mp4") || file.name.includes("avi")
+        (file) => file.name.includes("mp4") || file.name.includes("avi")
       );
       if (elementsSeqEdit.includes(newArrVideo[i])) {
         const itemSelectedEdit = elementsEdit.filter(
-          item => item.number === newArrVideo[i]
+          (item) => item.number === newArrVideo[i]
         )[0];
         elementsSequence.push({
           type: "video",
           value: itemSelectedEdit.value,
           original: itemSelectedEdit.original,
-          number: itemSelectedEdit.number
+          number: itemSelectedEdit.number,
         });
       } else {
         let indexElem = 0;
-        if (elementsSeqEdit.filter(item => item.includes("video")).length > 0) {
+        if (
+          elementsSeqEdit.filter((item) => item.includes("video")).length > 0
+        ) {
           indexElem =
-            elementsSeqEdit.filter(item => item.includes("video")).length - i;
+            elementsSeqEdit.filter((item) => item.includes("video")).length - i;
         } else {
           indexElem = i;
         }
@@ -301,93 +314,97 @@ const FlowBuilderSingleBlockModal = ({
           type: "video",
           value: onlyVideo[indexElem],
           original: onlyVideoNameOriginal[indexElem].name,
-          number: newArrVideo[i]
+          number: newArrVideo[i],
         });
       }
     }
 
-    console.log(elementsSequence)
+    console.log(elementsSequence);
 
     return elementsSequence;
   };
 
   const deleteElementsTypeOne = (id, type) => {
     if (type === "message") {
-      setNumberMessages(old => old - 1);
-      setElementsSeq(old => old.filter(item => item !== `message${id}`));
-      setElementsSeqEdit(old => old.filter(item => item !== `message${id}`))
+      setNumberMessages((old) => old - 1);
+      setElementsSeq((old) => old.filter((item) => item !== `message${id}`));
+      setElementsSeqEdit((old) =>
+        old.filter((item) => item !== `message${id}`)
+      );
       document.querySelector(`.stackMessage${id}`).remove();
     }
     if (type === "interval") {
-      setNumberInterval(old => old - 1);
-      setElementsSeq(old => old.filter(item => item !== `interval${id}`));
-      setElementsSeqEdit(old => old.filter(item => item !== `interval${id}`))
+      setNumberInterval((old) => old - 1);
+      setElementsSeq((old) => old.filter((item) => item !== `interval${id}`));
+      setElementsSeqEdit((old) =>
+        old.filter((item) => item !== `interval${id}`)
+      );
       document.querySelector(`.stackInterval${id}`).remove();
     }
     if (type === "img") {
-      setNumberImg(old => old - 1);
-      setPreviewImg(old => {
-        setMedias(oldMedia => {
+      setNumberImg((old) => old - 1);
+      setPreviewImg((old) => {
+        setMedias((oldMedia) => {
           try {
             return oldMedia.filter(
-              mediaItem =>
+              (mediaItem) =>
                 mediaItem.name !==
-                old.filter(item => item.number === id)[0].name
+                old.filter((item) => item.number === id)[0].name
             );
           } catch (e) {
             return oldMedia;
           }
         });
-        return old.filter(item => item.number !== id);
+        return old.filter((item) => item.number !== id);
       });
-      setElementsSeq(old => old.filter(item => item !== `img${id}`));
-      setElementsSeqEdit(old => old.filter(item => item !== `img${id}`))
+      setElementsSeq((old) => old.filter((item) => item !== `img${id}`));
+      setElementsSeqEdit((old) => old.filter((item) => item !== `img${id}`));
       document.querySelector(`.stackImg${id}`).remove();
     }
     if (type === "audio") {
-      setNumberAudio(old => old - 1);
-      setPreviewAudios(old => {
-        setMedias(oldMedia => {
+      setNumberAudio((old) => old - 1);
+      setPreviewAudios((old) => {
+        setMedias((oldMedia) => {
           try {
             return oldMedia.filter(
-              mediaItem =>
+              (mediaItem) =>
                 mediaItem.name !==
-                old.filter(item => item.number === id)[0].name
+                old.filter((item) => item.number === id)[0].name
             );
           } catch (e) {
             return oldMedia;
           }
         });
-        return old.filter(item => item.number !== id);
+        return old.filter((item) => item.number !== id);
       });
-      setElementsSeq(old => old.filter(item => item !== `audio${id}`));
-      setElementsSeqEdit(old => old.filter(item => item !== `audio${id}`))
+      setElementsSeq((old) => old.filter((item) => item !== `audio${id}`));
+      setElementsSeqEdit((old) => old.filter((item) => item !== `audio${id}`));
       document.querySelector(`.stackAudio${id}`).remove();
     }
     if (type === "video") {
-      setNumberVideo(old => old - 1);
-      setPreviewVideos(old => {
-        setMedias(oldMedia => {
+      setNumberVideo((old) => old - 1);
+      setPreviewVideos((old) => {
+        setMedias((oldMedia) => {
           try {
             return oldMedia.filter(
-              mediaItem =>
+              (mediaItem) =>
                 mediaItem.name !==
-                old.filter(item => item.number === id)[0].name
+                old.filter((item) => item.number === id)[0].name
             );
           } catch (e) {
             return oldMedia;
           }
         });
-        return old.filter(item => item.number !== id);
+        return old.filter((item) => item.number !== id);
       });
-      setElementsSeq(old => old.filter(item => item !== `video${id}`));
-      setElementsSeqEdit(old => old.filter(item => item !== `video${id}`))
+      setElementsSeq((old) => old.filter((item) => item !== `video${id}`));
+      setElementsSeqEdit((old) => old.filter((item) => item !== `video${id}`));
       document.querySelector(`.stackVideo${id}`).remove();
     }
   };
 
-  const moveElementDown = id => {
-    setElementsSeq(old => {
+  const moveElementDown = (id) => {
+    setElementsSeq((old) => {
       const array = old;
       const index = array.indexOf(id);
       moveItemParaFrente(index);
@@ -403,8 +420,8 @@ const FlowBuilderSingleBlockModal = ({
     });
   };
 
-  const moveElementUp = id => {
-    setElementsSeq(old => {
+  const moveElementUp = (id) => {
+    setElementsSeq((old) => {
       const array = old;
       const index = array.indexOf(id);
       moveItemParaTras(index);
@@ -421,7 +438,7 @@ const FlowBuilderSingleBlockModal = ({
   };
 
   function moveItemParaFrente(posicao) {
-    setElements(old => {
+    setElements((old) => {
       const array = old;
 
       if (posicao >= 0 && posicao < array.length - 1) {
@@ -436,7 +453,7 @@ const FlowBuilderSingleBlockModal = ({
   }
 
   function moveItemParaTras(posicao) {
-    setElements(old => {
+    setElements((old) => {
       const array = old;
       if (posicao > 0 && posicao < array.length) {
         const novoArray = [...array]; // Cria uma cópia do array original
@@ -459,16 +476,16 @@ const FlowBuilderSingleBlockModal = ({
       return;
     }
     const imgBlob = URL.createObjectURL(e.target.files[0]);
-    setPreviewImg(old => [
+    setPreviewImg((old) => [
       ...old,
       {
         number: number,
         url: imgBlob,
-        name: e.target.files[0].name
-      }
+        name: e.target.files[0].name,
+      },
     ]);
     const selectedMedias = Array.from(e.target.files);
-    setMedias(old => [...old, selectedMedias[0]]);
+    setMedias((old) => [...old, selectedMedias[0]]);
 
     document.querySelector(`.img${number}`).src = imgBlob;
     document.querySelector(`.btnImg${number}`).remove();
@@ -485,17 +502,17 @@ const FlowBuilderSingleBlockModal = ({
     }
 
     const audioBlob = URL.createObjectURL(e.target.files[0]);
-    setPreviewAudios(old => [
+    setPreviewAudios((old) => [
       ...old,
       {
         number: number,
         url: audioBlob,
-        name: e.target.files[0].name
-      }
+        name: e.target.files[0].name,
+      },
     ]);
 
     const selectedMedias = Array.from(e.target.files);
-    setMedias(old => [...old, selectedMedias[0]]);
+    setMedias((old) => [...old, selectedMedias[0]]);
 
     document.querySelector(
       `.audio${number}`
@@ -516,19 +533,19 @@ const FlowBuilderSingleBlockModal = ({
       return;
     }
     const videoBlob = URL.createObjectURL(e.target.files[0]);
-    setPreviewVideos(old => [
+    setPreviewVideos((old) => [
       ...old,
       {
         number: number,
         url: videoBlob,
-        name: e.target.files[0].name
-      }
+        name: e.target.files[0].name,
+      },
     ]);
 
     var divConteudo = document.createElement("div");
 
     const selectedMedias = Array.from(e.target.files);
-    setMedias(old => [...old, selectedMedias[0]]);
+    setMedias((old) => [...old, selectedMedias[0]]);
 
     divConteudo.innerHTML = `<video controls="controls" style="width: 200px;">
     <source src="${videoBlob}" type="video/mp4" />
@@ -546,7 +563,7 @@ const FlowBuilderSingleBlockModal = ({
           border: "1px solid #0000FF",
           borderRadius: "7px",
           padding: "6px",
-          position: "relative"
+          position: "relative",
         }}
         className={`stackImg${number}`}
         key={`stackImg${number}`}
@@ -577,7 +594,7 @@ const FlowBuilderSingleBlockModal = ({
               type="file"
               accept="image/png, image/jpg, image/jpeg"
               hidden
-              onChange={e => handleChangeMediasImg(e, number)}
+              onChange={(e) => handleChangeMediasImg(e, number)}
             />
           </Button>
         )}
@@ -592,7 +609,7 @@ const FlowBuilderSingleBlockModal = ({
           border: "1px solid #0000FF",
           borderRadius: "7px",
           padding: "6px",
-          position: "relative"
+          position: "relative",
         }}
         className={`stackAudio${number}`}
         key={`stackAudio${number}`}
@@ -621,7 +638,7 @@ const FlowBuilderSingleBlockModal = ({
           style={{
             display: "flex",
             flexDirection: "row",
-            justifyContent: "center"
+            justifyContent: "center",
           }}
         >
           {valueDefault.length > 0 && (
@@ -647,7 +664,7 @@ const FlowBuilderSingleBlockModal = ({
               type="file"
               accept="audio/ogg, audio/mp3, audio/opus"
               hidden
-              onChange={e => handleChangeAudios(e, number)}
+              onChange={(e) => handleChangeAudios(e, number)}
             />
           </Button>
         )}
@@ -671,7 +688,7 @@ const FlowBuilderSingleBlockModal = ({
           border: "1px solid #0000FF",
           borderRadius: "7px",
           padding: "6px",
-          position: "relative"
+          position: "relative",
         }}
         className={`stackVideo${number}`}
         key={`stackVideo${number}`}
@@ -685,13 +702,15 @@ const FlowBuilderSingleBlockModal = ({
           style={{
             display: "flex",
             flexDirection: "row",
-            justifyContent: "center"
+            justifyContent: "center",
           }}
         >
           {valueDefault.length > 0 && (
-            <video controls="controls" style={{width: '200px'}}>
+            <video controls="controls" style={{ width: "200px" }}>
               <source
-                src={process.env.REACT_APP_BACKEND_URL + "/public/" + valueDefault}
+                src={
+                  process.env.REACT_APP_BACKEND_URL + "/public/" + valueDefault
+                }
                 type="video/mp4"
               />
               seu navegador não suporta HTML5
@@ -709,7 +728,7 @@ const FlowBuilderSingleBlockModal = ({
               type="file"
               accept="video/mp4"
               hidden
-              onChange={e => handleChangeVideos(e, number)}
+              onChange={(e) => handleChangeVideos(e, number)}
             />
           </Button>
         )}
@@ -724,7 +743,7 @@ const FlowBuilderSingleBlockModal = ({
           border: "1px solid #0000FF",
           borderRadius: "7px",
           padding: "6px",
-          position: "relative"
+          position: "relative",
         }}
         className={`stackMessage${number}`}
         key={`stackMessage${number}`}
@@ -755,7 +774,7 @@ const FlowBuilderSingleBlockModal = ({
           border: "1px solid #0000FF",
           borderRadius: "7px",
           padding: "6px",
-          position: "relative"
+          position: "relative",
         }}
         className={`stackInterval${number}`}
         key={`stackInterval${number}`}
@@ -778,102 +797,121 @@ const FlowBuilderSingleBlockModal = ({
     );
   };
 
- 
-
   useEffect(() => {
+    const localVariables = localStorage.getItem("variables");
+    if (localVariables) {
+      setVariables(JSON.parse(localVariables));
+    }
+
     if (open === "edit") {
       setLabels({
         title: "Editar conteúdo",
-        btn: "Salvar"
+        btn: "Salvar",
       });
 
       setElementsSeq(data.data.seq);
 
-    setElementsSeqEdit(data.data.seq);
-    setElementsEdit(data.data.elements);
-    if (data) {
-      const elementsEditLoc = data.data.elements;
-      const sequence = data.data.seq;
+      setElementsSeqEdit(data.data.seq);
+      setElementsEdit(data.data.elements);
+      if (data) {
+        const elementsEditLoc = data.data.elements;
+        const sequence = data.data.seq;
 
-      sequence.map(item => {
-        const itemNode = elementsEditLoc.filter(inode => inode.number === item)[0];
-        if (itemNode.type === "message") {
-          const numberLoc = parseInt(item.replace("message", ""));
-          setElements(elm => [
-            ...elm,
-            messageLayout(numberLoc, itemNode.value)
-          ]);
-          setNumberMessages(old => {
-            const arsOnly = sequence.filter(item => item.includes("message"));
-            const arrNumberMax = arsOnly.map(item =>
-              parseInt(item.replace("message", ""))
-            );
-            setNumberMessagesLast(Math.max.apply(null, arrNumberMax) + 1);
-            return old + 1;
-          });
-        }
-        if (itemNode.type === "interval") {
-          const numberLoc = parseInt(item.replace("interval", ""));
-          setElements(elm => [
-            ...elm,
-            intervalLayout(numberLoc, itemNode.value)
-          ]);
-          setNumberInterval(old => {
-            const arsOnly = sequence.filter(item => item.includes("interval"));
-            const arrNumberMax = arsOnly.map(item =>
-              parseInt(item.replace("interval", ""))
-            );
-            setNumberIntervalLast(Math.max.apply(null, arrNumberMax) + 1);
-            return old + 1;
-          });
-        }
-        if (itemNode.type === "audio") {
-          const numberLoc = parseInt(item.replace("audio", ""));
-          setElements(elm => [
-            ...elm,
-            audioLayout(numberLoc, itemNode.value, itemNode.record ? "" : "ok")
-          ]);
-          setNumberAudio(old => {
-            const arsOnly = sequence.filter(item => item.includes("audio"));
-            const arrNumberMax = arsOnly.map(item =>
-              parseInt(item.replace("audio", ""))
-            );
-            setNumberAudioLast(Math.max.apply(null, arrNumberMax) + 1);
-            return old + 1;
-          });
-        }
-        if (itemNode.type === "img") {
-          const numberLoc = parseInt(item.replace("img", ""));
-          setElements(elm => [...elm, imgLayout(numberLoc, itemNode.value)]);
-          setNumberImg(old => {
-            const arsOnly = sequence.filter(item => item.includes("img"));
-            const arrNumberMax = arsOnly.map(item =>
-              parseInt(item.replace("img", ""))
-            );
-            setNumberImgLast(Math.max.apply(null, arrNumberMax) + 1);
-            return old + 1;
-          });
-        }
-        if (itemNode.type === "video") {
-          const numberLoc = parseInt(item.replace("video", ""));
-          setElements(elm => [...elm, videoLayout(numberLoc, itemNode.value)]);
-          setNumberVideo(old => {
-            const arsOnly = sequence.filter(item => item.includes("video"));
-            const arrNumberMax = arsOnly.map(item =>
-              parseInt(item.replace("video", ""))
-            );
-            setNumberVideoLast(Math.max.apply(null, arrNumberMax) + 1);
-            return old + 1;
-          });
-        }
-      });
-    }
-    setActiveModal(true);
+        sequence.map((item) => {
+          const itemNode = elementsEditLoc.filter(
+            (inode) => inode.number === item
+          )[0];
+          if (itemNode.type === "message") {
+            const numberLoc = parseInt(item.replace("message", ""));
+            setElements((elm) => [
+              ...elm,
+              messageLayout(numberLoc, itemNode.value),
+            ]);
+            setNumberMessages((old) => {
+              const arsOnly = sequence.filter((item) =>
+                item.includes("message")
+              );
+              const arrNumberMax = arsOnly.map((item) =>
+                parseInt(item.replace("message", ""))
+              );
+              setNumberMessagesLast(Math.max.apply(null, arrNumberMax) + 1);
+              return old + 1;
+            });
+          }
+          if (itemNode.type === "interval") {
+            const numberLoc = parseInt(item.replace("interval", ""));
+            setElements((elm) => [
+              ...elm,
+              intervalLayout(numberLoc, itemNode.value),
+            ]);
+            setNumberInterval((old) => {
+              const arsOnly = sequence.filter((item) =>
+                item.includes("interval")
+              );
+              const arrNumberMax = arsOnly.map((item) =>
+                parseInt(item.replace("interval", ""))
+              );
+              setNumberIntervalLast(Math.max.apply(null, arrNumberMax) + 1);
+              return old + 1;
+            });
+          }
+          if (itemNode.type === "audio") {
+            const numberLoc = parseInt(item.replace("audio", ""));
+            setElements((elm) => [
+              ...elm,
+              audioLayout(
+                numberLoc,
+                itemNode.value,
+                itemNode.record ? "" : "ok"
+              ),
+            ]);
+            setNumberAudio((old) => {
+              const arsOnly = sequence.filter((item) => item.includes("audio"));
+              const arrNumberMax = arsOnly.map((item) =>
+                parseInt(item.replace("audio", ""))
+              );
+              setNumberAudioLast(Math.max.apply(null, arrNumberMax) + 1);
+              return old + 1;
+            });
+          }
+          if (itemNode.type === "img") {
+            const numberLoc = parseInt(item.replace("img", ""));
+            setElements((elm) => [
+              ...elm,
+              imgLayout(numberLoc, itemNode.value),
+            ]);
+            setNumberImg((old) => {
+              const arsOnly = sequence.filter((item) => item.includes("img"));
+              const arrNumberMax = arsOnly.map((item) =>
+                parseInt(item.replace("img", ""))
+              );
+              setNumberImgLast(Math.max.apply(null, arrNumberMax) + 1);
+              return old + 1;
+            });
+          }
+          if (itemNode.type === "video") {
+            const numberLoc = parseInt(item.replace("video", ""));
+            setElements((elm) => [
+              ...elm,
+              videoLayout(numberLoc, itemNode.value),
+            ]);
+            setNumberVideo((old) => {
+              const arsOnly = sequence.filter((item) => item.includes("video"));
+              const arrNumberMax = arsOnly.map((item) =>
+                parseInt(item.replace("video", ""))
+              );
+              setNumberVideoLast(Math.max.apply(null, arrNumberMax) + 1);
+              return old + 1;
+            });
+          }
+        });
+      }
+      setActiveModal(true);
     }
     if (open === "create") {
       setLabels({
         title: "Adicionar menu ao fluxo",
-        btn: "Adicionar"
+        btn: "Adicionar",
       });
       setTextDig();
       setArrayOption([]);
@@ -914,9 +952,9 @@ const FlowBuilderSingleBlockModal = ({
   };
 
   const verifyButtonsUpload = () => {
-    const newArrImg = elementsSeq.filter(item => item.includes("img"));
-    const newArrAudio = elementsSeq.filter(item => item.includes("audio"));
-    const newArrVideo = elementsSeq.filter(item => item.includes("video"));
+    const newArrImg = elementsSeq.filter((item) => item.includes("img"));
+    const newArrAudio = elementsSeq.filter((item) => item.includes("audio"));
+    const newArrVideo = elementsSeq.filter((item) => item.includes("video"));
 
     for (let i = 0; i < numberImg; i++) {
       const imgVerify = document.querySelector(
@@ -967,7 +1005,7 @@ const FlowBuilderSingleBlockModal = ({
             error(err) {
               alert("erro");
               console.log(err.message);
-            }
+            },
           });
         } else {
           formData.append("medias", media);
@@ -983,12 +1021,12 @@ const FlowBuilderSingleBlockModal = ({
           try {
             const mountData = {
               seq: elementsSeq,
-              elements: handleElements(null)
+              elements: handleElements(null),
             };
-            console.log('QUI', mountData)
+            console.log("QUI", mountData);
             onUpdate({
               ...data,
-              data: mountData
+              data: mountData,
             });
             toast.success("Conteúdo adicionada com sucesso!");
             handleClose();
@@ -996,7 +1034,7 @@ const FlowBuilderSingleBlockModal = ({
 
             return;
           } catch (e) {
-            console.log(e)
+            console.log(e);
             setLoading(false);
           }
           return;
@@ -1011,17 +1049,17 @@ const FlowBuilderSingleBlockModal = ({
           .then(async (res) => {
             const mountData = {
               seq: elementsSeq,
-              elements: handleElements(res.data)
+              elements: handleElements(res.data),
             };
             onUpdate({
               ...data,
-              data: mountData
+              data: mountData,
             });
             toast.success("Conteúdo adicionada com sucesso!");
             await handleClose();
             setLoading(false);
           })
-          .catch(error => {
+          .catch((error) => {
             console.log(error);
           });
       }, 1500);
@@ -1047,7 +1085,7 @@ const FlowBuilderSingleBlockModal = ({
             error(err) {
               alert("erro");
               console.log(err.message);
-            }
+            },
           });
         } else {
           formData.append("medias", media);
@@ -1060,10 +1098,10 @@ const FlowBuilderSingleBlockModal = ({
           try {
             const mountData = {
               seq: elementsSeq,
-              elements: handleElements(null)
+              elements: handleElements(null),
             };
             onSave({
-              ...mountData
+              ...mountData,
             });
             toast.success("Conteúdo adicionada com sucesso!");
             handleClose();
@@ -1081,30 +1119,33 @@ const FlowBuilderSingleBlockModal = ({
         }
         await api
           .post("/flowbuilder/content", formData)
-          .then(res => {
+          .then((res) => {
             const mountData = {
               seq: elementsSeq,
-              elements: handleElements(res.data)
+              elements: handleElements(res.data),
             };
             onSave({
-              ...mountData
+              ...mountData,
             });
             toast.success("Conteúdo adicionada com sucesso!");
             handleClose();
             setLoading(false);
           })
-          .catch(error => {
+          .catch((error) => {
             console.log(error);
           });
       }, 1500);
     }
   };
 
-  const scrollToBottom = className => {
+  const scrollToBottom = (className) => {
     const element = document.querySelector(className);
     element.scrollTop = element.scrollHeight;
   };
 
+  const variableFormatter = (item) => {
+    return "{{" + item + "}}";
+  };
   return (
     <div>
       <Dialog open={activeModal} fullWidth="md" scroll="paper">
@@ -1122,10 +1163,10 @@ const FlowBuilderSingleBlockModal = ({
               overflow: "auto",
               height: "70vh",
               scrollBehavior: "smooth",
-              display: loading && "none"
+              display: loading && "none",
             }}
           >
-            {elements.map(item => (
+            {elements.map((item) => (
               <>{item}</>
             ))}
             <Stack direction={"row"} gap={1}>
@@ -1133,18 +1174,18 @@ const FlowBuilderSingleBlockModal = ({
                 variant="contained"
                 color="primary"
                 onClick={() => {
-                  setElements(old => [
+                  setElements((old) => [
                     ...old,
-                    messageLayout(numberMessagesLast)
+                    messageLayout(numberMessagesLast),
                   ]);
-                  setNumberMessages(old => {
-                    setElementsSeq(oldEleme => [
+                  setNumberMessages((old) => {
+                    setElementsSeq((oldEleme) => [
                       ...oldEleme,
-                      `message${numberMessagesLast}`
+                      `message${numberMessagesLast}`,
                     ]);
                     return old + 1;
                   });
-                  setNumberMessagesLast(old => old + 1);
+                  setNumberMessagesLast((old) => old + 1);
                   setTimeout(() => {
                     scrollToBottom(".body-card");
                   }, 100);
@@ -1154,7 +1195,7 @@ const FlowBuilderSingleBlockModal = ({
                   sx={{
                     width: "16px",
                     height: "16px",
-                    marginRight: "4px"
+                    marginRight: "4px",
                   }}
                 />
                 Texto
@@ -1163,18 +1204,18 @@ const FlowBuilderSingleBlockModal = ({
                 variant="contained"
                 color="primary"
                 onClick={() => {
-                  setElements(old => [
+                  setElements((old) => [
                     ...old,
-                    intervalLayout(numberIntervalLast)
+                    intervalLayout(numberIntervalLast),
                   ]);
-                  setNumberInterval(old => {
-                    setElementsSeq(oldEleme => [
+                  setNumberInterval((old) => {
+                    setElementsSeq((oldEleme) => [
                       ...oldEleme,
-                      `interval${numberIntervalLast}`
+                      `interval${numberIntervalLast}`,
                     ]);
                     return old + 1;
                   });
-                  setNumberIntervalLast(old => old + 1);
+                  setNumberIntervalLast((old) => old + 1);
                   setTimeout(() => {
                     scrollToBottom(".body-card");
                   }, 100);
@@ -1184,7 +1225,7 @@ const FlowBuilderSingleBlockModal = ({
                   sx={{
                     width: "16px",
                     height: "16px",
-                    marginRight: "4px"
+                    marginRight: "4px",
                   }}
                 />
                 Intervalo
@@ -1193,15 +1234,15 @@ const FlowBuilderSingleBlockModal = ({
                 variant="contained"
                 color="primary"
                 onClick={() => {
-                  setElements(old => [...old, imgLayout(numberImgLast)]);
-                  setNumberImg(old => {
-                    setElementsSeq(oldEleme => [
+                  setElements((old) => [...old, imgLayout(numberImgLast)]);
+                  setNumberImg((old) => {
+                    setElementsSeq((oldEleme) => [
                       ...oldEleme,
-                      `img${numberImgLast}`
+                      `img${numberImgLast}`,
                     ]);
                     return old + 1;
                   });
-                  setNumberImgLast(old => old + 1);
+                  setNumberImgLast((old) => old + 1);
                   setTimeout(() => {
                     scrollToBottom(".body-card");
                   }, 100);
@@ -1211,7 +1252,7 @@ const FlowBuilderSingleBlockModal = ({
                   sx={{
                     width: "16px",
                     height: "16px",
-                    marginRight: "4px"
+                    marginRight: "4px",
                   }}
                 />
                 Imagem
@@ -1220,15 +1261,15 @@ const FlowBuilderSingleBlockModal = ({
                 variant="contained"
                 color="primary"
                 onClick={() => {
-                  setElements(old => [...old, audioLayout(numberAudioLast)]);
-                  setNumberAudio(old => {
-                    setElementsSeq(oldEleme => [
+                  setElements((old) => [...old, audioLayout(numberAudioLast)]);
+                  setNumberAudio((old) => {
+                    setElementsSeq((oldEleme) => [
                       ...oldEleme,
-                      `audio${numberAudioLast}`
+                      `audio${numberAudioLast}`,
                     ]);
                     return old + 1;
                   });
-                  setNumberAudioLast(old => old + 1);
+                  setNumberAudioLast((old) => old + 1);
                   setTimeout(() => {
                     scrollToBottom(".body-card");
                   }, 100);
@@ -1238,7 +1279,7 @@ const FlowBuilderSingleBlockModal = ({
                   sx={{
                     width: "16px",
                     height: "16px",
-                    marginRight: "4px"
+                    marginRight: "4px",
                   }}
                 />
                 Audio
@@ -1247,15 +1288,15 @@ const FlowBuilderSingleBlockModal = ({
                 variant="contained"
                 color="primary"
                 onClick={() => {
-                  setElements(old => [...old, videoLayout(numberVideoLast)]);
-                  setNumberVideo(old => {
-                    setElementsSeq(oldEleme => [
+                  setElements((old) => [...old, videoLayout(numberVideoLast)]);
+                  setNumberVideo((old) => {
+                    setElementsSeq((oldEleme) => [
                       ...oldEleme,
-                      `video${numberVideoLast}`
+                      `video${numberVideoLast}`,
                     ]);
                     return old + 1;
                   });
-                  setNumberVideoLast(old => old + 1);
+                  setNumberVideoLast((old) => old + 1);
                   setTimeout(() => {
                     scrollToBottom(".body-card");
                   }, 100);
@@ -1265,12 +1306,25 @@ const FlowBuilderSingleBlockModal = ({
                   sx={{
                     width: "16px",
                     height: "16px",
-                    marginRight: "4px"
+                    marginRight: "4px",
                   }}
                 />
                 Video
               </Button>
             </Stack>
+            <Divider />
+            <Box style={{ width: "100%", textAlign: "center" }}>
+              <Typography>Variáveis</Typography>
+              {variables && (
+                <>
+                  {variables.map((item) => (
+                    <>
+                      <Typography>{variableFormatter(item)}</Typography>
+                    </>
+                  ))}
+                </>
+              )}
+            </Box>
           </Stack>
 
           <DialogActions>
@@ -1300,7 +1354,7 @@ const FlowBuilderSingleBlockModal = ({
               padding: "16px",
               height: "70vh",
               alignSelf: "center",
-              justifyContent: "center"
+              justifyContent: "center",
             }}
           >
             <Stack>

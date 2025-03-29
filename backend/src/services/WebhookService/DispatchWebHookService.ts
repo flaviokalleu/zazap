@@ -8,6 +8,7 @@ import CreateMessageService, {
 import { Request, Response } from "express";
 import { ActionsWebhookService } from "./ActionsWebhookService";
 import Whatsapp from "../../models/Whatsapp";
+import QueueIntegrations from "../../models/QueueIntegrations";
 
 interface RequestLocal {
   companyId: number;
@@ -32,11 +33,17 @@ interface IArrayOption {
 export interface INodes {
   id: string;
   position: { x: number; y: number };
-  data: { 
+  data: {
+    id: any;
+    data: any;
+    seq: any;
+    percent: number;
+    elements: any; 
     label: string; 
     sec?: string
     message?: string
     arrayOption?: IArrayOption[]
+    typebotIntegration?: QueueIntegrations
   };
   type: string;
   style: { backgroundColor: string; color: string };

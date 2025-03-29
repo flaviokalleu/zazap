@@ -9,8 +9,8 @@ import { isString, isArray } from "lodash";
 import path from "path";
 import fs from 'fs';
 
-const ImportContactsService = async (companyId: number): Promise<void> => {
-  const defaultWhatsapp = await GetDefaultWhatsApp(companyId);
+const ImportContactsService = async (companyId?: number, whatsappId?: number): Promise<void> => {
+  const defaultWhatsapp = await GetDefaultWhatsApp(whatsappId, companyId);
   const wbot = getWbot(defaultWhatsapp.id);
 
   let phoneContacts;

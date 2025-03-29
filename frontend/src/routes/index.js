@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter, Switch } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-
+import ForgotPassword from "../pages/ForgetPassWord";
+import ResetPassword from "../pages/ResetPassword";
 import LoggedInLayout from "../layout";
 import Dashboard from "../pages/Dashboard";
 import TicketResponsiveContainer from "../pages/TicketResponsiveContainer";
@@ -33,6 +34,7 @@ import CampaignReport from "../pages/CampaignReport";
 import Annoucements from "../pages/Annoucements";
 import Chat from "../pages/Chat";
 import Prompts from "../pages/Prompts";
+import ForgetPassword from "../pages/ForgetPassWord/";
 import AllConnections from "../pages/AllConnections";
 import Reports from "../pages/Reports";
 import { FlowBuilderConfig } from "../pages/FlowBuilderConfig";
@@ -64,6 +66,8 @@ const Routes = () => {
           <Switch>
             <Route exact path="/login" component={Login} />
             <Route exact path="/signup" component={Signup} />
+            <Route exact path="/forgot-password" component={ForgotPassword} />
+            <Route exact path="/reset-password" component={ResetPassword} />
             <WhatsAppsProvider>
               <LoggedInLayout>
                 <Route exact path="/financeiro" component={Financeiro} isPrivate />
@@ -111,6 +115,12 @@ const Routes = () => {
                 <Route exact path="/TagsKanban" component={TagsKanban} isPrivate />
                 <Route exact path="/prompts" component={Prompts} isPrivate />
                 <Route exact path="/allConnections" component={AllConnections} isPrivate />
+                <Route
+                  exact
+                  path="/subscription"
+                  component={Subscription}
+                  isPrivate
+                />
                 {showCampaigns && (
                   <>
                     <Route exact path="/contact-lists" component={ContactLists} isPrivate />

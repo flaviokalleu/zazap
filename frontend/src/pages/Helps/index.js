@@ -6,69 +6,109 @@ import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper"
 import Title from "../../components/Title";
 import { i18n } from "../../translate/i18n";
 import useHelps from "../../hooks/useHelps";
+import CloseIcon from "@material-ui/icons/Close";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
+  mainContainer: {
+    background: "linear-gradient(135deg, #f0f2f5 0%, #e9ecef 100%)",
+    minHeight: "100vh",
+    padding: theme.spacing(3),
+    [theme.breakpoints.down("sm")]: {
+      padding: theme.spacing(1),
+    },
+  },
   mainPaperContainer: {
-    overflowY: 'auto',
-    maxHeight: 'calc(100vh - 200px)',
+    overflowY: "auto",
+    maxHeight: "calc(100vh - 200px)",
+    padding: theme.spacing(2),
+    background: "transparent",
+    boxShadow: "none",
   },
   mainPaper: {
-    width: '100%',
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+    width: "100%",
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
     gap: theme.spacing(3),
     padding: theme.spacing(2),
-    marginBottom: theme.spacing(3),
   },
   helpPaper: {
-    position: 'relative',
-    width: '100%',
-    minHeight: '340px',
+    position: "relative",
+    width: "100%",
+    minHeight: "360px",
     padding: theme.spacing(2),
-    boxShadow: theme.shadows[3],
-    borderRadius: theme.spacing(1),
-    cursor: 'pointer',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    maxWidth: '340px',
-  },
-  paperHover: {
-    transition: 'transform 0.3s, box-shadow 0.3s',
-    '&:hover': {
-      transform: 'scale(1.03)',
-      boxShadow: `0 0 8px`,
-      color: theme.palette.primary.main,
+    background: "white",
+    borderRadius: "16px",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.1)",
+    cursor: "pointer",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    maxWidth: "340px",
+    transition: "all 0.3s ease",
+    "&:hover": {
+      transform: "translateY(-8px)",
+      boxShadow: "0 12px 32px rgba(0, 0, 0, 0.15)",
+      "& $videoThumbnail": {
+        filter: "brightness(1.1)",
+      },
     },
   },
   videoThumbnail: {
-    width: '100%',
-    height: 'calc(100% - 56px)',
-    objectFit: 'cover',
-    borderRadius: `${theme.spacing(1)}px ${theme.spacing(1)}px 0 0`,
+    width: "100%",
+    height: "200px",
+    objectFit: "cover",
+    borderRadius: "12px 12px 0 0",
+    transition: "filter 0.3s ease",
   },
   videoTitle: {
-    marginTop: theme.spacing(1),
+    marginTop: theme.spacing(2),
+    fontWeight: 600,
+    color: "#333",
     flex: 1,
+    fontSize: "1.1rem",
   },
   videoDescription: {
-    maxHeight: '100px',
-    overflow: 'hidden',
+    maxHeight: "60px",
+    overflow: "hidden",
+    color: "#666",
+    fontSize: "0.9rem",
+    lineHeight: "1.4",
+    display: "-webkit-box",
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: "vertical",
   },
   videoModal: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: theme.spacing(2),
   },
   videoModalContent: {
-    outline: 'none',
-    width: '90%',
+    outline: "none",
+    width: "90%",
     maxWidth: 1024,
-    aspectRatio: '16/9',
-    position: 'relative',
-    backgroundColor: 'white',
-    borderRadius: theme.spacing(1),
-    overflow: 'hidden',
+    aspectRatio: "16/9",
+    position: "relative",
+    background: "black",
+    borderRadius: "16px",
+    overflow: "hidden",
+    boxShadow: "0 16px 48px rgba(0, 0, 0, 0.5)",
+  },
+  closeButton: {
+    position: "absolute",
+    top: theme.spacing(1),
+    right: theme.spacing(1),
+    color: "white",
+    background: "rgba(0, 0, 0, 0.5)",
+    "&:hover": {
+      background: "rgba(0, 0, 0, 0.7)",
+    },
+  },
+  title: {
+    color: "#333",
+    fontWeight: 700,
+    fontSize: "1.8rem",
+    textShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
   },
 }));
 
@@ -84,8 +124,7 @@ const Helps = () => {
       setRecords(helps);
     }
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [list]);
 
   const openVideoModal = (video) => {
     setSelectedVideo(video);
@@ -117,14 +156,19 @@ const Helps = () => {
       >
         <div className={classes.videoModalContent}>
           {selectedVideo && (
-            <iframe
-              style={{ width: "100%", height: "100%", position: "absolute", top: 0, left: 0 }}
-              src={`https://www.youtube.com/embed/${selectedVideo}`}
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+            <>
+              <iframe
+                style={{ width: "100%", height: "100%", position: "absolute", top: 0, left: 0 }}
+                src={`https://www.youtube.com/embed/${selectedVideo}`}
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+              <IconButton className={classes.closeButton} onClick={closeVideoModal}>
+                <CloseIcon />
+              </IconButton>
+            </>
           )}
         </div>
       </Modal>
@@ -133,10 +177,14 @@ const Helps = () => {
 
   const renderHelps = () => {
     return (
-      <>
-        <div className={`${classes.mainPaper} ${classes.mainPaperContainer}`}>
-          {records.length ? records.map((record, key) => (
-            <Paper key={key} className={`${classes.helpPaper} ${classes.paperHover}`} onClick={() => openVideoModal(record.video)}>
+      <div className={`${classes.mainPaper} ${classes.mainPaperContainer}`}>
+        {records.length ? (
+          records.map((record, key) => (
+            <Paper
+              key={key}
+              className={classes.helpPaper}
+              onClick={() => openVideoModal(record.video)}
+            >
               <img
                 src={`https://img.youtube.com/vi/${record.video}/mqdefault.jpg`}
                 alt="Thumbnail"
@@ -149,21 +197,25 @@ const Helps = () => {
                 {record.description}
               </Typography>
             </Paper>
-          )) : null}
-        </div>
-      </>
+          ))
+        ) : (
+          <Typography variant="body1" color="textSecondary" align="center" style={{ gridColumn: "1 / -1" }}>
+            Nenhum vídeo de ajuda disponível no momento.
+          </Typography>
+        )}
+      </div>
     );
   };
 
   return (
-    <MainContainer>
+    <MainContainer className={classes.mainContainer}>
       <MainHeader>
-        <Title>{i18n.t("helps.title")} ({records.length})</Title>
+        <Title className={classes.title}>
+          {i18n.t("helps.title")} ({records.length})
+        </Title>
         <MainHeaderButtonsWrapper></MainHeaderButtonsWrapper>
       </MainHeader>
-      <div className={classes.mainPaper}>
-        {renderHelps()}
-      </div>
+      {renderHelps()}
       {renderVideoModal()}
     </MainContainer>
   );

@@ -1,73 +1,19 @@
 import React, { useState, useEffect, useContext } from "react";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
 import api from "../../services/api";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import Board from 'react-trello';
 import { toast } from "react-toastify";
 import { i18n } from "../../translate/i18n";
 import { useHistory } from 'react-router-dom';
-import { Facebook, Instagram, WhatsApp } from "@material-ui/icons";
-import { Badge, Tooltip, Typography, Button, TextField, Box } from "@material-ui/core";
+import { Facebook, Instagram, MessageCircle } from "lucide-react";
 import { format, isSameDay, parseISO } from "date-fns";
 import { Can } from "../../components/Can";
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    padding: theme.spacing(1),
-  },
-  kanbanContainer: {
-    width: "100%",
-    maxWidth: "1200px",
-    margin: "0 auto",
-  },
-  connectionTag: {
-    background: "green",
-    color: "#FFF",
-    marginRight: 1,
-    padding: 1,
-    fontWeight: 'bold',
-    borderRadius: 3,
-    fontSize: "0.6em",
-  },
-  lastMessageTime: {
-    justifySelf: "flex-end",
-    textAlign: "right",
-    position: "relative",
-    marginLeft: "auto",
-    color: theme.palette.text.secondary,
-  },
-  lastMessageTimeUnread: {
-    justifySelf: "flex-end",
-    textAlign: "right",
-    position: "relative",
-    color: theme.palette.success.main,
-    fontWeight: "bold",
-    marginLeft: "auto"
-  },
-  cardButton: {
-    marginRight: theme.spacing(1),
-    color: theme.palette.common.white,
-    backgroundColor: theme.palette.primary.main,
-    "&:hover": {
-      backgroundColor: theme.palette.primary.dark,
-    },
-  },
-  dateInput: {
-    marginRight: theme.spacing(2),
-  },
-}));
-
 const Kanban = () => {
-  const classes = useStyles();
-  const theme = useTheme(); // Obter o tema atual
   const history = useHistory();
   const { user, socket } = useContext(AuthContext);
   const [tags, setTags] = useState([]);
   const [tickets, setTickets] = useState([]);
-  const [ticketNot, setTicketNot] = useState(0);
   const [file, setFile] = useState({ lanes: [] });
   const [startDate, setStartDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [endDate, setEndDate] = useState(format(new Date(), "yyyy-MM-dd"));
@@ -81,8 +27,7 @@ const Kanban = () => {
   const fetchTags = async () => {
     try {
       const response = await api.get("/tag/kanban/");
-      const fetchedTags = response.data.lista || [];
-      setTags(fetchedTags);
+      setTags(response.data.lista || []);
       fetchTickets();
     } catch (error) {
       console.log(error);
@@ -136,13 +81,13 @@ const Kanban = () => {
   const IconChannel = (channel) => {
     switch (channel) {
       case "facebook":
-        return <Facebook style={{ color: "#3b5998", verticalAlign: "middle", fontSize: "16px" }} />;
+        return <Facebook className="text-[#3b5998] w-5 h-5" />;
       case "instagram":
-        return <Instagram style={{ color: "#e1306c", verticalAlign: "middle", fontSize: "16px" }} />;
-      case "whatsapp":
-        return <WhatsApp style={{ color: "#25d366", verticalAlign: "middle", fontSize: "16px" }} />
+        return <Instagram className="text-[#e1306c] w-5 h-5" />;
+      case "MessageCircle":
+        return <MessageCircle className="text-[#25d366] w-5 h-5" />;
       default:
-        return "error";
+        return null;
     }
   };
 
@@ -158,46 +103,43 @@ const Kanban = () => {
           id: ticket.id.toString(),
           label: "Ticket nº " + ticket.id.toString(),
           description: (
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>{ticket.contact.number}</span>
-                <Typography
-                  className={Number(ticket.unreadMessages) > 0 ? classes.lastMessageTimeUnread : classes.lastMessageTime}
-                  component="span"
-                  variant="body2"
-                >
-                  {isSameDay(parseISO(ticket.updatedAt), new Date()) ? (
-                    <>{format(parseISO(ticket.updatedAt), "HH:mm")}</>
-                  ) : (
-                    <>{format(parseISO(ticket.updatedAt), "dd/MM/yyyy")}</>
-                  )}
-                </Typography>
+            <div className="p-2">
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-gray-800">{ticket.contact.number}</span>
+                <span className={`${ticket.unreadMessages > 0 ? 'text-green-500 font-bold' : 'text-gray-500'} text-sm italic`}>
+                  {isSameDay(parseISO(ticket.updatedAt), new Date()) 
+                    ? format(parseISO(ticket.updatedAt), "HH:mm")
+                    : format(parseISO(ticket.updatedAt), "dd/MM/yyyy")}
+                </span>
               </div>
-              <div style={{ textAlign: 'left' }}>{ticket.lastMessage || " "}</div>
-              <Button
-                className={`${classes.button} ${classes.cardButton}`}
-                onClick={() => {
-                  handleCardClick(ticket.uuid)
-                }}>
+              <div className="text-left text-gray-600 my-2">{ticket.lastMessage || " "}</div>
+              <button 
+                className="mt-2 px-4 py-1 bg-gradient-to-r from-pink-500 to-orange-500 text-white rounded-full hover:from-orange-500 hover:to-pink-500 transition-all"
+                onClick={() => handleCardClick(ticket.uuid)}
+              >
                 Ver Ticket
-              </Button>
-              <span style={{ marginRight: '8px' }} />
-              {ticket?.user && (<Badge style={{ backgroundColor: "#000000" }} className={classes.connectionTag}>{ticket.user?.name.toUpperCase()}</Badge>)}
+              </button>
+              {ticket?.user && (
+                <span className="mt-2 inline-block bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                  {ticket.user?.name.toUpperCase()}
+                </span>
+              )}
             </div>
           ),
-          title: <>
-            <Tooltip title={ticket.whatsapp?.name}>
-              {IconChannel(ticket.channel)}
-            </Tooltip> {ticket.contact.name}</>,
+          title: (
+            <div className="flex items-center font-semibold text-gray-800">
+              <span title={ticket.MessageCircle?.name}>{IconChannel(ticket.channel)}</span>
+              <span className="ml-2">{ticket.contact.name}</span>
+            </div>
+          ),
           draggable: true,
           href: "/tickets/" + ticket.uuid,
         })),
       },
       ...tags.map(tag => {
-        const filteredTickets = tickets.filter(ticket => {
-          const tagIds = ticket.tags.map(tag => tag.id);
-          return tagIds.includes(tag.id);
-        });
+        const filteredTickets = tickets.filter(ticket => 
+          ticket.tags.map(t => t.id).includes(tag.id)
+        );
 
         return {
           id: tag.id.toString(),
@@ -207,34 +149,38 @@ const Kanban = () => {
             id: ticket.id.toString(),
             label: "Ticket nº " + ticket.id.toString(),
             description: (
-              <div>
-                <p>
-                  {ticket.contact.number}
-                  <br />
-                  {ticket.lastMessage || " "}
-                </p>
-                <Button
-                  className={`${classes.button} ${classes.cardButton}`}
-                  onClick={() => {
-                    handleCardClick(ticket.uuid)
-                  }}>
+              <div className="p-2">
+                <div className="font-medium text-gray-800">{ticket.contact.number}</div>
+                <div className="text-left text-gray-600 my-2">{ticket.lastMessage || " "}</div>
+                <button 
+                  className="mt-2 px-4 py-1 bg-gradient-to-r from-pink-500 to-orange-500 text-white rounded-full hover:from-orange-500 hover:to-pink-500 transition-all"
+                  onClick={() => handleCardClick(ticket.uuid)}
+                >
                   Ver Ticket
-                </Button>
-                <span style={{ marginRight: '8px' }} />
-                <p>
-                  {ticket?.user && (<Badge style={{ backgroundColor: "#000000" }} className={classes.connectionTag}>{ticket.user?.name.toUpperCase()}</Badge>)}
-                </p>
+                </button>
+                {ticket?.user && (
+                  <span className="mt-2 inline-block bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                    {ticket.user?.name.toUpperCase()}
+                  </span>
+                )}
               </div>
             ),
-            title: <>
-              <Tooltip title={ticket.whatsapp?.name}>
-                {IconChannel(ticket.channel)}
-              </Tooltip> {ticket.contact.name}
-            </>,
+            title: (
+              <div className="flex items-center font-semibold text-gray-800">
+                <span title={ticket.MessageCircle?.name}>{IconChannel(ticket.channel)}</span>
+                <span className="ml-2">{ticket.contact.name}</span>
+              </div>
+            ),
             draggable: true,
             href: "/tickets/" + ticket.uuid,
           })),
-          style: { backgroundColor: tag.color, color: "white" }
+          style: { 
+            background: `linear-gradient(135deg, ${tag.color} 0%, #f3f4f6 100%)`,
+            color: "#fff",
+            borderRadius: "8px",
+            padding: "10px",
+            boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+          },
         };
       }),
     ];
@@ -268,56 +214,42 @@ const Kanban = () => {
   };
 
   return (
-    <div className={classes.root}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', width: '100%', maxWidth: '1200px' }}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <TextField
-            label="Data de início"
+    <div className="flex flex-col items-center p-4 bg-gradient-to-br from-gray-100 to-gray-300 min-h-screen">
+      <div className="flex items-center justify-between mb-8 w-full max-w-7xl bg-white p-5 rounded-xl shadow-lg">
+        <div className="flex items-center space-x-4">
+          <input
             type="date"
             value={startDate}
             onChange={handleStartDateChange}
-            InputLabelProps={{
-              shrink: true,
-            }}
-            variant="outlined"
-            className={classes.dateInput}
+            className="border rounded-lg p-2 bg-white shadow-sm"
           />
-          <Box mx={1} />
-          <TextField
-            label="Data de fim"
+          <input
             type="date"
             value={endDate}
             onChange={handleEndDateChange}
-            InputLabelProps={{
-              shrink: true,
-            }}
-            variant="outlined"
-            className={classes.dateInput}
+            className="border rounded-lg p-2 bg-white shadow-sm"
           />
-          <Box mx={1} />
-          <Button
-            variant="contained"
-            color="primary"
+          <button
             onClick={handleSearchClick}
+            className="px-6 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all"
           >
             Buscar
-          </Button>
+          </button>
         </div>
         <Can role={user.profile} perform="dashboard:view" yes={() => (
-          <Button
-            variant="contained"
-            color="primary"
+          <button
             onClick={handleAddConnectionClick}
+            className="px-6 py-2 bg-gradient-to-r from-green-500 to-green-300 text-white rounded-lg hover:from-green-300 hover:to-green-500 transition-all"
           >
-            {'+ Adicionar colunas'}
-          </Button>
+            + Adicionar Colunas
+          </button>
         )} />
       </div>
-      <div className={classes.kanbanContainer}>
+      <div className="w-full max-w-7xl bg-white rounded-xl shadow-lg overflow-hidden">
         <Board
           data={file}
           onCardMoveAcrossLanes={handleCardMove}
-          style={{ backgroundColor: 'rgba(252, 252, 252, 0.03)' }}
+          style={{ backgroundColor: 'transparent', padding: "20px" }}
         />
       </div>
     </div>

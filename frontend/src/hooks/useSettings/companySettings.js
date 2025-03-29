@@ -26,6 +26,16 @@ const useCompanySettings = () => {
         return data;
     } 
 
+    const getTypePayment = async (params) => {
+        const { data } = await api.request({
+            url: '/companySettingOnePayment',
+            method: 'GET',
+            params
+        });
+        return data;
+    } 
+
+
     const update = async (data) => {
         const { data: responseData } = await api.request({
             url: '/companySettings',
@@ -38,7 +48,8 @@ const useCompanySettings = () => {
     return {
         getAll,
         get,
-        update
+        update,
+        getTypePayment
     }
 }
 

@@ -79,7 +79,7 @@ const TagModal = ({ open, onClose, tagId, reload }) => {
 	const classes = useStyles();
 	const { user } = useContext(AuthContext);
 	const [colorPickerModalOpen, setColorPickerModalOpen] = useState(false);
-    //console.log(user);
+    console.log(user);
 
 
 	const initialState = {
@@ -96,7 +96,7 @@ const TagModal = ({ open, onClose, tagId, reload }) => {
 				if (!tagId) return;
 
 				const { data } = await api.get(`/tags/${tagId}`);
-                //console.log(data);
+                console.log(data);
 				setTag(prevState => {
 					return { ...prevState, ...data };
 				});

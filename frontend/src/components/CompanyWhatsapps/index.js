@@ -119,8 +119,8 @@ const WhatsAppModalCompany = ({
   filteredWhatsapps,
   companyInfos
 }) => {
-  //console.log(filteredWhatsapps,"teste")
-  //console.log(companyInfos,"testeeeee")
+  console.log(filteredWhatsapps,"teste")
+  console.log(companyInfos,"testeeeee")
   const classes = useStyles();
   const { user, socket } = useContext(AuthContext);
   const { list } = useCompanies();
@@ -243,7 +243,8 @@ const WhatsAppModalCompany = ({
   const handleSubmitConfirmationModal = async () => {
     if (confirmModalInfo.action === "disconnect") {
       try {
-        await api.delete(`/whatsappsession/${confirmModalInfo.whatsAppId}`);
+        await api.delete(`/whatsappsession/admin/${confirmModalInfo.whatsAppId}`);
+        toast.success(i18n.t("connections.toasts.disconnected"));
       } catch (err) {
         toastError(err);
       }

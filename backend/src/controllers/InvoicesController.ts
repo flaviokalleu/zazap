@@ -39,7 +39,6 @@ type UpdateInvoiceData = {
   id?: string;
 };
 
-
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { searchParam, pageNumber } = req.query as IndexQuery;
 
@@ -50,7 +49,6 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
   return res.json({ invoices, count, hasMore });
 };
-
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { id } = req.params;
@@ -71,7 +69,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
 export const list = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
-  const invoice: Invoices[] = await FindAllInvoiceService(companyId);
+  const invoice: Invoices[] = await FindAllInvoiceService(+companyId);
 
   return res.status(200).json(invoice);
 };

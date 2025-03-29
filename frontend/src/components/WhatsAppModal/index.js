@@ -520,6 +520,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                   <Tab label={i18n.t("whatsappModal.tabs.messages")} value={"messages"} />
                   <Tab label="Chatbot" value={"chatbot"} />
                   <Tab label={i18n.t("whatsappModal.tabs.assessments")} value={"nps"} />
+                  <Tab label="Fluxo Padrão" value={"flowbuilder"} />
                   {schedulesEnabled && <Tab label={i18n.t("whatsappModal.tabs.schedules")} value={"schedules"} />}
                 </Tabs>
               </Paper>
@@ -531,7 +532,9 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                 >
                   <DialogContent dividers>
                     {attachmentName && (
-                      <div style={{ display: 'flex', flexDirection: 'row-reverse' }}>
+                      <div
+                        style={{ display: 'flex', flexDirection: 'row-reverse' }}
+                      >
                         <Button
                           variant='outlined'
                           color="primary"
@@ -542,7 +545,9 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                         </Button>
                       </div>
                     )}
-                    <div style={{ display: 'flex', flexDirection: "column-reverse" }}>
+                    <div
+                      style={{ display: 'flex', flexDirection: "column-reverse" }}
+                    >
                       <input
                         type="file"
                         accept="video/*,image/*"
@@ -554,7 +559,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                         {i18n.t("userModal.buttons.addImage")}
                       </Button>
                     </div>
-                    
+                    {/* NOME E PADRAO */}
                     <div className={classes.multFieldLine}>
                       <Grid spacing={2} container>
                         <Grid item>
@@ -617,7 +622,8 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                         </Grid>
                       </Grid>
                     </div>
-  
+
+
                     <div className={classes.importMessage}>
                       <div className={classes.multFieldLine}>
                         <FormControlLabel
@@ -634,43 +640,50 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                             />
                           }
                         />
-  
-                        {enableImportMessage && (
+
+                        {enableImportMessage ? (
                           <>
                             <FormControlLabel
                               style={{ marginRight: 7, color: "gray" }}
-                              label={i18n.t("whatsappModal.form.importOldMessagesGroups")}
+                              label={i18n.t(
+                                "whatsappModal.form.importOldMessagesGroups"
+                              )}
                               labelPlacement="end"
                               control={
                                 <Switch
                                   size="medium"
                                   checked={importOldMessagesGroups}
-                                  onChange={(e) => setImportOldMessagesGroups(e.target.checked)}
+                                  onChange={(e) =>
+                                    setImportOldMessagesGroups(e.target.checked)
+                                  }
                                   name="importOldMessagesGroups"
                                   color="primary"
                                 />
                               }
                             />
-  
+
                             <FormControlLabel
                               style={{ marginRight: 7, color: "gray" }}
-                              label={i18n.t("whatsappModal.form.closedTicketsPostImported")}
+                              label={i18n.t(
+                                "whatsappModal.form.closedTicketsPostImported"
+                              )}
                               labelPlacement="end"
                               control={
                                 <Switch
                                   size="medium"
                                   checked={closedTicketsPostImported}
-                                  onChange={(e) => setClosedTicketsPostImported(e.target.checked)}
+                                  onChange={(e) =>
+                                    setClosedTicketsPostImported(e.target.checked)
+                                  }
                                   name="closedTicketsPostImported"
                                   color="primary"
                                 />
                               }
                             />
-                          </>
-                        )}
+                          </>) : <></>}
                       </div>
-  
-                      {enableImportMessage && (
+
+                      {enableImportMessage ? (
                         <Grid style={{ marginTop: 18 }} container spacing={1}>
                           <Grid item xs={6}>
                             <Field
@@ -680,16 +693,28 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                               type="datetime-local"
                               name="importOldMessages"
                               inputProps={{
-                                max: moment().add(0, "minutes").format("YYYY-MM-DDTHH:mm"),
-                                min: moment().add(-2, "years").format("YYYY-MM-DDTHH:mm"),
+                                max: moment()
+                                  .add(0, "minutes")
+                                  .format("YYYY-MM-DDTHH:mm"),
+                                min: moment()
+                                  .add(-2, "years")
+                                  .format("YYYY-MM-DDTHH:mm"),
                               }}
+                              //min="2022-11-06T22:22:55"
                               InputLabelProps={{
                                 shrink: true,
                               }}
-                              error={touched.importOldMessages && Boolean(errors.importOldMessages)}
-                              helperText={touched.importOldMessages && errors.importOldMessages}
+                              error={
+                                touched.importOldMessages &&
+                                Boolean(errors.importOldMessages)
+                              }
+                              helperText={
+                                touched.importOldMessages && errors.importOldMessages
+                              }
                               variant="outlined"
-                              value={moment(importOldMessages).format("YYYY-MM-DDTHH:mm")}
+                              value={moment(importOldMessages).format(
+                                "YYYY-MM-DDTHH:mm"
+                              )}
                               onChange={(e) => {
                                 setImportOldMessages(e.target.value);
                               }}
@@ -703,16 +728,28 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                               type="datetime-local"
                               name="importRecentMessages"
                               inputProps={{
-                                max: moment().add(0, "minutes").format("YYYY-MM-DDTHH:mm"),
-                                min: moment(importOldMessages).format("YYYY-MM-DDTHH:mm")
+                                max: moment()
+                                  .add(0, "minutes")
+                                  .format("YYYY-MM-DDTHH:mm"),
+                                min: moment(importOldMessages).format(
+                                  "YYYY-MM-DDTHH:mm"
+                                )
                               }}
+                              //min="2022-11-06T22:22:55"
                               InputLabelProps={{
                                 shrink: true,
                               }}
-                              error={touched.importRecentMessages && Boolean(errors.importRecentMessages)}
-                              helperText={touched.importRecentMessages && errors.importRecentMessages}
+                              error={
+                                touched.importRecentMessages &&
+                                Boolean(errors.importRecentMessages)
+                              }
+                              helperText={
+                                touched.importRecentMessages && errors.importRecentMessages
+                              }
                               variant="outlined"
-                              value={moment(importRecentMessages).format("YYYY-MM-DDTHH:mm")}
+                              value={moment(importRecentMessages).format(
+                                "YYYY-MM-DDTHH:mm"
+                              )}
                               onChange={(e) => {
                                 setImportRecentMessages(e.target.value);
                               }}
@@ -748,15 +785,17 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                             </FormControl>
                           </Grid>
                         </Grid>
-                      )}
+
+                      ) : null}
                     </div>
-                    
                     {enableImportMessage && (
                       <span style={{ color: "red" }}>
                         {i18n.t("whatsappModal.form.importAlert")}
                       </span>
                     )}
-  
+
+
+                    {/* TOKEN */}
                     <Box display="flex" alignItems="center">
                       <Grid xs={6} md={12} item>
                         <Field
@@ -764,6 +803,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                           label={i18n.t("whatsappModal.form.token")}
                           type="token"
                           fullWidth
+                          // name="token"
                           value={autoToken}
                           variant="outlined"
                           margin="dense"
@@ -784,11 +824,12 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                         startIcon={<FileCopy style={{ color: copied ? "blue" : "inherit" }} />}
                       />
                     </Box>
-  
+
                     <div>
                       <h3>{i18n.t("whatsappModal.form.queueRedirection")}</h3>
                       <p>{i18n.t("whatsappModal.form.queueRedirectionDesc")}</p>
                       <Grid spacing={2} container>
+
                         <Grid xs={6} md={6} item>
                           <FormControl
                             variant="outlined"
@@ -817,8 +858,9 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                               ))}
                             </Field>
                           </FormControl>
+
                         </Grid>
-  
+
                         <Grid xs={6} md={6} item>
                           <Field
                             as={TextField}
@@ -831,17 +873,19 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                             helperText={touched.timeSendQueue && errors.timeSendQueue}
                           />
                         </Grid>
+
                       </Grid>
                     </div>
                   </DialogContent>
                 </TabPanel>
-                
+                {/* INTEGRAÇÃO */}
                 <TabPanel
                   className={classes.container}
                   value={tab}
                   name={"integrations"}
                 >
                   <DialogContent dividers>
+                    {/* FILAS */}
                     <QueueSelect
                       selectedQueueIds={selectedQueueIds}
                       onChange={(selectedIds) => handleChangeQueue(selectedIds)}
@@ -865,9 +909,8 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                           variant="outlined"
                           margin="dense"
                           placeholder={i18n.t("queueModal.form.integrationId")}
-                          labelId="integrationId-selection-label"
-                        >
-                          <MenuItem value={null}>{"Desabilitado"}</MenuItem>
+                          labelId="integrationId-selection-label"                        >
+                          <MenuItem value={null} >{"Desabilitado"}</MenuItem>
                           {integrations.map((integration) => (
                             <MenuItem key={integration.id} value={integration.id}>
                               {integration.name}
@@ -918,13 +961,13 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     )}
                   </DialogContent>
                 </TabPanel>
-                
                 <TabPanel
                   className={classes.container}
                   value={tab}
                   name={"messages"}
                 >
                   <DialogContent dividers>
+                    {/* MENSAGEM DE SAUDAÇÃO */}
                     <Grid container spacing={1}>
                       <Grid item xs={12} md={12} xl={12}>
                         <Field
@@ -935,13 +978,18 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                           rows={4}
                           fullWidth
                           name="greetingMessage"
-                          error={touched.greetingMessage && Boolean(errors.greetingMessage)}
-                          helperText={touched.greetingMessage && errors.greetingMessage}
+                          error={
+                            touched.greetingMessage && Boolean(errors.greetingMessage)
+                          }
+                          helperText={
+                            touched.greetingMessage && errors.greetingMessage
+                          }
                           variant="outlined"
                           margin="dense"
                         />
                       </Grid>
-  
+
+                      {/* MENSAGEM DE CONCLUSÃO */}
                       <Grid item xs={12} md={12} xl={12}>
                         <Field
                           as={TextField}
@@ -950,13 +998,19 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                           rows={4}
                           fullWidth
                           name="complationMessage"
-                          error={touched.complationMessage && Boolean(errors.complationMessage)}
-                          helperText={touched.complationMessage && errors.complationMessage}
+                          error={
+                            touched.complationMessage &&
+                            Boolean(errors.complationMessage)
+                          }
+                          helperText={
+                            touched.complationMessage && errors.complationMessage
+                          }
                           variant="outlined"
                           margin="dense"
                         />
                       </Grid>
-  
+
+                      {/* MENSAGEM DE FORA DE EXPEDIENTE */}
                       <Grid item xs={12} md={12} xl={12}>
                         <Field
                           as={TextField}
@@ -971,7 +1025,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                           margin="dense"
                         />
                       </Grid>
-                      
+                      {/* MENSAGEM DE FÉRIAS COLETIVAS */}
                       <Grid item xs={12} md={12} xl={12}>
                         <Field
                           as={TextField}
@@ -986,7 +1040,6 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                           margin="dense"
                         />
                       </Grid>
-                      
                       <Grid item xs={6}>
                         <Field
                           fullWidth
@@ -996,17 +1049,24 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                           name="collectiveVacationStart"
                           required={values.collectiveVacationMessage?.length > 0}
                           inputProps={{
-                            min: moment().add(-10, "days").format("YYYY-MM-DD"),
+                            min: moment()
+                              .add(-10, "days")
+                              .format("YYYY-MM-DD"),
                           }}
+                          //min="2022-11-06T22:22:55"
                           InputLabelProps={{
                             shrink: true,
                           }}
-                          error={touched.collectiveVacationStart && Boolean(errors.collectiveVacationStart)}
-                          helperText={touched.collectiveVacationStart && errors.collectiveVacationStart}
+                          error={
+                            touched.collectiveVacationStart &&
+                            Boolean(errors.collectiveVacationStart)
+                          }
+                          helperText={
+                            touched.collectiveVacationStart && errors.collectiveVacationStart
+                          }
                           variant="outlined"
                         />
                       </Grid>
-                      
                       <Grid item xs={6}>
                         <Field
                           fullWidth
@@ -1016,20 +1076,28 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                           name="collectiveVacationEnd"
                           required={values.collectiveVacationMessage?.length > 0}
                           inputProps={{
-                            min: moment().add(-10, "days").format("YYYY-MM-DD")
+                            min: moment()
+                              .add(-10, "days")
+                              .format("YYYY-MM-DD")
                           }}
+                          //min="2022-11-06T22:22:55"
                           InputLabelProps={{
                             shrink: true,
                           }}
-                          error={touched.collectiveVacationEnd && Boolean(errors.collectiveVacationEnd)}
-                          helperText={touched.collectiveVacationEnd && errors.collectiveVacationEnd}
+                          error={
+                            touched.collectiveVacationEnd &&
+                            Boolean(errors.collectiveVacationEnd)
+                          }
+                          helperText={
+                            touched.collectiveVacationEnd && errors.collectiveVacationEnd
+                          }
                           variant="outlined"
                         />
                       </Grid>
                     </Grid>
                   </DialogContent>
                 </TabPanel>
-  
+
                 <TabPanel
                   className={classes.container}
                   value={tab}
@@ -1037,6 +1105,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                 >
                   <DialogContent dividers>
                     <Grid spacing={2} container>
+                      {/* TEMPO PARA CRIAR NOVO TICKET */}
                       <Grid xs={6} md={4} item>
                         <Field
                           as={TextField}
@@ -1049,7 +1118,8 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                           helperText={touched.timeCreateNewTicket && errors.timeCreateNewTicket}
                         />
                       </Grid>
-  
+
+                      {/* QUANTIDADE MÁXIMA DE VEZES QUE O CHATBOT VAI SER ENVIADO */}
                       <Grid xs={6} md={4} item>
                         <Field
                           as={TextField}
@@ -1062,7 +1132,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                           helperText={touched.maxUseBotQueues && errors.maxUseBotQueues}
                         />
                       </Grid>
-                      
+                      {/* TEMPO PARA ENVIO DO CHATBOT */}
                       <Grid xs={6} md={4} item>
                         <Field
                           as={TextField}
@@ -1076,8 +1146,8 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                         />
                       </Grid>
                     </Grid>
-                    
                     <Grid spacing={2} container>
+                      {/* ENCERRAR CHATS ABERTOS APÓS X HORAS */}
                       <Grid xs={6} md={6} item>
                         <Field
                           as={TextField}
@@ -1091,7 +1161,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                           helperText={touched.expiresTicket && errors.expiresTicket}
                         />
                       </Grid>
-                      
+                      {/* TEMPO PARA ENVIO DO CHATBOT */}
                       <Grid xs={6} md={6} item>
                         <FormControl
                           variant="outlined"
@@ -1105,7 +1175,9 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                           <Field
                             as={Select}
                             label={i18n.t("whatsappModal.form.whenExpiresTicket")}
-                            placeholder={i18n.t("whatsappModal.form.whenExpiresTicket")}
+                            placeholder={i18n.t(
+                              "whatsappModal.form.whenExpiresTicket"
+                            )}
                             labelId="whenExpiresTicket-selection-label"
                             id="whenExpiresTicket"
                             name="whenExpiresTicket"
@@ -1116,20 +1188,23 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                         </FormControl>
                       </Grid>
                     </Grid>
-                    
-                    <Field
-                      as={TextField}
-                      label={i18n.t("whatsappModal.form.expiresInactiveMessage")}
-                      multiline
-                      rows={4}
-                      fullWidth
-                      name="expiresInactiveMessage"
-                      error={touched.expiresInactiveMessage && Boolean(errors.expiresInactiveMessage)}
-                      helperText={touched.expiresInactiveMessage && errors.expiresInactiveMessage}
-                      variant="outlined"
-                      margin="dense"
-                    />
-                    
+                    {/* MENSAGEM POR INATIVIDADE*/}
+                    <div>
+                      <Field
+                        as={TextField}
+                        label={i18n.t("whatsappModal.form.expiresInactiveMessage")}
+                        multiline
+                        rows={4}
+                        fullWidth
+                        name="expiresInactiveMessage"
+                        error={touched.expiresInactiveMessage && Boolean(errors.expiresInactiveMessage)}
+                        helperText={touched.expiresInactiveMessage && errors.expiresInactiveMessage}
+                        variant="outlined"
+                        margin="dense"
+                      />
+                    </div>
+
+                    {/* TEMPO PARA ENVIO DE MENSAGEM POR INATIVIDADE */}
                     <Field
                       as={TextField}
                       label={i18n.t("whatsappModal.form.timeInactiveMessage")}
@@ -1140,65 +1215,138 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                       error={touched.timeInactiveMessage && Boolean(errors.timeInactiveMessage)}
                       helperText={touched.timeInactiveMessage && errors.timeInactiveMessage}
                     />
-                    
-                    <Field
-                      as={TextField}
-                      label={i18n.t("whatsappModal.form.inactiveMessage")}
-                      multiline
-                      rows={4}
-                      fullWidth
-                      name="inactiveMessage"
-                      error={touched.inactiveMessage && Boolean(errors.inactiveMessage)}
-                      helperText={touched.inactiveMessage && errors.inactiveMessage}
-                      variant="outlined"
-                      margin="dense"
-                    />
+                    {/* MENSAGEM POR INATIVIDADE*/}
+                    <div>
+                      <Field
+                        as={TextField}
+                        label={i18n.t("whatsappModal.form.inactiveMessage")}
+                        multiline
+                        rows={4}
+                        fullWidth
+                        name="inactiveMessage"
+                        error={touched.inactiveMessage && Boolean(errors.inactiveMessage)}
+                        helperText={touched.inactiveMessage && errors.inactiveMessage}
+                        variant="outlined"
+                        margin="dense"
+                      />
+                    </div>
                   </DialogContent>
                 </TabPanel>
-                
                 <TabPanel
                   className={classes.container}
                   value={tab}
                   name={"nps"}
                 >
                   <DialogContent dividers>
-                    <Field
-                      as={TextField}
-                      label={i18n.t("whatsappModal.form.ratingMessage")}
-                      multiline
-                      rows={4}
-                      fullWidth
-                      name="ratingMessage"
-                      error={touched.ratingMessage && Boolean(errors.ratingMessage)}
-                      helperText={touched.ratingMessage && errors.ratingMessage}
-                      variant="outlined"
-                      margin="dense"
-                    />
-                    
-                    <Field
-                      as={TextField}
-                      label={i18n.t("whatsappModal.form.maxUseBotQueuesNPS")}
-                      fullWidth
-                      name="maxUseBotQueuesNPS"
-                      variant="outlined"
-                      margin="dense"
-                      error={touched.maxUseBotQueuesNPS && Boolean(errors.maxUseBotQueuesNPS)}
-                      helperText={touched.maxUseBotQueuesNPS && errors.maxUseBotQueuesNPS}
-                    />
-                    
-                    <Field
-                      as={TextField}
-                      label={i18n.t("whatsappModal.form.expiresTicketNPS")}
-                      fullWidth
-                      name="expiresTicketNPS"
-                      variant="outlined"
-                      margin="dense"
-                      error={touched.expiresTicketNPS && Boolean(errors.expiresTicketNPS)}
-                      helperText={touched.expiresTicketNPS && errors.expiresTicketNPS}
-                    />
+                    {/* MENSAGEM DE AVALIAÇAO*/}
+                    <div>
+                      <Field
+                        as={TextField}
+                        label={i18n.t("whatsappModal.form.ratingMessage")}
+                        multiline
+                        rows={4}
+                        fullWidth
+                        name="ratingMessage"
+                        error={touched.ratingMessage && Boolean(errors.ratingMessage)}
+                        helperText={touched.ratingMessage && errors.ratingMessage}
+                        variant="outlined"
+                        margin="dense"
+                      />
+                    </div>
+                    {/* QUANTIDADE MÁXIMA DE VEZES QUE O NPS VAI SER ENVIADO */}
+                    <div>
+                      <Field
+                        as={TextField}
+                        label={i18n.t("whatsappModal.form.maxUseBotQueuesNPS")}
+                        fullWidth
+                        name="maxUseBotQueuesNPS"
+                        variant="outlined"
+                        margin="dense"
+                        error={touched.maxUseBotQueuesNPS && Boolean(errors.maxUseBotQueuesNPS)}
+                        helperText={touched.maxUseBotQueuesNPS && errors.maxUseBotQueuesNPS}
+                      />
+                    </div>
+                    {/* ENCERRAR CHATS NPS APÓS X Minutos */}
+                    <div>
+                      <Field
+                        as={TextField}
+                        label={i18n.t("whatsappModal.form.expiresTicketNPS")}
+                        fullWidth
+                        name="expiresTicketNPS"
+                        variant="outlined"
+                        margin="dense"
+                        error={touched.expiresTicketNPS && Boolean(errors.expiresTicketNPS)}
+                        helperText={touched.expiresTicketNPS && errors.expiresTicketNPS}
+                      />
+                    </div>
                   </DialogContent>
                 </TabPanel>
-                
+                {/* Flowbuilder */}
+                {showIntegrations && (
+                  <>
+                    <TabPanel
+                      className={classes.container}
+                      value={tab}
+                      name={"flowbuilder"}
+                    >
+                      <DialogContent>
+                        <h3>Fluxo de boas vindas</h3>
+                        <p>Este fluxo é disparado apenas para novos contatos, pessoas que voce não possui em sua lista de contatos e que mandaram uma mensagem
+                        </p>
+                        <FormControl
+                          variant="outlined"
+                          margin="dense"
+                          className={classes.FormControl}
+                          fullWidth
+                        >
+                          <Select
+                            name="flowIdWelcome"
+                            value={flowIdWelcome || ""}
+                            onChange={handleChangeFlowIdWelcome}
+                            id="flowIdWelcome"
+                            variant="outlined"
+                            margin="dense"
+                            labelId="flowIdWelcome-selection-label"                        >
+                            <MenuItem value={null} >{"Desabilitado"}</MenuItem>
+                            {webhooks.map(webhook => (
+                              <MenuItem key={webhook.id} value={webhook.id}>
+                                {webhook.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </DialogContent>
+                      <DialogContent>
+                        <h3>Fluxo de resposta padrão</h3>
+                        <p>Resposta Padrão é enviada com qualquer caractere diferente de uma palavra chave. ATENÇÃO! Será disparada se o atendimento ja estiver fechado.
+
+                        </p>
+                        <FormControl
+                          variant="outlined"
+                          margin="dense"
+                          className={classes.FormControl}
+                          fullWidth
+                        >
+                          <Select
+                            name="flowNotIdPhrase"
+                            value={flowIdNotPhrase || ""}
+                            onChange={handleChangeFlowIdNotPhrase}
+                            id="flowNotIdPhrase"
+                            variant="outlined"
+                            margin="dense"
+                            labelId="flowNotIdPhrase-selection-label"                        >
+                            <MenuItem value={null} >{"Desabilitado"}</MenuItem>
+                            {webhooks.map(webhook => (
+                              <MenuItem key={webhook.id} value={webhook.id}>
+                                {webhook.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </DialogContent>
+                    </TabPanel>
+                  </>
+                )}
                 <TabPanel
                   className={classes.container}
                   value={tab}
@@ -1214,9 +1362,9 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                       />
                     </Paper>
                   )}
+
                 </TabPanel>
               </Paper>
-              
               <DialogActions>
                 <Button
                   onClick={handleClose}

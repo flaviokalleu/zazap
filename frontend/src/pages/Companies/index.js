@@ -267,28 +267,7 @@ const Companies = () => {
             />
             <MainHeader>
                 <Title>{i18n.t("compaies.title")} ({companies.length})</Title>
-                {/* <MainHeaderButtonsWrapper>
-                    <TextField
-                        placeholder={i18n.t("contacts.searchPlaceholder")}
-                        type="search"
-                        value={searchParam}
-                        onChange={handleSearch}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <SearchIcon style={{ color: "gray" }} />
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleOpenCompanyModal}
-                    >
-                        {i18n.t("compaies.buttons.add")}
-                    </Button>
-                </MainHeaderButtonsWrapper> */}
+             
             </MainHeader>
             <Paper
                 className={classes.mainPaper}
@@ -310,17 +289,7 @@ const Companies = () => {
                             <TableCell align="center">Tamanho da pasta</TableCell>
                             <TableCell align="center">Total de arquivos</TableCell>
                             <TableCell align="center">Ultimo update</TableCell>
-                            {/* <TableCell align="center">{i18n.t("compaies.table.numberAttendants")}</TableCell> */}
-                            {/* <TableCell align="center">{i18n.t("compaies.table.numberConections")}</TableCell> */}
-                            {/* <TableCell align="center">{i18n.t("compaies.table.numberQueues")}</TableCell> */}
-                            {/* <TableCell align="center">{i18n.t("compaies.table.useWhatsapp")}</TableCell> */}
-                            {/* <TableCell align="center">{i18n.t("compaies.table.useFacebook")}</TableCell> */}
-                            {/* <TableCell align="center">{i18n.t("compaies.table.useInstagram")}</TableCell> */}
-                            {/* <TableCell align="center">{i18n.t("compaies.table.useCampaigns")}</TableCell> */}
-                            {/* <TableCell align="center">{i18n.t("compaies.table.useExternalApi")}</TableCell> */}
-                            {/* <TableCell align="center">{i18n.t("compaies.table.useInternalChat")}</TableCell> */}
-                            {/* <TableCell align="center">{i18n.t("compaies.table.useSchedules")}</TableCell> */}
-                            {/* <TableCell align="center">{i18n.t("compaies.table.actions")}</TableCell> */}
+                            
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -339,34 +308,7 @@ const Companies = () => {
                                     <TableCell align="center">{company.folderSize}</TableCell>
                                     <TableCell align="center">{company.numberFileFolder}</TableCell>
                                     <TableCell align="center">{datetimeToClient(company.updatedAtFolder)}</TableCell>
-                                    {/* <TableCell align="center">{company.plan.users}</TableCell> */}
-                                    {/* <TableCell align="center">{company.plan.connections}</TableCell> */}
-                                    {/* <TableCell align="center">{company.plan.queues}</TableCell> */}
-                                    {/* <TableCell align="center">{renderWhatsapp(company.plan.useWhatsapp)}</TableCell> */}
-                                    {/* <TableCell align="center">{renderFacebook(company.plan.useFacebook)}</TableCell> */}
-                                    {/* <TableCell align="center">{renderInstagram(company.plan.useInstagram)}</TableCell> */}
-                                    {/* <TableCell align="center">{renderCampaigns(company.plan.useCampaigns)}</TableCell> */}
-                                    {/* <TableCell align="center">{renderExternalApi(company.plan.useExternalApi)}</TableCell> */}
-                                    {/* <TableCell align="center">{renderInternalChat(company.plan.useInternalChat)}</TableCell> */}
-                                    {/* <TableCell align="center">{renderSchedules(company.plan.useSchedules)}</TableCell> */}
-                                    {/* <TableCell align="center">
-                                        <IconButton
-                                            size="small"
-                                            onClick={() => handleEditCompany(company)}
-                                        >
-                                            <EditIcon />
-                                        </IconButton>
-
-                                        <IconButton
-                                            size="small"
-                                            onClick={(e) => {
-                                                setConfirmModalOpen(true);
-                                                setDeletingCompany(company);
-                                            }}
-                                        >
-                                            <DeleteOutlineIcon />
-                                        </IconButton>
-                                    </TableCell> */}
+                                    
                                 </TableRow>
                             ))}
                             {loading && <TableRowSkeleton columns={4} />}

@@ -54,39 +54,37 @@ const useStyles = makeStyles((theme) => ({
     letterSpacing: '0.5px',
     lineHeight: 2.5,
     textTransform: 'uppercase',
-    fontFamily: "'Plus Jakarta Sans', sans-serif",
+    fontFamily: "'Plus Jakarta Sans', sans-serif'",
   },
   h4: {
-    fontFamily: "'Plus Jakarta Sans', sans-serif",
+    fontFamily: "'Plus Jakarta Sans', sans-serif'",
     fontWeight: 500,
     fontSize: '2rem',
     lineHeight: 1,
     color: "grey",
-    [theme.breakpoints.down("sm")]: {
-      fontSize: '1.75rem',
-    },
   },
   tab: {
     minWidth: "auto",
     width: "auto",
-    padding: theme.spacing(0.5, 1.5),
-    borderRadius: 12, // bordas mais arredondadas
+    padding: theme.spacing(0.5, 1),
+    borderRadius: 8,
     transition: "0.3s",
     borderWidth: "1px",
     borderStyle: "solid",
-    margin: theme.spacing(0, 0.5),
+    marginRight: theme.spacing(0.5),
+    marginLeft: theme.spacing(0.5),
+
     [theme.breakpoints.down("lg")]: {
       fontSize: "0.9rem",
-      padding: theme.spacing(0.4, 1.2),
+      padding: theme.spacing(0.4, 0.8),
+      marginRight: theme.spacing(0.4),
+      marginLeft: theme.spacing(0.4),
     },
     [theme.breakpoints.down("md")]: {
       fontSize: "0.8rem",
-      padding: theme.spacing(0.3, 1),
-    },
-    [theme.breakpoints.down("sm")]: {
-      fontSize: "0.75rem",
-      padding: theme.spacing(0.3, 0.8),
-      margin: theme.spacing(0, 0.2),
+      padding: theme.spacing(0.3, 0.6),
+      marginRight: theme.spacing(0.3),
+      marginLeft: theme.spacing(0.3),
     },
     "&:hover": {
       backgroundColor: "rgba(6, 81, 131, 0.3)",
@@ -101,52 +99,39 @@ const useStyles = makeStyles((theme) => ({
     borderStyle: "solid",
     height: 6,
     bottom: 0,
-    color:
-      theme.palette.mode === "light"
-        ? theme.palette.primary.main
-        : "#FFF",
+    color: theme.mode === "light" ? theme.palette.primary.main : "#FFF",
   },
   container: {
-    paddingTop: theme.spacing(4),
-    paddingBottom: theme.spacing(4),
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.padding,
     maxWidth: "1150px",
-    margin: "0 auto",
-    [theme.breakpoints.down("sm")]: {
-      padding: theme.spacing(2),
-      maxWidth: "100%",
-    },
+    minWidth: "xs",
   },
   nps: {
-    paddingTop: theme.spacing(2),
-    paddingBottom: theme.spacing(2),
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.padding,
   },
-  // Papel com altura fixa e bordas arredondadas
-  paper: {
+  fixedHeightPaper: {
     padding: theme.spacing(2),
     display: "flex",
     flexDirection: "column",
-    borderRadius: 12,
-    overflowY: "auto",
     height: 240,
+    overflowY: "auto",
     ...theme.scrollbarStyles,
-    [theme.breakpoints.down("sm")]: {
-      height: "auto",
-    },
   },
   cardAvatar: {
     fontSize: "55px",
-    color: theme.palette.grey[500],
+    color: grey[500],
     backgroundColor: "#ffffff",
     width: theme.spacing(7),
     height: theme.spacing(7),
-    borderRadius: "50%",
   },
   cardTitle: {
     fontSize: "18px",
-    color: theme.palette.info.main,
+    color: blue[700],
   },
   cardSubtitle: {
-    color: theme.palette.grey[600],
+    color: grey[600],
     fontSize: "14px",
   },
   alignRight: {
@@ -164,34 +149,38 @@ const useStyles = makeStyles((theme) => ({
     height: "calc(100vh - 64px)",
     border: "none",
   },
-  // Versões customizadas do papel para diferentes contextos
-  customPaperSmall: {
+  container: {
+    paddingTop: theme.spacing(4),
+    paddingBottom: theme.spacing(4),
+  },
+  fixedHeightPaper: {
     padding: theme.spacing(2),
     display: "flex",
+    overflow: "auto",
     flexDirection: "column",
-    borderRadius: 12,
+    height: 240,
+  },
+  customFixedHeightPaper: {
+    padding: theme.spacing(2),
+    display: "flex",
+    overflow: "auto",
+    flexDirection: "column",
     height: 120,
-    overflowY: "auto",
-    [theme.breakpoints.down("sm")]: {
-      height: "auto",
-    },
   },
-  customPaperFull: {
+  customFixedHeightPaperLg: {
     padding: theme.spacing(2),
     display: "flex",
+    overflow: "auto",
     flexDirection: "column",
-    borderRadius: 12,
     height: "100%",
-    overflowY: "auto",
   },
-  paperNoFixedHeight: {
+  fixedHeightPaper2: {
     padding: theme.spacing(2),
     display: "flex",
+    overflow: "auto",
     flexDirection: "column",
-    overflowY: "auto",
   },
 }));
-
 
 const Dashboard = () => {
   const theme = useTheme();
@@ -451,605 +440,634 @@ const Dashboard = () => {
                     className={classes.container}
                     value={tab}
                     name={"Indicadores"}
+                    /* CONTAINER */
                   >
-                    <Container maxWidth="xl" >
-                      <Grid2
-                        container
-                        spacing={3}
-                      >
-                        {/* EM ATENDIMENTO */}
-                        <Grid2 xs={12}
-                          sm={6}
-                          lg={4}
-                        >
-                          <Card sx={{
-                            height: "100%",
-                            backgroundColor:
-                              theme.mode === "light"
-                                ? "transparent"
-                                : "rgba(170, 170, 170, 0.2)",
-                          }}>
-                            <CardContent>
-                              <Stack
-                                alignItems="flex-start"
-                                direction="row"
-                                justifyContent="space-between"
-                                spacing={3}
-                              >
-                                <Stack spacing={1}>
-                                  <Typography
-                                    color="primary"
-                                    variant="overline"
-                                    className={classes.overline}
-                                  >
-                                    {i18n.t("dashboard.cards.inAttendance")}
-                                  </Typography>
-                                  <Typography variant="h4" className={classes.h4}>
-                                    {counters.supportHappening}
-                                  </Typography>
-                                </Stack>
-                                <Avatar
-                                  sx={{
-                                    backgroundColor: '#0b708c',
-                                    height: 60,
-                                    width: 60
-                                  }}
-                                >
-                                  <SvgIcon>
-                                    <CallIcon />
-                                  </SvgIcon>
-                                </Avatar>
-                              </Stack>
-                            </CardContent>
-                          </Card>
-                        </Grid2>
+                    <Container 
+  maxWidth="xl"
+  sx={{
+    py: 4,
+    px: { xs: 2, sm: 3 },
+    bgcolor: '#f8fafc',
+    borderRadius: 2,
+    boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.05)',
+  }}
+>
+  <Grid2
+    container
+    spacing={3}
+  >
+    {/* EM ATENDIMENTO */}
+    <Grid2 xs={12}
+      sm={6}
+      lg={4}
+    >
+      <Card sx={{
+        height: "100%",
+        backgroundColor: "#1976d2", // Azul escuro profissional
+        borderRadius: 0,
+        boxShadow: "none", 
+        color: 'white',
+      }}>
+        <CardContent>
+          <Stack
+            alignItems="flex-start"
+            direction="row"
+            justifyContent="space-between"
+            spacing={3}
+          >
+            <Stack spacing={1}>
+              <Typography
+                style={{ color: 'white' }}
+                variant="overline"
+                className={classes.overline}
+              >
+                {i18n.t("dashboard.cards.inAttendance")}
+              </Typography>
+              <Typography
+                 style={{ color: 'white' }}
+                 variant="h4"
+                 className={classes.h4}>
+                {counters.supportHappening}
+              </Typography>
+            </Stack>
+            <Avatar
+              sx={{
+                backgroundColor: '#1976d2',
+                height: 60,
+                width: 60
+              }}
+            >
+              <SvgIcon>
+                <CallIcon />
+              </SvgIcon>
+            </Avatar>
+          </Stack>
+        </CardContent>
+      </Card>
+    </Grid2>
 
-                        {/* AGUARDANDO */}
-                        <Grid2 xs={12}
-                          sm={6}
-                          lg={4}
-                        >
-                          <Card sx={{
-                            height: "100%",
-                            backgroundColor:
-                              theme.mode === "light"
-                                ? "transparent"
-                                : "rgba(170, 170, 170, 0.2)",
-                          }}>
-                            <CardContent>
-                              <Stack
-                                alignItems="flex-start"
-                                direction="row"
-                                justifyContent="space-between"
-                                spacing={3}
-                              >
-                                <Stack spacing={1}>
-                                  <Typography
-                                    color="primary"
-                                    variant="overline"
-                                    className={classes.overline}
-                                  >
-                                    {i18n.t("dashboard.cards.waiting")}
-                                  </Typography>
-                                  <Typography variant="h4"
-                                    className={classes.h4}
-                                  >
-                                    {counters.supportPending}
-                                  </Typography>
-                                </Stack>
-                                <Avatar
-                                  sx={{
-                                    backgroundColor: '#47606e',
-                                    height: 60,
-                                    width: 60
-                                  }}
-                                >
-                                  <SvgIcon>
-                                    <HourglassEmptyIcon />
-                                  </SvgIcon>
-                                </Avatar>
-                              </Stack>
-                            </CardContent>
-                          </Card>
-                        </Grid2>
+    {/* AGUARDANDO */}
+    <Grid2 xs={12}
+      sm={6}
+      lg={4}
+    >
+      <Card sx={{
+        height: "100%",
+        backgroundColor: "#0288d1", // Azul médio
+        borderRadius: 0,
+        boxShadow: "none", 
+        color: 'white',
+      }}>
+        <CardContent>
+          <Stack
+            alignItems="flex-start"
+            direction="row"
+            justifyContent="space-between"
+            spacing={3}
+          >
+            <Stack spacing={1}>
+              <Typography
+                style={{ color: 'white' }}
+                variant="overline"
+                className={classes.overline}
+              >
+                {i18n.t("dashboard.cards.waiting")}
+              </Typography>
+              <Typography
+                style={{ color: 'white' }}
+                variant="h4"
+                className={classes.h4}
+              >
+                {counters.supportPending}
+              </Typography>
+            </Stack>
+            <Avatar
+              sx={{
+                backgroundColor: '#0288d1',
+                height: 60,
+                width: 60
+              }}
+            >
+              <SvgIcon>
+                <HourglassEmptyIcon />
+              </SvgIcon>
+            </Avatar>
+          </Stack>
+        </CardContent>
+      </Card>
+    </Grid2>
 
-                        {/* FINALIZADOS */}
-                        <Grid2 xs={12}
-                          sm={6}
-                          lg={4}
-                        >
-                          <Card sx={{
-                            height: "100%",
-                            backgroundColor:
-                              theme.mode === "light"
-                                ? "transparent"
-                                : "rgba(170, 170, 170, 0.2)",
-                          }}>
-                            <CardContent>
-                              <Stack
-                                alignItems="flex-start"
-                                direction="row"
-                                justifyContent="space-between"
-                                spacing={3}
-                              >
-                                <Stack spacing={1}>
-                                  <Typography
-                                    color="primary"
-                                    variant="overline"
-                                    className={classes.overline}
-                                  >
-                                    {i18n.t("dashboard.cards.finalized")}
-                                  </Typography>
-                                  <Typography variant="h4"
-                                    className={classes.h4}
-                                  >
-                                    {counters.supportFinished}
-                                  </Typography>
-                                </Stack>
-                                <Avatar
-                                  sx={{
-                                    backgroundColor: '#5852ab',
-                                    height: 60,
-                                    width: 60
-                                  }}
-                                >
-                                  <SvgIcon>
-                                    <CheckCircleIcon />
-                                  </SvgIcon>
-                                </Avatar>
-                              </Stack>
-                            </CardContent>
-                          </Card>
-                        </Grid2>
+    {/* FINALIZADOS */}
+    <Grid2 xs={12}
+      sm={6}
+      lg={4}
+    >
+      <Card sx={{
+        height: "100%",
+        backgroundColor: "#388e3c", // Verde escuro profissional
+        borderRadius: 0,
+        boxShadow: "none", 
+        color: 'white',
+      }}>
+        <CardContent>
+          <Stack
+            alignItems="flex-start"
+            direction="row"
+            justifyContent="space-between"
+            spacing={3}
+          >
+            <Stack spacing={1}>
+              <Typography
+                style={{ color: 'white' }}
+                variant="overline"
+                className={classes.overline}
+              >
+                {i18n.t("dashboard.cards.finalized")}
+              </Typography>
+              <Typography
+                style={{ color: 'white' }}
+                variant="h4"
+                className={classes.h4}
+              >
+                {counters.supportFinished}
+              </Typography>
+            </Stack>
+            <Avatar
+              sx={{
+                backgroundColor: '#388e3c',
+                height: 60,
+                width: 60
+              }}
+            >
+              <SvgIcon>
+                <CheckCircleIcon />
+              </SvgIcon>
+            </Avatar>
+          </Stack>
+        </CardContent>
+      </Card>
+    </Grid2>
 
-                        {/* GRUPOS */}
-                        <Grid2 xs={12}
-                          sm={6}
-                          lg={4}
-                        >
-                          <Card sx={{
-                            height: "100%",
-                            backgroundColor:
-                              theme.mode === "light"
-                                ? "transparent"
-                                : "rgba(170, 170, 170, 0.2)",
-                          }}>
-                            <CardContent>
-                              <Stack
-                                alignItems="flex-start"
-                                direction="row"
-                                justifyContent="space-between"
-                                spacing={3}
-                              >
-                                <Stack spacing={1}>
-                                  <Typography
-                                    color="primary"
-                                    variant="overline"
-                                    className={classes.overline}
-                                  >
-                                    {i18n.t("dashboard.cards.groups")}
-                                  </Typography>
-                                  <Typography variant="h4"
+    {/* GRUPOS */}
+    <Grid2 xs={12}
+      sm={6}
+      lg={4}
+    >
+      <Card sx={{
+        height: "100%",
+        backgroundColor: "#455a64", // Cinza azulado escuro
+        borderRadius: 0,
+        boxShadow: "none", 
+        color: 'white',
+      }}>
+        <CardContent>
+          <Stack
+            alignItems="flex-start"
+            direction="row"
+            justifyContent="space-between"
+            spacing={3}
+          >
+            <Stack spacing={1}>
+              <Typography
+                style={{ color: 'white' }}
+                variant="overline"
+                className={classes.overline}
+              >
+                {i18n.t("dashboard.cards.groups")}
+              </Typography>
+              <Typography
+                style={{ color: 'white' }}
+                variant="h4"
+                className={classes.h4}
+              >
+                {counters.supportGroups}
+              </Typography>
+            </Stack>
+            <Avatar
+              sx={{
+                backgroundColor: '#455a64',
+                height: 60,
+                width: 60
+              }}
+            >
+              <SvgIcon>
+                <Groups />
+              </SvgIcon>
+            </Avatar>
+          </Stack>
+        </CardContent>
+      </Card>
+    </Grid2>
 
-                                    className={classes.h4}
-                                  >
-                                    {counters.supportGroups}
-                                  </Typography>
-                                </Stack>
+    {/* ATENDENTES ATIVOS */}
+    <Grid2 xs={12}
+      sm={6}
+      lg={4}
+    >
+      <Card sx={{
+        height: "100%",
+        backgroundColor: "#1976d2", // Azul escuro (repetido para consistência)
+        borderRadius: 0,
+        boxShadow: "none", 
+        color: 'white',
+      }}>
+        <CardContent>
+          <Stack
+            alignItems="flex-start"
+            direction="row"
+            justifyContent="space-between"
+            spacing={3}
+          >
+            <Stack spacing={1}>
+              <Typography
+                style={{ color: 'white' }}
+                variant="overline"
+                className={classes.overline}
+              >
+                {i18n.t("dashboard.cards.activeAttendants")}
+              </Typography>
+              <Typography
+                style={{ color: 'white' }}
+                variant="h4"
+                className={classes.h4}
+              >
+                {GetUsers()}/{attendants.length}
+              </Typography>
+            </Stack>
+            <Avatar
+              sx={{
+                backgroundColor: '#1976d2',
+                height: 60,
+                width: 60
+              }}
+            >
+              <SvgIcon>
+                <RecordVoiceOverIcon />
+              </SvgIcon>
+            </Avatar>
+          </Stack>
+        </CardContent>
+      </Card>
+    </Grid2>
 
-                                <Avatar
-                                  sx={{
-                                    backgroundColor: '#01BBAC',
-                                    height: 60,
-                                    width: 60
-                                  }}
-                                >
-                                  <SvgIcon>
-                                    <Groups />
-                                  </SvgIcon>
-                                </Avatar>
-                              </Stack>
-                            </CardContent>
-                          </Card>
-                        </Grid2>
+    {/* NOVOS CONTATOS */}
+    <Grid2 xs={12}
+      sm={6}
+      lg={4}
+    >
+      <Card sx={{
+        height: "100%",
+        backgroundColor: "#0288d1", // Azul médio (repetido para consistência)
+        borderRadius: 0,
+        boxShadow: "none", 
+        color: 'white',
+      }}>
+        <CardContent>
+          <Stack
+            alignItems="flex-start"
+            direction="row"
+            justifyContent="space-between"
+            spacing={3}
+          >
+            <Stack spacing={1}>
+              <Typography
+                style={{ color: 'white' }}
+                variant="overline"
+                className={classes.overline}
+              >
+                {i18n.t("dashboard.cards.newContacts")}
+              </Typography>
+              <Typography
+                style={{ color: 'white' }}
+                variant="h4"
+                className={classes.h4}
+              >
+                {counters.leads}
+              </Typography>
+            </Stack>
+            <Avatar
+              sx={{
+                backgroundColor: '#0288d1',
+                height: 60,
+                width: 60
+              }}
+            >
+              <SvgIcon>
+                <GroupAddIcon />
+              </SvgIcon>
+            </Avatar>
+          </Stack>
+        </CardContent>
+      </Card>
+    </Grid2>
 
-                        {/* ATENDENTES ATIVOS */}
-                        <Grid2 xs={12}
-                          sm={6}
-                          lg={4}
-                        >
-                          <Card sx={{
-                            height: "100%",
-                            backgroundColor:
-                              theme.mode === "light"
-                                ? "transparent"
-                                : "rgba(170, 170, 170, 0.2)",
-                          }}>
-                            <CardContent>
-                              <Stack
-                                alignItems="flex-start"
-                                direction="row"
-                                justifyContent="space-between"
-                                spacing={3}
-                              >
-                                <Stack spacing={1}>
-                                  <Typography
-                                    color="primary"
-                                    variant="overline"
-                                    className={classes.overline}
-                                  >
-                                    {i18n.t("dashboard.cards.activeAttendants")}
-                                  </Typography>
-                                  <Typography variant="h4"
-                                    className={classes.h4}
-                                  >
-                                    {GetUsers()}/{attendants.length}
-                                  </Typography>
-                                </Stack>
-                                <Avatar
-                                  sx={{
-                                    backgroundColor: '#805753',
-                                    height: 60,
-                                    width: 60
-                                  }}
-                                >
-                                  <SvgIcon>
-                                    <RecordVoiceOverIcon />
-                                  </SvgIcon>
-                                </Avatar>
-                              </Stack>
-                            </CardContent>
-                          </Card>
-                        </Grid2>
+    {/* MINHAS MENSAGEM RECEBIDAS */}
+    <Grid2 xs={12}
+      sm={6}
+      lg={4}
+    >
+      <Card sx={{
+        height: "100%",
+        backgroundColor: "#607d8b", // Cinza azulado médio
+        borderRadius: 0,
+        boxShadow: "none", 
+        color: 'white',
+      }}>
+        <CardContent>
+          <Stack
+            alignItems="flex-start"
+            direction="row"
+            justifyContent="space-between"
+            spacing={3}
+          >
+            <Stack spacing={1}>
+              <Typography
+                style={{ color: 'white' }}
+                variant="overline"
+                className={classes.overline}
+              >
+                {i18n.t("dashboard.cards.totalReceivedMessages")}
+              </Typography>
+              <Typography
+                style={{ color: 'white' }}
+                variant="h4"
+                className={classes.h4}
+              >
+                {GetMessages(false, false)}/{GetMessages(true, false)}
+              </Typography>
+            </Stack>
+            <Avatar
+              sx={{
+                backgroundColor: '#607d8b',
+                height: 60,
+                width: 60
+              }}
+            >
+              <SvgIcon>
+                <MessageIcon />
+              </SvgIcon>
+            </Avatar>
+          </Stack>
+        </CardContent>
+      </Card>
+    </Grid2>
 
-                        {/* NOVOS CONTATOS */}
-                        <Grid2 xs={12}
-                          sm={6}
-                          lg={4}
-                        >
-                          <Card sx={{
-                            height: "100%",
-                            backgroundColor:
-                              theme.mode === "light"
-                                ? "transparent"
-                                : "rgba(170, 170, 170, 0.2)",
-                          }}>
-                            <CardContent>
-                              <Stack
-                                alignItems="flex-start"
-                                direction="row"
-                                justifyContent="space-between"
-                                spacing={3}
-                              >
-                                <Stack spacing={1}>
-                                  <Typography
-                                    color="primary"
-                                    variant="overline"
-                                    className={classes.overline}
-                                  >
-                                    {i18n.t("dashboard.cards.newContacts")}
-                                  </Typography>
-                                  <Typography variant="h4"
-                                    className={classes.h4}
-                                  >
-                                    {counters.leads}
-                                  </Typography>
-                                </Stack>
-                                <Avatar
-                                  sx={{
-                                    backgroundColor: '#8c6b19',
-                                    height: 60,
-                                    width: 60
-                                  }}
-                                >
-                                  <SvgIcon>
-                                    <GroupAddIcon />
-                                  </SvgIcon>
-                                </Avatar>
-                              </Stack>
-                            </CardContent>
-                          </Card>
-                        </Grid2>
+    {/* MINHAS MENSAGEM ENVIADAS */}
+    <Grid2 xs={12}
+      sm={6}
+      lg={4}
+    >
+      <Card sx={{
+        height: "100%",
+        backgroundColor: "#455a64", // Cinza azulado escuro (repetido)
+        borderRadius: 0,
+        boxShadow: "none", 
+        color: 'white',
+      }}>
+        <CardContent>
+          <Stack
+            alignItems="flex-start"
+            direction="row"
+            justifyContent="space-between"
+            spacing={3}
+          >
+            <Stack spacing={1}>
+              <Typography
+                style={{ color: 'white' }}
+                variant="overline"
+                className={classes.overline}
+              >
+                {i18n.t("dashboard.cards.totalSentMessages")}
+              </Typography>
+              <Typography
+                style={{ color: 'white' }}
+                variant="h4"
+                className={classes.h4}
+              >
+                {GetMessages(false, true)}/{GetMessages(true, true)}
+              </Typography>
+            </Stack>
+            <Avatar
+              sx={{
+                backgroundColor: '#455a64',
+                height: 60,
+                width: 60
+              }}
+            >
+              <SvgIcon>
+                <SendIcon />
+              </SvgIcon>
+            </Avatar>
+          </Stack>
+        </CardContent>
+      </Card>
+    </Grid2>
 
-                        {/* MINHAS MENSAGEM RECEBIDAS */}
-                        <Grid2 xs={12}
-                          sm={6}
-                          lg={4}
-                        >
-                          <Card sx={{
-                            height: "100%",
-                            backgroundColor:
-                              theme.mode === "light"
-                                ? "transparent"
-                                : "rgba(170, 170, 170, 0.2)",
-                          }}>
-                            <CardContent>
-                              <Stack
-                                alignItems="flex-start"
-                                direction="row"
-                                justifyContent="space-between"
-                                spacing={3}
-                              >
-                                <Stack spacing={1}>
-                                  <Typography
-                                    color="primary"
-                                    variant="overline"
-                                    className={classes.overline}
-                                  >
-                                    {i18n.t("dashboard.cards.totalReceivedMessages")}
-                                  </Typography>
-                                  <Typography variant="h4"
-                                    className={classes.h4}
-                                  >
-                                    {GetMessages(false, false)}/{GetMessages(true, false)}
-                                  </Typography>
-                                </Stack>
-                                <Avatar
-                                  sx={{
-                                    backgroundColor: '#333133',
-                                    height: 60,
-                                    width: 60
-                                  }}
-                                >
-                                  <SvgIcon>
-                                    <MessageIcon />
-                                  </SvgIcon>
-                                </Avatar>
-                              </Stack>
-                            </CardContent>
-                          </Card>
-                        </Grid2>
+    {/* T.M. DE ATENDIMENTO */}
+    <Grid2 xs={12}
+      sm={6}
+      lg={4}
+    >
+      <Card sx={{
+        height: "100%",
+        backgroundColor: "#388e3c", // Verde escuro (repetido)
+        borderRadius: 0,
+        boxShadow: "none", 
+        color: 'white',
+      }}>
+        <CardContent>
+          <Stack
+            alignItems="flex-start"
+            direction="row"
+            justifyContent="space-between"
+            spacing={3}
+          >
+            <Stack spacing={1}>
+              <Typography
+                style={{ color: 'white' }}
+                variant="overline"
+                className={classes.overline}
+              >
+                {i18n.t("dashboard.cards.averageServiceTime")}
+              </Typography>
+              <Typography
+                style={{ color: 'white' }}
+                variant="h4"
+                className={classes.h4}
+              >
+                {formatTime(counters.avgSupportTime)}
+              </Typography>
+            </Stack>
+            <Avatar
+              sx={{
+                backgroundColor: '#388e3c',
+                height: 60,
+                width: 60
+              }}
+            >
+              <SvgIcon>
+                <AccessAlarmIcon />
+              </SvgIcon>
+            </Avatar>
+          </Stack>
+        </CardContent>
+      </Card>
+    </Grid2>
 
-                        {/* MINHAS MENSAGEM ENVIADAS */}
-                        <Grid2 xs={12}
-                          sm={6}
-                          lg={4}
-                        >
-                          <Card sx={{
-                            height: "100%",
-                            backgroundColor:
-                              theme.mode === "light"
-                                ? "transparent"
-                                : "rgba(170, 170, 170, 0.2)",
-                          }}>
-                            <CardContent>
-                              <Stack
-                                alignItems="flex-start"
-                                direction="row"
-                                justifyContent="space-between"
-                                spacing={3}
-                              >
-                                <Stack spacing={1}>
-                                  <Typography
-                                    color="primary"
-                                    variant="overline"
-                                    className={classes.overline}
-                                  >
-                                    {i18n.t("dashboard.cards.totalSentMessages")}
-                                  </Typography>
-                                  <Typography variant="h4"
-                                    className={classes.h4}
-                                  >
-                                    {GetMessages(false, true)}/{GetMessages(true, true)}
-                                  </Typography>
-                                </Stack>
-                                <Avatar
-                                  sx={{
-                                    backgroundColor: '#558a59',
-                                    height: 60,
-                                    width: 60
-                                  }}
-                                >
-                                  <SvgIcon>
-                                    <SendIcon />
-                                  </SvgIcon>
-                                </Avatar>
-                              </Stack>
-                            </CardContent>
-                          </Card>
-                        </Grid2>
+    {/* T.M. DE ESPERA */}
+    <Grid2 xs={12}
+      sm={6}
+      lg={4}
+    >
+      <Card sx={{
+        height: "100%",
+        backgroundColor: "#607d8b", // Cinza azulado médio (repetido)
+        borderRadius: 0,
+        boxShadow: "none", 
+        color: 'white',
+      }}>
+        <CardContent>
+          <Stack
+            alignItems="flex-start"
+            direction="row"
+            justifyContent="space-between"
+            spacing={3}
+          >
+            <Stack spacing={1}>
+              <Typography
+                style={{ color: 'white' }}
+                variant="overline"
+                className={classes.overline}
+              >
+                {i18n.t("dashboard.cards.averageWaitingTime")}
+              </Typography>
+              <Typography
+                style={{ color: 'white' }}
+                variant="h4"
+                className={classes.h4}
+              >
+                {formatTime(counters.avgWaitTime)}
+              </Typography>
+            </Stack>
+            <Avatar
+              sx={{
+                backgroundColor: '#607d8b',
+                height: 60,
+                width: 60
+              }}
+            >
+              <SvgIcon>
+                <TimerIcon />
+              </SvgIcon>
+            </Avatar>
+          </Stack>
+        </CardContent>
+      </Card>
+    </Grid2>
 
-                        {/* T.M. DE ATENDIMENTO */}
-                        <Grid2 xs={12}
-                          sm={6}
-                          lg={4}
-                        >
-                          <Card sx={{
-                            height: "100%",
-                            backgroundColor:
-                              theme.mode === "light"
-                                ? "transparent"
-                                : "rgba(170, 170, 170, 0.2)",
-                          }}>
-                            <CardContent>
-                              <Stack
-                                alignItems="flex-start"
-                                direction="row"
-                                justifyContent="space-between"
-                                spacing={3}
-                              >
-                                <Stack spacing={1}>
-                                  <Typography
-                                    color="primary"
-                                    variant="overline"
-                                    className={classes.overline}
-                                  >
-                                    {i18n.t("dashboard.cards.averageServiceTime")}
-                                  </Typography>
-                                  <Typography variant="h4"
-                                    className={classes.h4}
-                                  >
-                                    {formatTime(counters.avgSupportTime)}
-                                  </Typography>
-                                </Stack>
-                                <Avatar
-                                  sx={{
-                                    backgroundColor: '#F79009',
-                                    height: 60,
-                                    width: 60
-                                  }}
-                                >
-                                  <SvgIcon>
-                                    <AccessAlarmIcon />
-                                  </SvgIcon>
-                                </Avatar>
-                              </Stack>
-                            </CardContent>
-                          </Card>
-                        </Grid2>
+    {/* TICKETS ATIVOS */}
+    <Grid2 xs={12}
+      sm={6}
+      lg={4}
+    >
+      <Card sx={{
+        height: "100%",
+        backgroundColor: "#1976d2", // Azul escuro (repetido)
+        borderRadius: 0,
+        boxShadow: "none", 
+        color: 'white',
+      }}>
+        <CardContent>
+          <Stack
+            alignItems="flex-start"
+            direction="row"
+            justifyContent="space-between"
+            spacing={3}
+          >
+            <Stack spacing={1}>
+              <Typography
+                style={{ color: 'white' }}
+                variant="overline"
+                className={classes.overline}
+              >
+                {i18n.t("dashboard.cards.activeTickets")}
+              </Typography>
+              <Typography
+                style={{ color: 'white' }}
+                variant="h4"
+                className={classes.h4}
+              >
+                {counters.activeTickets}
+              </Typography>
+            </Stack>
+            <Avatar
+              sx={{
+                backgroundColor: '#1976d2',
+                height: 60,
+                width: 60
+              }}
+            >
+              <SvgIcon>
+                <ArrowUpward />
+              </SvgIcon>
+            </Avatar>
+          </Stack>
+        </CardContent>
+      </Card>
+    </Grid2>
 
-                        {/* T.M. DE ESPERA */}
-                        <Grid2 xs={12}
-                          sm={6}
-                          lg={4}
-                        >
-                          <Card sx={{
-                            height: "100%",
-                            backgroundColor:
-                              theme.mode === "light"
-                                ? "transparent"
-                                : "rgba(170, 170, 170, 0.2)",
-                          }}>
-                            <CardContent>
-                              <Stack
-                                alignItems="flex-start"
-                                direction="row"
-                                justifyContent="space-between"
-                                spacing={3}
-                              >
-                                <Stack spacing={1}>
-                                  <Typography
-                                    color="primary"
-                                    variant="overline"
-                                    className={classes.overline}
-                                  >
-                                    {i18n.t("dashboard.cards.averageWaitingTime")}
-                                  </Typography>
-                                  <Typography variant="h4"
-                                    className={classes.h4}
-                                  >
-                                    {formatTime(counters.avgWaitTime)}
-                                  </Typography>
-                                </Stack>
-                                <Avatar
-                                  sx={{
-                                    backgroundColor: '#8a2c40',
-                                    height: 60,
-                                    width: 60
-                                  }}
-                                >
-                                  <SvgIcon>
-                                    <TimerIcon />
-                                  </SvgIcon>
-                                </Avatar>
-                              </Stack>
-                            </CardContent>
-                          </Card>
-                        </Grid2>
-
-                        {/* TICKETS ATIVOS */}
-                        <Grid2 xs={12}
-                          sm={6}
-                          lg={4}
-                        >
-                          <Card sx={{
-                            height: "100%",
-                            backgroundColor:
-                              theme.mode === "light"
-                                ? "transparent"
-                                : "rgba(170, 170, 170, 0.2)",
-                          }}>
-                            <CardContent>
-                              <Stack
-                                alignItems="flex-start"
-                                direction="row"
-                                justifyContent="space-between"
-                                spacing={3}
-                              >
-                                <Stack spacing={1}>
-                                  <Typography
-                                    color="primary"
-                                    variant="overline"
-                                    className={classes.overline}
-                                  >
-                                    {i18n.t("dashboard.cards.activeTickets")}
-                                  </Typography>
-                                  <Typography variant="h4"
-                                    className={classes.h4}
-                                  >
-                                    {counters.activeTickets}
-                                  </Typography>
-                                </Stack>
-
-                                <Avatar
-                                  sx={{
-                                    backgroundColor: '#EE4512',
-                                    height: 60,
-                                    width: 60
-                                  }}
-                                >
-                                  <SvgIcon>
-                                    <ArrowUpward />
-                                  </SvgIcon>
-                                </Avatar>
-                              </Stack>
-                            </CardContent>
-                          </Card>
-                        </Grid2>
-
-                        {/* TICKETS PASSIVOS */}
-                        <Grid2 xs={12}
-                          sm={6}
-                          lg={4}
-                        >
-                          <Card sx={{
-                            height: "100%",
-                            backgroundColor:
-                              theme.mode === "light"
-                                ? "transparent"
-                                : "rgba(170, 170, 170, 0.2)",
-                          }}>
-                            <CardContent>
-                              <Stack
-                                alignItems="flex-start"
-                                direction="row"
-                                justifyContent="space-between"
-                                spacing={3}
-                              >
-                                <Stack spacing={1}>
-                                  <Typography
-                                    color="primary"
-                                    variant="overline"
-                                    className={classes.overline}
-                                  >
-                                    {i18n.t("dashboard.cards.passiveTickets")}
-                                  </Typography>
-                                  <Typography variant="h4"
-
-                                    className={classes.h4}
-                                  >
-                                    {counters.passiveTickets}
-                                  </Typography>
-                                </Stack>
-
-
-                                <Avatar
-                                  sx={{
-                                    backgroundColor: '#28C037',
-                                    height: 60,
-                                    width: 60
-                                  }}
-                                >
-                                  <SvgIcon>
-                                    <ArrowDownward />
-                                  </SvgIcon>
-                                </Avatar>
-                              </Stack>
-                            </CardContent>
-                          </Card>
-                        </Grid2>
-                      </Grid2>
-                    </Container>
+    {/* TICKETS PASSIVOS */}
+    <Grid2 xs={12}
+      sm={6}
+      lg={4}
+    >
+      <Card sx={{
+        height: "100%",
+        backgroundColor: "#0288d1", // Azul médio (repetido)
+        borderRadius: 0,
+        boxShadow: "none", 
+        color: 'white',
+      }}>
+        <CardContent>
+          <Stack
+            alignItems="flex-start"
+            direction="row"
+            justifyContent="space-between"
+            spacing={3}
+          >
+            <Stack spacing={1}>
+              <Typography
+                style={{ color: 'white' }}
+                variant="overline"
+                className={classes.overline}
+              >
+                {i18n.t("dashboard.cards.passiveTickets")}
+              </Typography>
+              <Typography
+                style={{ color: 'white' }}
+                variant="h4"
+                className={classes.h4}
+              >
+                {counters.passiveTickets}
+              </Typography>
+            </Stack>
+            <Avatar
+              sx={{
+                backgroundColor: '#0288d1',
+                height: 60,
+                width: 60
+              }}
+            >
+              <SvgIcon>
+                <ArrowDownward />
+              </SvgIcon>
+            </Avatar>
+          </Stack>
+        </CardContent>
+      </Card>
+    </Grid2>
+  </Grid2>
+</Container>
                   </TabPanel>
 
                   <TabPanel
@@ -1191,3 +1209,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

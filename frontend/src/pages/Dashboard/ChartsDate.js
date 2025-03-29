@@ -9,6 +9,7 @@ import {
     Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import ChartDataLabels from 'chartjs-plugin-datalabels'; // Adicionado o plugin para datalabels
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import brLocale from 'date-fns/locale/pt-BR';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
@@ -20,7 +21,7 @@ import { toast } from 'react-toastify';
 import './button.css';
 import { i18n } from '../../translate/i18n';
 import { AuthContext } from "../../context/Auth/AuthContext";
-import {  useTheme } from '@material-ui/core';
+import { useTheme } from '@material-ui/core';
 
 ChartJS.register(
     CategoryScale,
@@ -28,35 +29,95 @@ ChartJS.register(
     BarElement,
     Title,
     Tooltip,
-    Legend
+    Legend,
+    ChartDataLabels // Registrando o plugin
 );
+
+// Função para criar gradiente futurista
+const createGradient = (ctx, chartArea) => {
+    const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+    gradient.addColorStop(0, '#00d4ff'); // Ciano claro
+    gradient.addColorStop(0.5, '#3b82f6'); // Azul vibrante
+    gradient.addColorStop(1, '#1e3a8a'); // Azul escuro
+    return gradient;
+};
 
 export const options = {
     responsive: true,
+    maintainAspectRatio: false,
+    animation: {
+        duration: 1000,
+        easing: 'easeOutBounce', // Animação futurista
+    },
     plugins: {
         legend: {
-            position: 'top',
             display: false,
         },
         title: {
             display: true,
             text: 'Tickets',
-            position: 'left',
+            position: 'top',
+            color: '#e0e0e0', // Cor clara para um look futurista
+            font: {
+                size: 18,
+                weight: 'bold',
+                family: "'Orbitron', sans-serif", // Fonte futurista
+            },
         },
         datalabels: {
             display: true,
-            anchor: 'start',
-            offset: -30,
-            align: "start",
-            color: "#fff",
-            textStrokeColor: "#000",
+            anchor: 'end',
+            align: 'top',
+            color: '#ffffff',
+            textStrokeColor: '#000000',
             textStrokeWidth: 2,
             font: {
-                size: 20,
-                weight: "bold"
-
+                size: 16,
+                weight: 'bold',
+                family: "'Roboto Mono', monospace", // Fonte tecnológica
             },
-        }
+            formatter: (value) => value > 0 ? value : '', // Mostra apenas valores positivos
+        },
+        tooltip: {
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            titleFont: { family: "'Roboto Mono', monospace" },
+            bodyFont: { family: "'Roboto Mono', monospace" },
+            cornerRadius: 8,
+            borderColor: '#00d4ff',
+            borderWidth: 1,
+        },
+    },
+    scales: {
+        x: {
+            grid: {
+                display: false, // Remove gridlines para um look mais limpo
+            },
+            ticks: {
+                color: '#b0b0b0',
+                font: {
+                    family: "'Roboto Mono', monospace",
+                },
+            },
+        },
+        y: {
+            grid: {
+                color: 'rgba(255, 255, 255, 0.1)',
+                borderDash: [5, 5], // Linhas tracejadas para um toque futurista
+            },
+            ticks: {
+                color: '#b0b0b0',
+                font: {
+                    family: "'Roboto Mono', monospace",
+                },
+            },
+        },
+    },
+    elements: {
+        bar: {
+            borderRadius: 4, // Bordas arredondadas nas barras
+            borderWidth: 1,
+            borderColor: '#00d4ff', // Borda ciano para destacar
+        },
     },
 };
 
@@ -76,15 +137,21 @@ export const ChartsDate = () => {
     }, [companyId]);
 
     const dataCharts = {
-
-        labels: ticketsData && ticketsData?.data.length > 0 && ticketsData?.data.map((item) => (item.hasOwnProperty('horario') ? `Das ${item.horario}:00 as ${item.horario}:59` : item.data)),
+        labels: ticketsData?.data.length > 0 ? ticketsData.data.map((item) => 
+            (item.hasOwnProperty('horario') ? `Das ${item.horario}:00 às ${item.horario}:59` : item.data)
+        ) : [],
         datasets: [
             {
-                // label: 'Dataset 1',
-                data: ticketsData?.data.length > 0 && ticketsData?.data.map((item, index) => {
-                    return item.total
-                }),
-                backgroundColor: theme.palette.primary.main,
+                data: ticketsData?.data.length > 0 ? ticketsData.data.map((item) => item.total) : [],
+                backgroundColor: (context) => {
+                    const chart = context.chart;
+                    const { ctx, chartArea } = chart;
+                    if (!chartArea) return null;
+                    return createGradient(ctx, chartArea);
+                },
+                borderSkipped: false,
+                hoverBackgroundColor: '#60a5fa', // Efeito ao passar o mouse
+                barThickness: 30, // Barras mais finas e modernas
             },
         ],
     };
@@ -96,7 +163,7 @@ export const ChartsDate = () => {
         } catch (error) {
             toast.error('Erro ao buscar informações dos tickets');
         }
-    }
+    };
 
     return (
         <>
@@ -112,7 +179,6 @@ export const ChartsDate = () => {
                             onChange={(newValue) => { setInitialDate(newValue) }}
                             label={i18n.t("dashboard.date.initialDate")}
                             renderInput={(params) => <TextField fullWidth {...params} sx={{ width: '20ch' }} />}
-
                         />
                     </LocalizationProvider>
                 </Grid>
@@ -127,10 +193,18 @@ export const ChartsDate = () => {
                     </LocalizationProvider>
                 </Grid>
                 <Grid item>
-                    <Button style={{ backgroundColor: theme.palette.primary.main, top: '10px' }} onClick={handleGetTicketsInformation} variant='contained'>Filtrar</Button>
+                    <Button 
+                        style={{ backgroundColor: theme.palette.primary.main, top: '10px' }} 
+                        onClick={handleGetTicketsInformation} 
+                        variant='contained'
+                    >
+                        Filtrar
+                    </Button>
                 </Grid>
             </Grid>
-            <Bar options={options} data={dataCharts} style={{ maxWidth: '100%', maxHeight: '280px', }} />
+            <div style={{ position: 'relative', height: '300px', width: '100%' }}>
+                <Bar options={options} data={dataCharts} />
+            </div>
         </>
     );
-}
+};

@@ -44,6 +44,7 @@ const messages = {
 				title: "Connections",
 				toasts: {
 					deleted: "WhatsApp connection deleted sucessfully!",
+					disconnected: "Connection disconnected successfully!",
 				},
 				confirmationModal: {
 					deleteTitle: "Delete",
@@ -215,6 +216,7 @@ const messages = {
 				},
 				buttons: {
 					showAll: "All",
+					quickmessageflash: "Quick Message",
 				},
 			},
 			transferTicketModal: {

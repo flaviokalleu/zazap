@@ -91,16 +91,15 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
-  const companyUser = bodyCompanyId || userCompanyId;
+  // const companyUser = bodyCompanyId || userCompanyId;
+  const companyUser = userCompanyId;
 
   if (!companyUser) {
 
-    const trialDays = parseInt(process.env.APP_TRIALEXPIRATION || "3", 10);
+    const dataNowMoreTwoDays = new Date();
+    dataNowMoreTwoDays.setDate(dataNowMoreTwoDays.getDate() + 3);
 
-    const dataNowMoreTrialDays = new Date();
-    dataNowMoreTrialDays.setDate(dataNowMoreTrialDays.getDate() + trialDays);
-
-    const date = dataNowMoreTrialDays.toISOString().split("T")[0];
+    const date = dataNowMoreTwoDays.toISOString().split("T")[0];
 
     const companyData = {
       name: companyName,
@@ -150,7 +149,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
         const whatsappId = whatsappCompany.whatsapps[0].id
         const wbot = getWbot(whatsappId);
 
-        const body = `Olá ${name}, este é uma mensagem sobre o cadastro da ${companyName}!\n\nSegue os dados da sua empresa:\n\nNome: ${companyName}\nEmail: ${email}\nSenha: ${password}\nData Vencimento Trial: ${dateToClient(date)}`
+        const body = `Olá ${name}, essa é uma mensagem sobre o cadastro da ${companyName}!\n\nSegue os dados da sua empresa:\n\nNome: ${companyName}\nEmail: ${email}\nSenha: ${password}\nData Vencimento Trial: ${dateToClient(date)}`
 
         await wbot.sendMessage(`55${phone}@s.whatsapp.net`, { text: body });
       }
