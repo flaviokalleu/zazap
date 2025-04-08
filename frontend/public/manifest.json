@@ -1,6 +1,6 @@
 {
-	"short_name": "Zazap - sistema de multiatendimento",
-	"name": "Zazap - sistema de multiatendimento",
+	"short_name": "Zazap - Sistema de MultiAtendimento",
+	"name": "Zazap",
 	"icons": [
 		{
 			"src": "favicon.ico",
@@ -11,10 +11,29 @@
 			"src": "/android-chrome-192x192.png",
 			"sizes": "192x192",
 			"type": "image/png"
+		},
+		{
+			"src": "/android-chrome-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "any maskable"
 		}
 	],
 	"start_url": ".",
 	"display": "standalone",
 	"theme_color": "#000000",
-	"background_color": "#ffffff"
+	"background_color": "#ffffff",
+	"prefer_related_applications": false,
+	"categories": ["business", "productivity"],
+	"description": "Sistema de MultiAtendimento para WhatsApp",
+	"orientation": "any",
+	"scope": "/",
+	"shortcuts": [
+		{
+			"name": "Iniciar atendimento",
+			"short_name": "Atendimento",
+			"description": "Iniciar novo atendimento",
+			"url": "/atendimento"
+		}
+	]
 }

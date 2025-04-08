@@ -19,8 +19,6 @@ ticketRoutes.get("/tickets/u/:uuid", isAuth, TicketController.showFromUUID);
 
 ticketRoutes.post("/tickets", isAuth, TicketController.store);
 
-ticketRoutes.put("/setunredmsg/:ticketId", isAuth, TicketController.setunredmsg);
-
 ticketRoutes.put("/tickets/:ticketId", isAuth, TicketController.update);
 
 ticketRoutes.delete("/tickets/:ticketId", isAuth, TicketController.remove);

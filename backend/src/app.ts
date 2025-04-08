@@ -57,11 +57,11 @@ if (String(process.env.BULL_BOARD).toLocaleLowerCase() === 'true' && process.env
 // app.use(helmet({
 //   contentSecurityPolicy: {
 //     directives: {
-//       defaultSrc: ["'self'", "https://localhost:8080"],
-//       imgSrc: ["'self'", "data:", "https://localhost:8080"],
-//       scriptSrc: ["'self'", "https://localhost:8080"],
-//       styleSrc: ["'self'", "'unsafe-inline'", "https://localhost:8080"],
-//       connectSrc: ["'self'", "https://localhost:8080"]
+//       defaultSrc: ["'self'", "http://localhost:8080"],
+//       imgSrc: ["'self'", "data:", "http://localhost:8080"],
+//       scriptSrc: ["'self'", "http://localhost:8080"],
+//       styleSrc: ["'self'", "'unsafe-inline'", "http://localhost:8080"],
+//       connectSrc: ["'self'", "http://localhost:8080"]
 //     }
 //   },
 //   crossOriginResourcePolicy: false, // Permite recursos de diferentes origens

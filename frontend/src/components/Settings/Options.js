@@ -8,7 +8,7 @@ import Select from "@material-ui/core/Select";
 import FormHelperText from "@material-ui/core/FormHelperText";
 
 import useSettings from "../../hooks/useSettings";
-import { ToastContainer, toast } from 'react-toastify';
+
 import { makeStyles } from "@material-ui/core/styles";
 import { grey, blue } from "@material-ui/core/colors";
 
@@ -104,32 +104,6 @@ export default function Options(props) {
   const [acceptAudioMessageContact, setAcceptAudioMessageContact] = useState("enabled");
   const [loadingAcceptAudioMessageContact, setLoadingAcceptAudioMessageContact] = useState(false);
 
-  //PAYMENT METHODS
-  const [eficlientidType, setEfiClientidType] = useState('');
-  const [loadingEfiClientidType, setLoadingEfiClientidType] = useState(false);
-
-  const [eficlientsecretType, setEfiClientsecretType] = useState('');
-  const [loadingEfiClientsecretType, setLoadingEfiClientsecretType] =
-    useState(false);
-
-  const [efichavepixType, setEfiChavepixType] = useState('');
-  const [loadingEfiChavepixType, setLoadingEfiChavepixType] = useState(false);
-
-  const [mpaccesstokenType, setmpaccesstokenType] = useState('');
-  const [loadingmpaccesstokenType, setLoadingmpaccesstokenType] =
-    useState(false);
-
-  const [stripeprivatekeyType, setstripeprivatekeyType] = useState('');
-  const [loadingstripeprivatekeyType, setLoadingstripeprivatekeyType] =
-    useState(false);
-
-  const [asaastokenType, setasaastokenType] = useState('');
-  const [loadingasaastokenType, setLoadingasaastokenType] = useState(false);
-
-  //OPENAI API KEY TRANSCRIÇÃO DE ÁUDIO
-  const [openaitokenType, setopenaitokenType] = useState('');
-  const [loadingopenaitokenType, setLoadingopenaitokenType] = useState(false);
-
   //LGPD
   const [enableLGPD, setEnableLGPD] = useState("disabled");
   const [loadingEnableLGPD, setLoadingEnableLGPD] = useState(false);
@@ -142,10 +116,6 @@ export default function Options(props) {
 
   const [lgpdDeleteMessage, setLGPDDeleteMessage] = useState("disabled");
   const [loadingLGPDDeleteMessage, setLoadingLGPDDeleteMessage] = useState(false);
-
-  //LIMITAR DOWNLOAD
-  const [downloadLimit, setdownloadLimit] = useState("64");
-  const [loadingDownloadLimit, setLoadingdownloadLimit] = useState(false);
 
   const [lgpdConsent, setLGPDConsent] = useState("disabled");
   const [loadingLGPDConsent, setLoadingLGPDConsent] = useState(false);
@@ -166,7 +136,7 @@ export default function Options(props) {
   const [loadingDirectTicketsToWallets, setLoadingDirectTicketsToWallets] = useState(false)
 
   //MENSAGENS CUSTOMIZADAS
-  const [transferMessage, setTransferMessage] = useState("");
+  const [transferMessage, setTransferMessage] = useState("Seu Atendimento foi Transferido para o setor ${queue.name},Aguarde atendimento por favor...");
   const [loadingTransferMessage, setLoadingTransferMessage] = useState(false);
 
   const [greetingAcceptedMessage, setGreetingAcceptedMessage] = useState("");
@@ -183,16 +153,6 @@ export default function Options(props) {
 
   const { update: updateUserCreation, getAll } = useSettings();
 
-  const { update: updatedownloadLimit } = useSettings();
-
-  const { update: updateeficlientid } = useSettings();
-  const { update: updateeficlientsecret } = useSettings();
-  const { update: updateefichavepix } = useSettings();
-  const { update: updatempaccesstoken } = useSettings();
-  const { update: updatestripeprivatekey } = useSettings();
-  const { update: updateasaastoken } = useSettings();
-  const { update: updateopenaitoken } = useSettings();
-
   const { update } = useCompanySettings();
 
   const isSuper = () => {
@@ -208,48 +168,6 @@ export default function Options(props) {
 
       if (userPar) {
         setUserCreation(userPar.value);
-      }
-
-      const downloadLimit = oldSettings.find((s) => s.key === "downloadLimit");
-
-      if (downloadLimit) {
-       setdownloadLimit(downloadLimit.value);
-      }
-
-      const eficlientidType = oldSettings.find((s) => s.key === 'eficlientid');
-      if (eficlientidType) {
-        setEfiClientidType(eficlientidType.value);
-      }
-
-      const eficlientsecretType = oldSettings.find(
-        (s) => s.key === 'eficlientsecret'
-      );
-      if (eficlientsecretType) {
-        setEfiClientsecretType(eficlientsecretType.value);
-      }
-
-      const efichavepixType = oldSettings.find((s) => s.key === 'efichavepix');
-      if (efichavepixType) {
-        setEfiChavepixType(efichavepixType.value);
-      }
-
-      const mpaccesstokenType = oldSettings.find((s) => s.key === 'mpaccesstoken');
-      if (mpaccesstokenType) {
-        setmpaccesstokenType(mpaccesstokenType.value);
-      }
-
-      const asaastokenType = oldSettings.find(
-        (s) => s.key === 'asaastoken'
-      );
-      if (asaastokenType) {
-        setasaastokenType(asaastokenType.value);
-      }
-
-      const openaitokenType = oldSettings.find(
-        (s) => s.key === 'openaikeyaudio'
-      );
-      if (openaitokenType) {
-        setopenaitokenType(openaitokenType.value);
       }
     }
   }, [oldSettings])
@@ -295,93 +213,6 @@ export default function Options(props) {
       value,
     });
     setLoadingUserCreation(false);
-  }
-
-  async function handleDownloadLimit(value) {
-    setdownloadLimit(value);
-    setLoadingdownloadLimit(true);
-    await updatedownloadLimit({
-      key: "downloadLimit",
-      value,
-    });
-    setLoadingdownloadLimit(false);
-  }
-
-  async function handleChangeEfiClientid(value) {
-    setEfiClientidType(value);
-    setLoadingEfiClientidType(true);
-    await updateeficlientid({
-      key: 'eficlientid',
-      value,
-    });
-    toast.success('Operação atualizada com sucesso.');
-    setLoadingEfiClientidType(false);
-  }
-
-  async function handleChangeEfiClientsecret(value) {
-    setEfiClientsecretType(value);
-    setLoadingEfiClientsecretType(true);
-    await updateeficlientsecret({
-      key: 'eficlientsecret',
-      value,
-    });
-    toast.success('Operação atualizada com sucesso.');
-    setLoadingEfiClientsecretType(false);
-  }
-
-  async function handleChangeEfiChavepix(value) {
-    setEfiChavepixType(value);
-    setLoadingEfiChavepixType(true);
-    await updateefichavepix({
-      key: 'efichavepix',
-      value,
-    });
-    toast.success('Operação atualizada com sucesso.');
-    setLoadingEfiChavepixType(false);
-  }
-
-  async function handleChangempaccesstoken(value) {
-    setmpaccesstokenType(value);
-    setLoadingmpaccesstokenType(true);
-    await updatempaccesstoken({
-      key: 'mpaccesstoken',
-      value,
-    });
-    toast.success('Operação atualizada com sucesso.');
-    setLoadingmpaccesstokenType(false);
-  }
-
-  async function handleChangestripeprivatekey(value) {
-    setstripeprivatekeyType(value);
-    setLoadingstripeprivatekeyType(true);
-    await updatestripeprivatekey({
-      key: 'stripeprivatekey',
-      value,
-    });
-    toast.success('Operação atualizada com sucesso.');
-    setLoadingstripeprivatekeyType(false);
-  }
-
-  async function handleChangeasaastoken(value) {
-    setasaastokenType(value);
-    setLoadingasaastokenType(true);
-    await updateasaastoken({
-      key: 'asaastoken',
-      value,
-    });
-    toast.success('Operação atualizada com sucesso.');
-    setLoadingasaastokenType(false);
-  }
-
-  async function handleChangeopenaitoken(value) {
-    setopenaitokenType(value);
-    setLoadingopenaitokenType(true);
-    await updateopenaitoken({
-      key: 'openaikeyaudio',
-      value,
-    });
-    toast.success('Operação atualizada com sucesso.');
-    setLoadingopenaitokenType(false);
   }
 
   async function handleChangeUserRating(value) {
@@ -682,36 +513,6 @@ export default function Options(props) {
           </Grid>
           : null}
 
-        {/* LIMITAR DOWNLOAD */}
-        {isSuper() ?
-        <Grid xs={12} sm={6} md={4} item>
-            <FormControl className={classes.selectContainer}>
-              <InputLabel id="downloadLimit-label">
-                Limite de Download de Arquivos (MB)
-              </InputLabel>
-              <Select
-                labelId="downloadLimit-label"
-                value={downloadLimit}
-                size="small"
-                onChange={async (e) => {
-                  handleDownloadLimit(e.target.value);
-                }}
-              >
-                <MenuItem value={"32"}>32</MenuItem>
-                <MenuItem value={"64"}>64</MenuItem>
-                <MenuItem value={"128"}>128</MenuItem>
-                <MenuItem value={"256"}>256</MenuItem>
-                <MenuItem value={"512"}>512</MenuItem>
-                <MenuItem value={"1024"}>1024</MenuItem>
-                <MenuItem value={"2048"}>2048</MenuItem>
-              </Select>
-              <FormHelperText>
-                {loadingDownloadLimit && "Atualizando..."}
-              </FormHelperText>
-            </FormControl>
-          </Grid>
-          : null}
-
         {/* AVALIAÇÕES */}
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
@@ -850,8 +651,7 @@ export default function Options(props) {
               }}
             >
               <MenuItem value={"text"}>Texto</MenuItem>
-              {/*<MenuItem value={"list"}>Lista</MenuItem>
-              <MenuItem value={"button"}>{i18n.t("settings.settings.options.buttons")}</MenuItem>
+              {/* <MenuItem value={"button"}>{i18n.t("settings.settings.options.buttons")}</MenuItem>
               <MenuItem value={"list"}>Lista</MenuItem> */}
             </Select>
             <FormHelperText>
@@ -1233,253 +1033,6 @@ export default function Options(props) {
           </Grid>
         </>
       )}
-
-      
-      <Grid spacing={3} container>
-      {isSuper() ?
-              <Tabs
-                indicatorColor='primary'
-                textColor='primary'
-                scrollButtons='on'
-                variant='scrollable'
-                className={classes.tab}
-                style={{
-                  marginBottom: 20,
-                  marginTop: 20,
-                }}
-              >
-                <Tab label='Configuração Pix Efí (GerenciaNet)' />
-              </Tabs>
-              : null}
-            </Grid>
-            
-            <Grid spacing={3} container style={{ marginBottom: 10 }}>
-              <Grid xs={12} sm={6} md={6} item>
-              {isSuper() ?
-                <FormControl className={classes.selectContainer}>
-                  <TextField
-                    id='eficlientid'
-                    name='eficlientid'
-                    margin='dense'
-                    label='Client ID'
-                    variant='outlined'
-                    value={eficlientidType}
-                    onChange={async (e) => {
-                      handleChangeEfiClientid(e.target.value);
-                    }}
-                  ></TextField>
-                  <FormHelperText>
-                    {loadingEfiClientidType && 'Atualizando...'}
-                  </FormHelperText>
-                </FormControl>
-                : null}
-              </Grid>
-              <Grid xs={12} sm={6} md={6} item>
-              {isSuper() ?
-                <FormControl className={classes.selectContainer}>
-                  <TextField
-                    id='eficlientsecret'
-                    name='eficlientsecret'
-                    margin='dense'
-                    label='Client Secret'
-                    variant='outlined'
-                    value={eficlientsecretType}
-                    onChange={async (e) => {
-                      handleChangeEfiClientsecret(e.target.value);
-                    }}
-                  ></TextField>
-                  <FormHelperText>
-                    {loadingEfiClientsecretType && 'Atualizando...'}
-                  </FormHelperText>
-                </FormControl>
-                : null}
-              </Grid>
-              <Grid xs={12} sm={12} md={12} item>
-              {isSuper() ?
-                <FormControl className={classes.selectContainer}>
-                  <TextField
-                    id='efichavepix'
-                    name='efichavepix'
-                    margin='dense'
-                    label='Chave PIX'
-                    variant='outlined'
-                    value={efichavepixType}
-                    onChange={async (e) => {
-                      handleChangeEfiChavepix(e.target.value);
-                    }}
-                  ></TextField>
-                  <FormHelperText>
-                    {loadingEfiChavepixType && 'Atualizando...'}
-                  </FormHelperText>
-                </FormControl>
-                : null}
-              </Grid>
-            </Grid>
-
-            <Grid spacing={3} container>
-            {isSuper() ?
-              <Tabs
-                indicatorColor='primary'
-                textColor='primary'
-                scrollButtons='on'
-                variant='scrollable'
-                className={classes.tab}
-                style={{
-                  marginBottom: 20,
-                  marginTop: 20,
-                }}
-              >
-                <Tab label='Mercado Pago' />
-              </Tabs>
-              : null}
-            </Grid>
-
-            <Grid spacing={3} container style={{ marginBottom: 10 }}>
-              <Grid xs={12} sm={12} md={12} item>
-              {isSuper() ?
-                <FormControl className={classes.selectContainer}>
-                  <TextField
-                    id='mpaccesstoken'
-                    name='mpaccesstoken'
-                    margin='dense'
-                    label='Access Token'
-                    variant='outlined'
-                    value={mpaccesstokenType}
-                    onChange={async (e) => {
-                      handleChangempaccesstoken(e.target.value);
-                    }}
-                  ></TextField>
-                  <FormHelperText>
-                    {loadingmpaccesstokenType && 'Atualizando...'}
-                  </FormHelperText>
-                </FormControl>
-                : null}
-              </Grid>
-            </Grid>
-
-            <Grid spacing={3} container>
-            {isSuper() ?
-              <Tabs
-                indicatorColor='primary'
-                textColor='primary'
-                scrollButtons='on'
-                variant='scrollable'
-                className={classes.tab}
-                style={{
-                  marginBottom: 20,
-                  marginTop: 20,
-                }}
-              >
-                <Tab label='Stripe' />
-              </Tabs>
-              : null}
-            </Grid>
-
-            <Grid spacing={3} container style={{ marginBottom: 10 }}>
-              <Grid xs={12} sm={12} md={12} item>
-              {isSuper() ?
-                <FormControl className={classes.selectContainer}>
-                  <TextField
-                    id='stripeprivatekey'
-                    name='stripeprivatekey'
-                    margin='dense'
-                    label='Stripe Private Key'
-                    variant='outlined'
-                    value={stripeprivatekeyType}
-                    onChange={async (e) => {
-                      handleChangestripeprivatekey(e.target.value);
-                    }}
-                  ></TextField>
-                  <FormHelperText>
-                    {loadingstripeprivatekeyType && 'Atualizando...'}
-                  </FormHelperText>
-                </FormControl>
-                : null}
-              </Grid>
-            </Grid>
-
-            <Grid spacing={3} container>
-            {isSuper() ?
-              <Tabs
-                indicatorColor='primary'
-                textColor='primary'
-                scrollButtons='on'
-                variant='scrollable'
-                className={classes.tab}
-                style={{
-                  marginBottom: 20,
-                  marginTop: 20,
-                }}
-              >
-                <Tab label='ASAAS' />
-              </Tabs>
-              : null}
-            </Grid>
-
-            <Grid spacing={3} container style={{ marginBottom: 10 }}>
-              <Grid xs={12} sm={12} md={12} item>
-              {isSuper() ?
-                <FormControl className={classes.selectContainer}>
-                  <TextField
-                    id='asaastoken'
-                    name='asaastoken'
-                    margin='dense'
-                    label='Token Asaas'
-                    variant='outlined'
-                    value={asaastokenType}
-                    onChange={async (e) => {
-                      handleChangeasaastoken(e.target.value);
-                    }}
-                  ></TextField>
-                  <FormHelperText>
-                    {loadingasaastokenType && 'Atualizando...'}
-                  </FormHelperText>
-                </FormControl>
-                : null}
-              </Grid>
-            </Grid>
-
-            <Grid spacing={3} container>
-            {isSuper() ?
-              <Tabs
-                indicatorColor='primary'
-                textColor='primary'
-                scrollButtons='on'
-                variant='scrollable'
-                className={classes.tab}
-                style={{
-                  marginBottom: 20,
-                  marginTop: 20,
-                }}
-              >
-                <Tab label='OpenAI API KEY Transcrição de áudio (Para todas empresas)' />
-              </Tabs>
-              : null}
-            </Grid>
-
-            <Grid spacing={3} container style={{ marginBottom: 10 }}>
-              <Grid xs={12} sm={12} md={12} item>
-              {isSuper() ?
-                <FormControl className={classes.selectContainer}>
-                  <TextField
-                    id='openaikeyaudio'
-                    name='openaikeyaudio'
-                    margin='dense'
-                    label='OpenAI API Key'
-                    variant='outlined'
-                    value={openaitokenType}
-                    onChange={async (e) => {
-                      handleChangeopenaitoken(e.target.value);
-                    }}
-                  ></TextField>
-                  <FormHelperText>
-                    {loadingopenaitokenType && 'Atualizando...'}
-                  </FormHelperText>
-                </FormControl>
-                : null}
-              </Grid>
-            </Grid>
-
       <Grid spacing={1} container>
         <Grid xs={12} sm={6} md={6} item>
           <FormControl className={classes.selectContainer}>

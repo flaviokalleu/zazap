@@ -702,7 +702,7 @@ const UpdateTicketService = async ({
 
     // ticket = await ShowTicketService(ticket.id, companyId)
 
-    if (status === "pending") {
+    if (status !== undefined && ["pending"].indexOf(status) > -1) {
       //ticket voltou para fila
       await CreateLogTicketService({
         userId: oldUserId,
@@ -717,8 +717,7 @@ const UpdateTicketService = async ({
       });
     }
 
-    if (status === "open") {
-      console.log('a')
+    if (status !== undefined && ["open"].indexOf(status) > -1) {
       await ticketTraking.update({
         startedAt: moment().toDate(),
         ratingAt: null,

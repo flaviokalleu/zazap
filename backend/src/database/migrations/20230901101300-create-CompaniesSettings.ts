@@ -112,7 +112,7 @@ module.exports = {
       updatedAt: {
         type: DataTypes.DATE,
         allowNull: false
-      }
+      },
     });
   },
 

@@ -192,7 +192,6 @@ const messages = {
         newConnection: "Nova Conexão",
         toasts: {
           deleted: "Conexão excluída com sucesso!",
-          disconnected: "Conexão desconectada com sucesso!",
           closedimported:
             "Estamos fechando os tickets importados, por favor aguarde uns instantes",
         },
@@ -786,7 +785,6 @@ const messages = {
           returnQueue: "Devolver a Fila",
           scredule: "Agendamento",
           deleteTicket: "Deletar Ticket",
-          quickmessageflash: "Mensagem Rápida",
         },
         closedTicket: {
           closedMessage: "Fechar Ticket Com Mensagem de Despedida",
@@ -1695,6 +1693,7 @@ const messages = {
         forward: "Encaminhar",
         toForward: "Encaminhar",
         talkTo: "Conversar Com",
+        react: "Reagir",
         confirmationModal: {
           title: "Apagar mensagem?",
           message: "Esta ação não pode ser revertida.",

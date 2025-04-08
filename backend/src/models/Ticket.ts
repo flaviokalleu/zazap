@@ -55,8 +55,7 @@ class Ticket extends Model<Ticket> {
   flowStopped: string;
 
   @Column(DataType.JSON)
-  dataWebhook: {} | null;
-;
+  dataWebhook: {} | null;;
 
   @Column
   lastMessage: string;

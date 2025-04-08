@@ -35,7 +35,6 @@ module.exports = {
         await queryInterface.bulkInsert("Companies", [{
           name: "Empresa 1",
           planId: 1,
-          dueDate: "2099-12-31 04:00:00+01",
           createdAt: new Date(),
           updatedAt: new Date()
         }], { transaction: t });

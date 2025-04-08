@@ -21,12 +21,24 @@ import { sayChatbot } from "../WbotServices/ChatbotListenerFacebook";
 import ListSettingsService from "../SettingServices/ListSettingsService";
 import { isNil, isNull, head } from "lodash";
 import FindOrCreateATicketTrakingService from "../TicketServices/FindOrCreateATicketTrakingService";
-import { handleRating, verifyRating } from "../WbotServices/wbotMessageListener";
+import { handleMessageIntegration, handleRating, verifyRating } from "../WbotServices/wbotMessageListener";
 import CompaniesSettings from "../../models/CompaniesSettings";
 import sendFacebookMessage from "./sendFacebookMessage";
 import { Mutex } from "async-mutex";
 import TicketTag from "../../models/TicketTag";
 import Tag from "../../models/Tag";
+import ShowQueueIntegrationService from "../QueueIntegrationServices/ShowQueueIntegrationService";
+import { ActionsWebhookService } from "../WebhookService/ActionsWebhookService";
+import { FlowBuilderModel } from "../../models/FlowBuilder";
+import { FlowDefaultModel } from "../../models/FlowDefault";
+import { IConnections, INodes } from "../WebhookService/DispatchWebHookService";
+
+import { differenceInMilliseconds } from "date-fns";
+import { ActionsWebhookFacebookService } from "./WebhookFacebookServices/ActionsWebhookFacebookService";
+import { get } from "http";
+import { WebhookModel } from "../../models/Webhook";
+import { is } from "bluebird";
+import ShowTicketService from "../TicketServices/ShowTicketService";
 
 interface IMe {
   name: string;
@@ -88,7 +100,7 @@ const verifyContact = async (msgContact: any, token: any, companyId: any) => {
     whatsappId: token.id
   };
 
-  const contact = CreateOrUpdateContactService(contactData);
+  const contact = await CreateOrUpdateContactService(contactData);
 
   return contact;
 };
@@ -187,6 +199,290 @@ export const verifyQuotedMessage = async (msg: any): Promise<Message | null> => 
   return quotedMsg;
 };
 
+
+const flowBuilderQueue = async (
+  ticket: Ticket,
+  message: any,
+  getSession: Whatsapp,
+  companyId: number,
+  contact: Contact,
+  isFirstMsg: Ticket,
+) => {
+
+  const flow = await FlowBuilderModel.findOne({
+    where: {
+      id: ticket.flowStopped,
+    }
+  });
+
+  const mountDataContact = {
+    number: contact.number,
+    name: contact.name,
+    email: contact.email
+  };
+
+
+  console.log("======================================")
+  console.log("|         flowBuilderQueue           |")
+  console.log("======================================")
+
+
+  const nodes: INodes[] = flow.flow["nodes"]
+  const connections: IConnections[] = flow.flow["connections"]
+
+  if (!ticket.lastFlowId) {
+    return
+  }
+
+
+  if (ticket.flowWebhook) {
+    await ActionsWebhookFacebookService(
+      getSession,
+      parseInt(ticket.flowStopped),
+      ticket.companyId,
+      nodes,
+      connections,
+      ticket.lastFlowId,
+      null,
+      "",
+      "",
+      message.text,
+      ticket.id,
+      mountDataContact
+    );
+  }
+
+  //const integrations = await ShowQueueIntegrationService(whatsapp.integrationId, companyId);
+  //await handleMessageIntegration(msg, wbot, companyId, integrations, ticket, contact, isFirstMsg)
+
+
+
+}
+
+
+
+const flowbuilderIntegration = async (
+  ticket: Ticket,
+  companyId: any,
+  isFirstMsg: Ticket,
+  getSession: Whatsapp,
+  contact: Contact,
+  message: any,
+) => {
+
+  console.log("======================================")
+  console.log("|      flowbuilderIntegration        |")
+  console.log("======================================")
+
+
+  await ticket.update({
+    lastMessage: message.text,
+  });
+
+
+  if (
+    !isFirstMsg
+  ) {
+
+    const flow = await FlowBuilderModel.findOne({
+      where: {
+        id: getSession.flowIdWelcome
+      }
+    });
+
+    if (flow) {
+
+      const nodes: INodes[] = flow.flow["nodes"];
+      const connections: IConnections[] = flow.flow["connections"];
+
+      const mountDataContact = {
+        number: contact.number,
+        name: contact.name,
+        email: contact.email
+      };
+
+      await ActionsWebhookFacebookService(
+        getSession,
+        getSession.flowIdWelcome,
+        ticket.companyId,
+        nodes,
+        connections,
+        flow.flow["nodes"][0].id,
+        null,
+        "",
+        "",
+        null,
+        ticket.id,
+        mountDataContact
+      )
+    }
+  }
+
+
+  const dateTicket = new Date(isFirstMsg ? isFirstMsg.updatedAt : "");
+  const dateNow = new Date();
+  const diferencaEmMilissegundos = Math.abs(
+    differenceInMilliseconds(dateTicket, dateNow)
+  );
+  const seisHorasEmMilissegundos = 2 * 1000;
+
+  if (
+    !ticket.fromMe &&
+    isFirstMsg &&
+    diferencaEmMilissegundos >= seisHorasEmMilissegundos
+  ) {
+    const flow = await FlowBuilderModel.findOne({
+      where: {
+        id: getSession.flowIdNotPhrase
+      }
+    });
+
+
+    if (flow) {
+
+      const nodes: INodes[] = flow.flow["nodes"];
+      const connections: IConnections[] = flow.flow["connections"];
+
+      const mountDataContact = {
+        number: contact.number,
+        name: contact.name,
+        email: contact.email
+      };
+
+      await ActionsWebhookFacebookService(
+        getSession,
+        getSession.flowIdNotPhrase,
+        ticket.companyId,
+        nodes,
+        connections,
+        flow.flow["nodes"][0].id,
+        null,
+        "",
+        "",
+        null,
+        ticket.id,
+        mountDataContact
+      )
+    }
+
+  }
+
+
+  /*
+  if (ticketUpdate.flowWebhook) {
+    const webhook = await WebhookModel.findOne({
+      where: {
+        company_id: ticketUpdate.companyId,
+        hash_id: ticketUpdate.hashFlowId
+      }
+    });
+
+    if (webhook && webhook.config["details"]) {
+      const flow = await FlowBuilderModel.findOne({
+        where: {
+          id: webhook.config["details"].idFlow
+        }
+      });
+      const nodes: INodes[] = flow.flow["nodes"];
+      const connections: IConnections[] = flow.flow["connections"];
+
+      // const worker = new Worker("./src/services/WebhookService/WorkerAction.ts");
+
+      // console.log('DISPARO4')
+      // // Enviar as variáveis como parte da mensagem para o Worker
+      // const data = {
+      //   idFlowDb: webhook.config["details"].idFlow,
+      //   companyId: ticketUpdate.companyId,
+      //   nodes: nodes,
+      //   connects: connections,
+      //   nextStage: ticketUpdate.lastFlowId,
+      //   dataWebhook: ticketUpdate.dataWebhook,
+      //   details: webhook.config["details"],
+      //   hashWebhookId: ticketUpdate.hashFlowId,
+      //   pressKey: body,
+      //   idTicket: ticketUpdate.id,
+      //   numberPhrase: ""
+      // };
+      // worker.postMessage(data);
+
+      // worker.on("message", message => {
+      //   console.log(`Mensagem do worker: ${message}`);
+      // });
+
+      await ActionsWebhookFacebookService(
+        getSession,
+        webhook.config["details"].idFlow,
+        ticketUpdate.companyId,
+        nodes,
+        connections,
+        ticketUpdate.lastFlowId,
+        ticketUpdate.dataWebhook,
+        webhook.config["details"],
+        ticketUpdate.hashFlowId,
+        message.text,
+        ticketUpdate.id
+      );
+    } else {
+      const flow = await FlowBuilderModel.findOne({
+        where: {
+          id: ticketUpdate.flowStopped
+        }
+      });
+
+      const nodes: INodes[] = flow.flow["nodes"];
+      const connections: IConnections[] = flow.flow["connections"];
+
+      if (!ticketUpdate.lastFlowId) {
+        return
+      }
+
+      const mountDataContact = {
+        number: contact.number,
+        name: contact.name,
+        email: contact.email
+      };
+
+      // const worker = new Worker("./src/services/WebhookService/WorkerAction.ts");
+
+      // console.log('DISPARO5')
+      // // Enviar as variáveis como parte da mensagem para o Worker
+      // const data = {
+      //   idFlowDb: parseInt(ticketUpdate.flowStopped),
+      //   companyId: ticketUpdate.companyId,
+      //   nodes: nodes,
+      //   connects: connections,
+      //   nextStage: ticketUpdate.lastFlowId,
+      //   dataWebhook: null,
+      //   details: "",
+      //   hashWebhookId: "",
+      //   pressKey: body,
+      //   idTicket: ticketUpdate.id,
+      //   numberPhrase: mountDataContact
+      // };
+      // worker.postMessage(data);
+      // worker.on("message", message => {
+      //   console.log(`Mensagem do worker: ${message}`);
+      // });
+
+      await ActionsWebhookFacebookService(
+        getSession,
+        parseInt(ticketUpdate.flowStopped),
+        ticketUpdate.companyId,
+        nodes,
+        connections,
+        ticketUpdate.lastFlowId,
+        null,
+        "",
+        "",
+        message.text,
+        ticketUpdate.id,
+        mountDataContact
+      );
+    }
+  }
+  */
+}
+
 export const handleMessage = async (
   token: Whatsapp,
   webhookEvent: any,
@@ -213,6 +509,7 @@ export const handleMessage = async (
       }
 
       const contact = await verifyContact(msgContact, token, companyId);
+
 
       const unreadCount = fromMe ? 0 : 1;
 
@@ -244,6 +541,14 @@ export const handleMessage = async (
         where: { companyId }
       }
       )
+
+      const isFirstMsg = await Ticket.findOne({
+        where: {
+          contactId: contact.id,
+          companyId,
+        },
+        order: [["id", "DESC"]]
+      });
 
       const mutex = new Mutex();
       const ticket = await mutex.runExclusive(async () => {
@@ -470,7 +775,7 @@ export const handleMessage = async (
               // await delay(1000);
 
               const bodyBot = formatBody(
-                `\u200eEstou ciente sobre o tratamento dos meus dados pessoais. \n\n*[1]* Sim\n*[2]* Não`,
+                `\u200eEstou ciente sobre o tratamento dos meus dados pessoais. \n\n[1] Sim\n[2] Não`,
                 ticket
               );
 
@@ -508,6 +813,74 @@ export const handleMessage = async (
         await verifyMessageFace(message, message.text, ticket, contact);
       }
 
+
+      const flow = await FlowBuilderModel.findOne({
+        where: {
+          id: ticket.flowStopped
+        }
+      });
+
+      let isMenu = false;
+      if (flow) {
+        isMenu = flow.flow["nodes"].find((node: any) => node.id === ticket.lastFlowId)?.type === "menu";
+      }
+
+
+      console.log({ ticket })
+
+      if (
+        !ticket.fromMe &&
+        isMenu &&
+        !isNaN(message.text)
+      ) {
+
+        await ticket.update({
+          queueId: ticket.queueId ? ticket.queueId : null,
+        });
+
+        await flowBuilderQueue(ticket, message, getSession, companyId, contact, isFirstMsg)
+      }
+
+
+
+      if (
+        !ticket.imported &&
+        !fromMe &&
+        !ticket.isGroup &&
+        !ticket.queue &&
+        !ticket.user &&
+        !isMenu &&
+        (!ticket.dataWebhook || ticket.dataWebhook["status"] === "stopped") &&
+        // ticket.isBot &&
+        !isNil(getSession.integrationId) &&
+        !ticket.useIntegration
+      ) {
+
+        const integrations = await ShowQueueIntegrationService(getSession.integrationId, companyId);
+
+        if (integrations.type === "flowbuilder") {
+          await ticket.update({
+            queueId: ticket.queueId ? ticket.queueId : null,
+            dataWebhook: {
+              status: "process",
+            },
+          });
+
+          await flowbuilderIntegration(
+            ticket,
+            companyId,
+            isFirstMsg,
+            getSession,
+            contact,
+            message
+          )
+        }
+
+      }
+
+
+
+
       if (
         !ticket.queue &&
         !fromMe &&
@@ -528,6 +901,7 @@ export const handleMessage = async (
           );
         }
       }
+
     }
 
     return;
@@ -578,11 +952,14 @@ const verifyQueue = async (
   const choosenQueue = queues[+selectedOption - 1];
 
   if (choosenQueue) {
+    console.log(585, "facebookMessageListener")
+
     await UpdateTicketService({
       ticketData: { queueId: choosenQueue.id },
       ticketId: ticket.id,
       companyId: ticket.companyId
     });
+
 
     if (choosenQueue.chatbots.length > 0) {
       let options = "";

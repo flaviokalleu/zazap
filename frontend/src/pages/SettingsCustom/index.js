@@ -12,7 +12,7 @@ import PlansManager from "../../components/PlansManager";
 import HelpsManager from "../../components/HelpsManager";
 import Options from "../../components/Settings/Options";
 import Whitelabel from "../../components/Settings/Whitelabel";
-import UploaderCert from "../../components/Settings/UploaderCert";
+
 import { i18n } from "../../translate/i18n.js";
 import { toast } from "react-toastify";
 
@@ -157,7 +157,6 @@ const SettingsCustom = () => {
               {isSuper() ? <Tab label={i18n.t("settings.tabs.plans")} value={"plans"} /> : null}
               {isSuper() ? <Tab label={i18n.t("settings.tabs.helps")} value={"helps"} /> : null}
               {isSuper() ? <Tab label="Whitelabel" value={"whitelabel"} /> : null}
-              {isSuper() ? <Tab label="Certificado Efí PIX" value={"uploadercert"} /> : null}
             </Tabs>
             <Paper className={classes.paper} elevation={0}>
               <TabPanel
@@ -206,13 +205,6 @@ const SettingsCustom = () => {
                       <Whitelabel
                         settings={oldSettings}
                       />
-                    </TabPanel>
-                    <TabPanel
-                    className={classes.container}
-                    value={tab}
-                    name={"uploadercert"}
-                    >
-                    <UploaderCert />
                     </TabPanel>
                   </>
                 )}

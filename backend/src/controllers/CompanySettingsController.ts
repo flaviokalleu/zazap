@@ -46,18 +46,6 @@ export const show = async (
     return res.status(200).json(setting[0]);
   };
 
-  export const showOnePayment = async (req: Request, res: Response): Promise<Response> => {
-    const { column } = req.query as IndexGetCompanySettingOneQuery;
-    const companyId = 1;
-    
-    const setting = await FindCompanySettingOneService({
-      companyId,
-      column
-    });
-    
-    return res.status(200).json(setting[0]);
-  };
-
 export const update = async(
   req: Request,
   res: Response

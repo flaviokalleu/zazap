@@ -8,7 +8,6 @@ import Prompt from "../../models/Prompt";
 
 const ShowWhatsAppServiceAdmin = async (
   id: string | number,
-  session?: any
 ): Promise<Whatsapp> => {
 
   const findOptions: FindOptions = {
@@ -35,11 +34,6 @@ const ShowWhatsAppServiceAdmin = async (
       ["queues", "chatbots", "id", "ASC"]
     ]
   };
-
-  if (session !== undefined && session == 0) {
-    findOptions.attributes = { exclude: ["session"] };
-  }
-
   const whatsapp = await Whatsapp.findByPk(id, findOptions);
 
   if (!whatsapp) {

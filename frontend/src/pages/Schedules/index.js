@@ -2,24 +2,22 @@ import React, { useState, useEffect, useReducer, useCallback, useContext } from 
 import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
-import {
-  Paper,
-  Button,
-  TextField,
-  InputAdornment,
-  IconButton,
-  Typography,
-} from "@material-ui/core";
+import Paper from "@material-ui/core/Paper";
+import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
+import InputAdornment from "@material-ui/core/InputAdornment";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import Title from "../../components/Title";
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
 import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
+// import MessageModal from "../../components/MessageModal"
 import ScheduleModal from "../../components/ScheduleModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
 import moment from "moment";
+// import { SocketContext } from "../../context/Socket/SocketContext";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import usePlans from "../../hooks/usePlans";
 import { Calendar, momentLocalizer } from "react-big-calendar";
@@ -28,16 +26,24 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import SearchIcon from "@material-ui/icons/Search";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import EditIcon from "@material-ui/icons/Edit";
-import AddIcon from "@material-ui/icons/Add";
 
-// Função para obter parâmetros da URL
+import "./Schedules.css"; // Importe o arquivo CSS
+
+// Defina a função getUrlParam antes de usá-la
 function getUrlParam(paramName) {
   const searchParams = new URLSearchParams(window.location.search);
   return searchParams.get(paramName);
 }
 
+const eventTitleStyle = {
+  fontSize: "14px", // Defina um tamanho de fonte menor
+  overflow: "hidden", // Oculte qualquer conteúdo excedente
+  whiteSpace: "nowrap", // Evite a quebra de linha do texto
+  textOverflow: "ellipsis", // Exiba "..." se o texto for muito longo
+};
+
 const localizer = momentLocalizer(moment);
-const defaultMessages = {
+var defaultMessages = {
   date: "Data",
   time: "Hora",
   event: "Evento",
@@ -53,13 +59,16 @@ const defaultMessages = {
   today: "Hoje",
   agenda: "Agenda",
   noEventsInRange: "Não há agendamentos no período.",
-  showMore: (total) => `+${total} mais`,
+  showMore: function showMore(total) {
+    return "+" + total + " mais";
+  }
 };
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_SCHEDULES") {
     const schedules = action.payload;
     const newSchedules = [];
+
     schedules.forEach((schedule) => {
       const scheduleIndex = state.findIndex((s) => s.id === schedule.id);
       if (scheduleIndex !== -1) {
@@ -68,11 +77,14 @@ const reducer = (state, action) => {
         newSchedules.push(schedule);
       }
     });
+
     return [...state, ...newSchedules];
   }
+
   if (action.type === "UPDATE_SCHEDULES") {
     const schedule = action.payload;
     const scheduleIndex = state.findIndex((s) => s.id === schedule.id);
+
     if (scheduleIndex !== -1) {
       state[scheduleIndex] = schedule;
       return [...state];
@@ -80,130 +92,47 @@ const reducer = (state, action) => {
       return [schedule, ...state];
     }
   }
+
   if (action.type === "DELETE_SCHEDULE") {
     const scheduleId = action.payload;
+
     const scheduleIndex = state.findIndex((s) => s.id === scheduleId);
     if (scheduleIndex !== -1) {
       state.splice(scheduleIndex, 1);
     }
     return [...state];
   }
+
   if (action.type === "RESET") {
     return [];
   }
 };
 
 const useStyles = makeStyles((theme) => ({
-  mainContainer: {
-    background: "#f0f2f5",
-    minHeight: "100vh",
-    padding: theme.spacing(2),
-    [theme.breakpoints.down("sm")]: {
-      padding: theme.spacing(1),
-    },
-  },
   mainPaper: {
     flex: 1,
-    padding: theme.spacing(2),
-    margin: theme.spacing(2, 0),
-    borderRadius: "12px",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-    background: "white",
-    overflowY: "auto",
-    "&::-webkit-scrollbar": {
-      width: "8px",
-    },
-    "&::-webkit-scrollbar-thumb": {
-      background: "#bdbdbd",
-      borderRadius: "4px",
-    },
-    [theme.breakpoints.down("sm")]: {
-      margin: theme.spacing(1, 0),
-      padding: theme.spacing(1),
-    },
+    padding: theme.spacing(1),
+    overflowY: "scroll",
+    ...theme.scrollbarStyles,
   },
-  searchField: {
-    background: "white",
-    borderRadius: "8px",
-    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
-    "& .MuiOutlinedInput-root": {
-      "&:hover fieldset": {
-        borderColor: theme.palette.primary.main,
+  calendarToolbar: {
+    '& .rbc-toolbar-label': {
+      color: theme.mode === "light" ? theme.palette.light : "white",
+    },
+    '& .rbc-btn-group button': {
+      color: theme.mode === "light" ? theme.palette.light : "white",
+      '&:hover': {
+        color: theme.palette.mode === 'dark' ? '#fff' : '#000',
       },
-    },
-    [theme.breakpoints.down("sm")]: {
-      width: "100%",
-      marginBottom: theme.spacing(1),
-    },
-  },
-  addButton: {
-    borderRadius: "8px",
-    padding: theme.spacing(1, 2),
-    textTransform: "none",
-    fontWeight: 500,
-    background: theme.palette.primary.main,
-    color: "white",
-    "&:hover": {
-      background: theme.palette.primary.dark,
-      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
-    },
-    [theme.breakpoints.down("sm")]: {
-      width: "100%",
-    },
-  },
-  calendar: {
-    "& .rbc-toolbar": {
-      marginBottom: theme.spacing(2),
-      padding: theme.spacing(1),
-      borderRadius: "8px",
-      background: "#fafafa",
-    },
-    "& .rbc-toolbar-label": {
-      fontWeight: 600,
-      color: "#333",
-    },
-    "& .rbc-btn-group button": {
-      border: "none",
-      background: "transparent",
-      color: theme.palette.primary.main,
-      "&:hover": {
-        background: "rgba(0, 0, 0, 0.05)",
-        borderRadius: "4px",
+      '&:active': {
+        color: theme.palette.mode === 'dark' ? '#fff' : '#000',
       },
-    },
-    "& .rbc-event": {
-      background: theme.palette.primary.main,
-      borderRadius: "6px",
-      padding: theme.spacing(0.5, 1),
-      "&:hover": {
-        background: theme.palette.primary.dark,
+      '&:focus': {
+        color: theme.palette.mode === 'dark' ? '#fff' : '#000',
       },
-    },
-    "& .rbc-event-label": {
-      fontSize: "0.85rem",
-      color: "white",
-    },
-  },
-  eventContainer: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  eventTitle: {
-    fontSize: "0.85rem",
-    color: "white",
-    overflow: "hidden",
-    whiteSpace: "nowrap",
-    textOverflow: "ellipsis",
-    flex: 1,
-  },
-  iconButton: {
-    color: "white",
-    padding: theme.spacing(0.5),
-    "&:hover": {
-      background: "rgba(255, 255, 255, 0.2)",
-      borderRadius: "50%",
+      '&.rbc-active': {
+        color: theme.palette.mode === 'dark' ? '#fff' : '#000',
+      },
     },
   },
 }));
@@ -211,7 +140,10 @@ const useStyles = makeStyles((theme) => ({
 const Schedules = () => {
   const classes = useStyles();
   const history = useHistory();
+
+  //   const socketManager = useContext(SocketContext);
   const { user, socket } = useContext(AuthContext);
+
 
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
@@ -223,6 +155,7 @@ const Schedules = () => {
   const [schedules, dispatch] = useReducer(reducer, []);
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
   const [contactId, setContactId] = useState(+getUrlParam("contactId"));
+
   const { getPlanCompany } = usePlans();
 
   useEffect(() => {
@@ -232,7 +165,7 @@ const Schedules = () => {
       if (!planConfigs.plan.useSchedules) {
         toast.error("Esta empresa não possui permissão para acessar essa página! Estamos lhe redirecionando.");
         setTimeout(() => {
-          history.push(`/`);
+          history.push(`/`)
         }, 1000);
       }
     }
@@ -244,6 +177,7 @@ const Schedules = () => {
       const { data } = await api.get("/schedules", {
         params: { searchParam, pageNumber },
       });
+
       dispatch({ type: "LOAD_SCHEDULES", payload: data.schedules });
       setHasMore(data.hasMore);
       setLoading(false);
@@ -269,20 +203,33 @@ const Schedules = () => {
       fetchSchedules();
     }, 500);
     return () => clearTimeout(delayDebounceFn);
-  }, [searchParam, pageNumber, contactId, fetchSchedules, handleOpenScheduleModalFromContactId]);
+  }, [
+    searchParam,
+    pageNumber,
+    contactId,
+    fetchSchedules,
+    handleOpenScheduleModalFromContactId,
+  ]);
 
   useEffect(() => {
+    // handleOpenScheduleModalFromContactId();
+    // const socket = socketManager.GetSocket(user.companyId, user.id);
+
+
     const onCompanySchedule = (data) => {
       if (data.action === "update" || data.action === "create") {
         dispatch({ type: "UPDATE_SCHEDULES", payload: data.schedule });
       }
+
       if (data.action === "delete") {
         dispatch({ type: "DELETE_SCHEDULE", payload: +data.scheduleId });
       }
-    };
-    socket.on(`company${user.companyId}-schedule`, onCompanySchedule);
+    }
+
+    socket.on(`company${user.companyId}-schedule`, onCompanySchedule)
+
     return () => {
-      socket.off(`company${user.companyId}-schedule`, onCompanySchedule);
+      socket.off(`company${user.companyId}-schedule`, onCompanySchedule)
     };
   }, [socket]);
 
@@ -319,7 +266,9 @@ const Schedules = () => {
     setDeletingSchedule(null);
     setSearchParam("");
     setPageNumber(1);
+
     dispatch({ type: "RESET" });
+    setPageNumber(1);
     await fetchSchedules();
   };
 
@@ -335,10 +284,20 @@ const Schedules = () => {
     }
   };
 
+  const truncate = (str, len) => {
+    if (str.length > len) {
+      return str.substring(0, len) + "...";
+    }
+    return str;
+  };
+
   return (
-    <MainContainer className={classes.mainContainer}>
+    <MainContainer>
       <ConfirmationModal
-        title={deletingSchedule && `${i18n.t("schedules.confirmationModal.deleteTitle")}`}
+        title={
+          deletingSchedule &&
+          `${i18n.t("schedules.confirmationModal.deleteTitle")}`
+        }
         open={confirmModalOpen}
         onClose={() => setConfirmModalOpen(false)}
         onConfirm={() => handleDeleteSchedule(deletingSchedule.id)}
@@ -350,7 +309,10 @@ const Schedules = () => {
           open={scheduleModalOpen}
           onClose={handleCloseScheduleModal}
           reload={fetchSchedules}
-          scheduleId={selectedSchedule ? selectedSchedule.id : null}
+          // aria-labelledby="form-dialog-title"
+          scheduleId={
+            selectedSchedule ? selectedSchedule.id : null
+          }
           contactId={contactId}
           cleanContact={cleanContact}
         />
@@ -359,26 +321,22 @@ const Schedules = () => {
         <Title>{i18n.t("schedules.title")} ({schedules.length})</Title>
         <MainHeaderButtonsWrapper>
           <TextField
-            className={classes.searchField}
             placeholder={i18n.t("contacts.searchPlaceholder")}
             type="search"
             value={searchParam}
             onChange={handleSearch}
-            variant="outlined"
-            size="small"
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon color="action" />
+                  <SearchIcon style={{ color: "gray" }} />
                 </InputAdornment>
               ),
             }}
           />
           <Button
             variant="contained"
-            className={classes.addButton}
+            color="primary"
             onClick={handleOpenScheduleModal}
-            startIcon={<AddIcon />}
           >
             {i18n.t("schedules.buttons.add")}
           </Button>
@@ -389,34 +347,24 @@ const Schedules = () => {
           messages={defaultMessages}
           formats={{
             agendaDateFormat: "DD/MM ddd",
-            weekdayFormat: "dddd",
+            weekdayFormat: "dddd"
           }}
           localizer={localizer}
           events={schedules.map((schedule) => ({
             title: (
-              <div className={classes.eventContainer}>
-                <Typography className={classes.eventTitle}>
-                  {schedule?.contact?.name}
-                </Typography>
-                <div>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      setDeletingSchedule(schedule);
-                      setConfirmModalOpen(true);
-                    }}
-                    className={classes.iconButton}
-                  >
-                    <DeleteOutlineIcon />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={() => handleEditSchedule(schedule)}
-                    className={classes.iconButton}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                </div>
+              <div key={schedule.id} className="event-container">
+                <div style={eventTitleStyle}>{schedule?.contact?.name}</div>
+                <DeleteOutlineIcon
+                  onClick={() => handleDeleteSchedule(schedule.id)}
+                  className="delete-icon"
+                />
+                <EditIcon
+                  onClick={() => {
+                    handleEditSchedule(schedule);
+                    setScheduleModalOpen(true);
+                  }}
+                  className="edit-icon"
+                />
               </div>
             ),
             start: new Date(schedule.sendAt),
@@ -425,7 +373,7 @@ const Schedules = () => {
           startAccessor="start"
           endAccessor="end"
           style={{ height: 500 }}
-          className={classes.calendar}
+          className={classes.calendarToolbar}
         />
       </Paper>
     </MainContainer>

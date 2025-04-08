@@ -1,13 +1,13 @@
 module.exports = {
   up: async (queryInterface) => {
-
+    
     await queryInterface.sequelize.query(`
       do
         $$
       declare
         a record;
       begin
-        for a in
+        for a in 
           select * from "Companies" c  where id not in (select "companyId" from "CompaniesSettings")
         loop
           insert into "CompaniesSettings" (

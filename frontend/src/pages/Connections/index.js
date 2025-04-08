@@ -59,7 +59,6 @@ import usePlans from "../../hooks/usePlans";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import ForbiddenPage from "../../components/ForbiddenPage";
 import { Can } from "../../components/Can";
-import moment from "moment";
 
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
@@ -159,7 +158,6 @@ const Connections = () => {
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [selectedWhatsApp, setSelectedWhatsApp] = useState(null);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const { handleLogout } = useContext(AuthContext);
   const history = useHistory();
   const confirmationModalInitialState = {
     action: "",
@@ -186,12 +184,6 @@ const Connections = () => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  var before = moment(moment().format()).isBefore(user.company.dueDate);
-
-	if (before !== true){
-		handleLogout();
-	}
 
   const responseFacebook = (response) => {
     if (response.status !== "unknown") {
@@ -613,7 +605,9 @@ const Connections = () => {
                               autoLoad={false}
                               fields="name,email,picture"
                               version="9.0"
-                              scope="public_profile,pages_messaging,pages_show_list,pages_manage_metadata,pages_read_engagement,business_management"
+                              scope={process.env.REACT_APP_REQUIRE_BUSINESS_MANAGEMENT?.toUpperCase() === "TRUE" ?
+                                "public_profile,pages_messaging,pages_show_list,pages_manage_metadata,pages_read_engagement,business_management"
+                                : "public_profile,pages_messaging,pages_show_list,pages_manage_metadata,pages_read_engagement"}
                               callback={responseFacebook}
                               render={(renderProps) => (
                                 <MenuItem
@@ -637,7 +631,9 @@ const Connections = () => {
                               autoLoad={false}
                               fields="name,email,picture"
                               version="9.0"
-                              scope="public_profile,instagram_basic,instagram_manage_messages,pages_messaging,pages_show_list,pages_manage_metadata,pages_read_engagement,business_management"
+                              scope={process.env.REACT_APP_REQUIRE_BUSINESS_MANAGEMENT?.toUpperCase() === "TRUE" ?
+                                "public_profile,instagram_basic,instagram_manage_messages,pages_messaging,pages_show_list,pages_manage_metadata,pages_read_engagement,business_management"
+                                : "public_profile,instagram_basic,instagram_manage_messages,pages_messaging,pages_show_list,pages_manage_metadata,pages_read_engagement"}
                               callback={responseInstagram}
                               render={(renderProps) => (
                                 <MenuItem

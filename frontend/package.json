@@ -1,15 +1,13 @@
 {
   "name": "frontend",
-  "version": "OriginDark",
+  "version": "2.2.2v-26",
+  "nomeEmpresa":"flavio",
+  "versionSystem":"2.0.0",
   "private": true,
-  "nomeEmpresa": "Sua empresa",
-  "versionSystem": "1.0.0",
   "dependencies": {
-    "@chakra-ui/react": "^3.14.2",
     "@date-io/date-fns": "^2.16.0",
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
-    "@fortawesome/free-regular-svg-icons": "^5.15.4",
     "@fortawesome/free-solid-svg-icons": "^6.2.1",
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@material-ui/core": "4.12.3",
@@ -30,7 +28,6 @@
     "caniuse-lite": "^1.0.30001616",
     "chart.js": "^3.9.1",
     "chartjs-plugin-datalabels": "^2.1.0",
-    "clipboard-copy": "^4.0.1",
     "compressorjs": "^1.2.1",
     "context": "^4.0.0",
     "date-fns": "^2.16.1",
@@ -44,11 +41,10 @@
     "i18next-browser-languagedetector": "^6.0.1",
     "icons": "^1.0.0",
     "jssip": "^3.10",
-    "lucide-react": "^0.483.0",
+    "lucide-react": "^0.475.0",
     "markdown-to-jsx": "^7.1.0",
     "material-ui-color": "^1.2.0",
     "material-ui-popup-state": "^4.1.0",
-    "mercadopago": "^2.0.7",
     "mic-recorder-to-mp3": "^2.2.2",
     "moment": "^2.29.4",
     "qrcode.react": "^1.0.0",
@@ -96,9 +92,9 @@
     "zustand": "^4.4.1"
   },
   "scripts": {
-    "start": "set NODE_OPTIONS=--openssl-legacy-provider && set GENERATE_SOURCEMAP=false && react-scripts start",
-    "build": "export NODE_OPTIONS='--max-old-space-size=4096' && set GENERATE_SOURCEMAP=false && react-scripts build"
-    "builddev": "set NODE_OPTIONS=--openssl-legacy-provider && react-scripts build",
+    "start": "export NODE_OPTIONS=--openssl-legacy-provider && react-scripts start",
+    "build": "export NODE_OPTIONS=--openssl-legacy-provider && export GENERATE_SOURCEMAP=false && react-scripts build",
+    "builddev": "export NODE_OPTIONS=--openssl-legacy-provider && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -118,7 +114,6 @@
     ]
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.17",
     "typescript": "^5.5.3"
   }
 }

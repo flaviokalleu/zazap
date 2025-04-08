@@ -7,13 +7,11 @@ import makeWASocket, {
   WAMessageKey,
   WASocket,
   fetchLatestWaWebVersion,
-  fetchLatestBaileysVersion,
   isJidBroadcast,
   isJidGroup,
   jidNormalizedUser,
   makeCacheableSignalKeyStore,
   makeInMemoryStore,
-  proto,
 } from "@whiskeysockets/baileys";
 import { FindOptions } from "sequelize/types";
 import Whatsapp from "../models/Whatsapp";
@@ -160,10 +158,8 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
         const { id, name, allowGroup, companyId } = whatsappUpdate;
 
         // const { version, isLatest } = await fetchLatestWaWebVersion({});
-        const { version, isLatest } = await fetchLatestBaileysVersion();
         const versionB = [2, 2410, 1];
         // logger.info(`using WA v${version.join(".")}, isLatest: ${isLatest}`);
-        logger.info(`Versão: v${version.join(".")}, isLatest: ${isLatest}`);
         logger.info(`Starting session ${name}`);
         let retriesQrCode = 0;
 
@@ -174,7 +170,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
         const { state, saveCreds } = await useMultiFileAuthState(whatsapp);
 
         wsocket = makeWASocket({
-          version,
+          version: [2, 3000, 1015901307],
           logger: loggerBaileys,
           printQRInTerminal: false,
           // auth: state as AuthenticationState,
@@ -203,18 +199,6 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
           connectTimeoutMs: 25_000,
           // keepAliveIntervalMs: 60_000,
           getMessage: msgDB.get,
-          patchMessageBeforeSending(message) {
-            if (message.deviceSentMessage?.message?.listMessage?.listType === proto.Message.ListMessage.ListType.PRODUCT_LIST) {
-              message = JSON.parse(JSON.stringify(message));
-              message.deviceSentMessage.message.listMessage.listType = proto.Message.ListMessage.ListType.SINGLE_SELECT;
-            }
-            if (message.listMessage?.listType == proto.Message.ListMessage.ListType.PRODUCT_LIST) {
-              message = JSON.parse(JSON.stringify(message));
-  
-              message.listMessage.listType = proto.Message.ListMessage.ListType.SINGLE_SELECT;
-            }
-            return message; // Adicionei este retorno que estava faltando
-          }
         });
 
 
@@ -311,7 +295,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                     action: "update",
                     session: wpp
                   });
-                console.log(JSON.stringify(wpp, null, 2));
+                //console.log(JSON.stringify(wpp, null, 2));
               }, 500);
 
               setTimeout(async () => {
@@ -331,14 +315,14 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                     const dataLimite = +add(ultimoStatus, { seconds: +45 }).getTime();
 
                     if (dataLimite < new Date().getTime()) {
-                      console.log("Pronto para come?ar")
+                      //console.log("Pronto para come?ar")
                       ImportWhatsAppMessageService(wpp.id)
                       wpp.update({
                         statusImportMessages: "Running"
                       })
 
                     } else {
-                      console.log("Aguardando inicio")
+                      //console.log("Aguardando inicio")
                     }
                   }
                 }

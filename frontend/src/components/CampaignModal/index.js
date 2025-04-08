@@ -287,8 +287,8 @@ const CampaignModal = ({
         queueId: selectedQueue || null
       };
 
-      console.log(values);
-      console.log(selectedWhatsapps);
+      //console.log(values);
+      //console.log(selectedWhatsapps);
 
       Object.entries(values).forEach(([key, value]) => {
         if (key === "scheduledAt" && value !== "" && value !== null) {

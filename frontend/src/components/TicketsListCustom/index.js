@@ -94,7 +94,7 @@ const ticketSortDesc = (a, b) => {
 }
 
 const reducer = (state, action) => {
-    console.log("action", action, state)
+    //console.log("action", action, state)
     const sortDir = action.sortDir;
     
     if (action.type === "LOAD_TICKETS") {

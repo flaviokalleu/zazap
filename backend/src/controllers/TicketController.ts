@@ -15,7 +15,6 @@ import ShowLogTicketService from "../services/TicketServices/ShowLogTicketServic
 import FindOrCreateATicketTrakingService from "../services/TicketServices/FindOrCreateATicketTrakingService";
 import ListTicketsServiceReport from "../services/TicketServices/ListTicketsServiceReport";
 import SetTicketMessagesAsRead from "../helpers/SetTicketMessagesAsRead";
-import SetTicketMessagesAsUnRead from "../helpers/SetTicketMessagesAsUnRead";
 import { Mutex } from "async-mutex";
 
 type IndexQuery = {
@@ -283,20 +282,6 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       action: "update",
       ticket
     });
-
-  return res.status(200).json(ticket);
-};
-
-export const setunredmsg = async (req: Request, res: Response): Promise<Response> => {
-  const { ticketId } = req.params;
-  const { id: userId, companyId } = req.user;
-
-  const ticket = await ShowTicketService(ticketId, companyId);
-
-  if (ticket.channel === "whatsapp" && ticket.whatsappId) {
-    SetTicketMessagesAsUnRead(ticket);
-  }
-
 
   return res.status(200).json(ticket);
 };

@@ -189,7 +189,6 @@ const messages = {
         toasts: {
           deleted:
             "¡La conexión de WhatsApp ha sido borrada satisfactoriamente!",
-          disconnected: "¡Conexión desconectada con éxito!",
           closedimported:
             "Estamos cerrando los tickets importados, por favor espere.",
         },
@@ -762,7 +761,6 @@ const messages = {
           returnQueue: "Regresar a la Fila",
           scredule: "Programar",
           deleteTicket: "Borrar Ticket",
-          quickmessageflash: "Mensaje Rápido",
         },
         closedTicket: {
           closedMessage: "Cerrar CON un mensaje de despedida",

@@ -7,11 +7,9 @@ import * as SettingController from "../controllers/SettingController";
 import isSuper from "../middleware/isSuper";
 import uploadConfig from "../config/upload";
 import uploadPrivateConfig from "../config/privateFiles";
-import uploadCertConfig from "../config/uploadcertificado";
 
 const upload = multer(uploadConfig);
 const uploadPrivate = multer(uploadPrivateConfig);
-const uploadCert = multer(uploadCertConfig);
 
 const settingRoutes = Router();
 
@@ -29,13 +27,6 @@ settingRoutes.put("/setting/:settingKey", isAuth, SettingController.updateOne);
 settingRoutes.get("/public-settings/:settingKey", envTokenAuth, SettingController.publicShow);
 
 settingRoutes.post("/settings-whitelabel/logo", isAuth, upload.single("file"), SettingController.storeLogo);
-
-settingRoutes.post(
-  "/settings/cert-upload",
-  isAuth,
-  uploadCert.array("file"),
-  SettingController.certUpload
-);
 
 settingRoutes.post(
   "/settings/privateFile",

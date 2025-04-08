@@ -1,7 +1,43 @@
 import React, { useEffect, useRef } from "react";
+
+import { makeStyles } from "@material-ui/core/styles";
+import { green } from "@material-ui/core/colors";
+import Dialog from "@material-ui/core/Dialog";
+import DialogContent from "@material-ui/core/DialogContent";
 import CheckoutPage from "../CheckoutPage";
 
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: "flex",
+    flexWrap: "wrap",
+  },
+  textField: {
+    marginRight: theme.spacing(1),
+    flex: 1,
+  },
+
+  extraAttr: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  btnWrapper: {
+    position: "relative",
+  },
+
+  buttonProgress: {
+    color: green[500],
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginTop: -12,
+    marginLeft: -12,
+  },
+}));
+
 const ContactModal = ({ open, onClose, Invoice, contactId, initialValues, onSave }) => {
+  const classes = useStyles();
   const isMounted = useRef(true);
 
   useEffect(() => {
@@ -15,25 +51,14 @@ const ContactModal = ({ open, onClose, Invoice, contactId, initialValues, onSave
   };
 
   return (
-    <div className="flex flex-wrap">
-      <div 
-        className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity ${
-          open ? "opacity-100 visible" : "opacity-0 invisible"
-        }`}
-      >
-        {/* Overlay */}
-        <div 
-          className="absolute inset-0 bg-black bg-opacity-50"
-          onClick={handleClose}
-        />
-        
-        {/* Modal Content */}
-        <div className="relative bg-white rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-xl">
-          <div className="p-6">
-            <CheckoutPage Invoice={Invoice} />
-          </div>
-        </div>
-      </div>
+    <div className={classes.root}>
+      <Dialog open={open} onClose={handleClose} maxWidth="md" scroll="paper">
+        <DialogContent dividers>
+          <CheckoutPage
+            Invoice={Invoice}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

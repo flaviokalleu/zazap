@@ -38,33 +38,24 @@ const publicFolder = path.resolve(__dirname, "..", "..", "..", "public");
 
 const processAudio = async (audio: string, companyId: string): Promise<string> => {
   const outputAudio = `${publicFolder}/company${companyId}/${new Date().getTime()}.mp3`;
+  
   return new Promise((resolve, reject) => {
     exec(
-      `${ffmpegPath.path} -i ${audio}  -vn -ar 44100 -ac 2 -b:a 192k ${outputAudio} -y`,
+      `${ffmpegPath.path} -i ${audio} -af "afftdn=nr=5:nf=-40, highpass=f=100, lowpass=f=4000, dynaudnorm=f=1000, aresample=44100, volume=1.0" -vn -ar 44100 -ac 2 -b:a 256k ${outputAudio} -y`,
       (error, _stdout, _stderr) => {
         if (error) reject(error);
-        // fs.unlinkSync(audio);
         resolve(outputAudio);
       }
     );
   });
-  // return new Promise((resolve, reject) => {
-  //   exec(
-  //     `${ffmpegPath} -i ${audio} -vn -ab 128k -ar 44100 -f ipod ${outputAudio} -y`,
-  //     (error, _stdout, _stderr) => {
-  //       if (error) reject(error);
-  //       // fs.unlinkSync(audio);
-  //       resolve(outputAudio);
-  //     }
-  //   );
-  // });
 };
+
 
 const processAudioFile = async (audio: string, companyId: string): Promise<string> => {
   const outputAudio = `${publicFolder}/company${companyId}/${new Date().getTime()}.mp3`;
   return new Promise((resolve, reject) => {
     exec(
-      `${ffmpegPath.path} -i ${audio} -vn -ar 44100 -ac 2 -b:a 192k ${outputAudio}`,
+      `${ffmpegPath.path} -i ${audio} -af "afftdn=nr=5:nf=-40, highpass=f=100, lowpass=f=4000, dynaudnorm=f=1000, aresample=44100, volume=1.0" -vn -ar 44100 -ac 2 -b:a 256k ${outputAudio} -y`,
       (error, _stdout, _stderr) => {
         if (error) reject(error);
         // fs.unlinkSync(audio);

@@ -33,16 +33,12 @@ import MessageOptionsMenu from "../MessageOptionsMenu";
 import whatsBackground from "../../assets/wa-background.png";
 import whatsBackgroundDark from "../../assets/wa-background-dark.png";
 import YouTubePreview from "../ModalYoutubeCors";
-import ListPreview from "../ListPreview";
-import PixPreview from "../PixPreview";
-import ButtonPreview from "../ButtonPreview";
-import EventPreview from "../EventPreview";
+
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import { ForwardMessageContext } from "../../context/ForwarMessage/ForwardMessageContext";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
-import AdMetaPreview from "../AdMetaPreview"; // Adicionado componente de preview de anúncio
 // import { SocketContext } from "../../context/Socket/SocketContext";
 import { i18n } from "../../translate/i18n";
 import SelectMessageCheckbox from "./SelectMessageCheckbox";
@@ -52,7 +48,6 @@ import { QueueSelectedContext } from "../../context/QueuesSelected/QueuesSelecte
 import AudioModal from "../AudioModal";
 import { messages } from "../../translate/languages";
 import { useParams, useHistory } from 'react-router-dom';
-import { downloadResource } from "../../utils";
 
 const useStyles = makeStyles((theme) => ({
   messagesListWrapper: {
@@ -624,177 +619,6 @@ const hanldeReplyMessage = (e, message) => {
 
 const checkMessageMedia = (message) => {
   console.log(message)
-  if (message.mediaType === "eventMessage") {
-    try {
-      // Parsear o dataJson diretamente da coluna do banco de dados
-      const parsedData = JSON.parse(message.dataJson);
-      const eventMessage = parsedData.message.eventMessage;
-  
-      const titulo = eventMessage.name || "Sem título";
-      const descricao = eventMessage.description || "Sem descrição";
-      const local = eventMessage.location?.name || "Local não especificado";
-      const link = eventMessage.joinLink || "#";
-      const linkTipo = link.includes("video") ? "video" : "voice";
-  
-      // Converter timestamps para data/hora formatada
-      const startTime = Number(eventMessage.startTime); // Em segundos
-      const endTime = startTime + 7200; // Exemplo: reunião de 2h
-  
-      const formatDateTime = (timestamp) => {
-        const date = new Date(timestamp * 1000);
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        const time = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        return `${day}/${month}/${year}, ${time}`;
-      };
-  
-      return (
-        <EventPreview
-          name={titulo}
-          description={descricao}
-          location={local}
-          startTime={startTime}
-          endTime={endTime}
-          joinLink={link}
-          linkType={linkTipo}
-        />
-      );
-    } catch (error) {
-      console.error("Erro ao processar a mensagem de evento: ", error);
-    }
-  } else
-  if (message.mediaType === "listMessage") {
-    try {
-      // Parsear o dataJson diretamente da coluna do banco de dados
-      const parsedData = JSON.parse(message.dataJson);
-      const listMessage = parsedData.message.listMessage;
-      let titulo = listMessage.title || "";
-      let descricao = listMessage.description || "";
-      let rodape = listMessage.footerText || "";
-      let secoes = [];
-      let rows = [];
-      listMessage.sections.forEach((section, index) => {
-        let currentSection = section.title || ""; 
-        section.rows.forEach((row, rowIndex) => {
-          rows.push({
-            titulo: row.title,           // Título do item da linha
-            descricao: row.description,  // Descrição do item da linha
-            idLinha: row.rowId           // ID da linha
-          });
-        });
-        secoes.push({ titulo: currentSection, linhas: rows });
-        rows = [];
-      });
-      return (
-        <ListPreview
-          titulo={titulo}
-          descricao={descricao}
-          textoBotao={listMessage.buttonText || "Clique aqui"} // Texto do botão
-          secoes={secoes}
-          rodape={rodape}
-          ticketId={message?.ticket?.id}
-        />
-      );
-    } catch (error) {
-      console.error("Erro ao processar a lista de mensagens: ", error);
-    }
-  }
-   else
-   if (message.mediaType === "viewOnceMessage" && message.body.startsWith('[BOTOES]')) {
-    try {
-        const dataJsonString = message.dataJson;
-        if (!dataJsonString || typeof dataJsonString !== 'string') {
-            console.error("dataJson não está definido ou não é uma string válida.");
-            return; 
-        }
-        const parsedData = JSON.parse(dataJsonString); 
-        const viewOnceMessage = parsedData.message.viewOnceMessage.message.interactiveMessage; // Acessando a mensagem diretamente
-        if (!viewOnceMessage) {
-            console.error("viewOnceMessage não está definido.");
-            return; // Sai da função se viewOnceMessage não estiver definido
-        }
-        const titulo = viewOnceMessage.body?.text || "";  // Título
-        const rodape = viewOnceMessage.footer?.text || "";  // Rodapé
-        const botoes = viewOnceMessage.nativeFlowMessage?.buttons?.map(button => {
-            const { name, buttonParamsJson } = button;
-            const params = JSON.parse(buttonParamsJson);  // Parse JSON para obter o conteúdo
-            return {
-                tipo: name,
-                texto: params.display_text,
-                conteudo: params.phoneNumber || params.url || params.copy_code
-            };
-        }) || [];  
-        let imagem = null;
-        if (viewOnceMessage.header?.imageMessage?.jpegThumbnail) {
-            imagem = viewOnceMessage.header.imageMessage.jpegThumbnail;    
-        } else {
-            console.log("Nenhuma imagem encontrada no header.");
-        }
-        return (
-            <ButtonPreview 
-                titulo={titulo} 
-                rodape={rodape} 
-                secoes={[{ titulo: "Botões", linhas: botoes }]} 
-                imagem={imagem} 
-                ticketId={message?.ticket?.id} 
-            />
-        );
-    } catch (error) {
-        console.error("Erro ao processar a mensagem do tipo viewOnceMessage: ", error);
-    }
-} else 
-   if ((message.mediaType === "viewOnceMessage" || message.mediaType === "interactiveMessage") && message.body.startsWith('[PIX]')) {
-  try {
-      // Verifica se o dataJson existe e é uma string antes de tentar fazer o parse
-      const dataJsonString = message.dataJson;
-      if (!dataJsonString || typeof dataJsonString !== 'string') {
-          console.error("dataJson não está definido ou não é uma string válida.");
-          return; // Sai da função se não for válido
-      }
-      // Parse do JSON
-      const parsedData = JSON.parse(dataJsonString);
-      const nativeFlowMessage =
-          parsedData.message?.interactiveMessage?.nativeFlowMessage ||
-          parsedData.message?.viewOnceMessage?.message?.interactiveMessage?.nativeFlowMessage;
-      if (!nativeFlowMessage) {
-          console.error("Mensagem de fluxo nativa não encontrada.");
-          return; // Sai da função se não encontrar o fluxo nativo
-      }
-      const button = nativeFlowMessage.buttons?.[0]; // Considera que há um único botão
-      if (!button) {
-          console.error("Botão não encontrado.");
-          return;
-      }
-      const { name, buttonParamsJson } = button;
-      const params = JSON.parse(buttonParamsJson);
-      const numeroCobranca = params.reference_id || "N/A";
-      const total = params.total_amount?.value || "N/A";
-      const produto = params.order?.items?.[0]?.name || "N/A";
-      let imagem = null;
-      if (nativeFlowMessage.header?.imageMessage?.jpegThumbnail) {
-          imagem = nativeFlowMessage.header.imageMessage.jpegThumbnail;
-      } else {
-      }
-      // Renderizar o componente PixPreview
-      return (
-          <PixPreview
-              companyId={message.companyId}
-              avatarUser={message.ticket?.user?.profileImage}
-              avatarName={message.ticket?.user?.name}
-              avatarUrl={message.contact?.urlPicture}
-              name={message.contact?.name}  
-              numeroCobranca={numeroCobranca}
-              total={total}
-              produto={produto}
-              imagem={imagem}
-              ticketId={message?.ticket?.id}
-          />
-      );
-  } catch (error) {
-      console.error("Erro ao processar a mensagem de pagamento: ", error);
-  }
-} else
   if (message.mediaType === "locationMessage" && message.body.split('|').length >= 2) {
     let locationParts = message.body.split('|')
     let imageLocation = locationParts[0]
@@ -826,13 +650,9 @@ const checkMessageMedia = (message) => {
       }
       // console.log(message)
       return <VcardPreview contact={contact} numbers={obj[0]?.number} queueId={message?.ticket?.queueId} whatsappId={message?.ticket?.whatsappId} />
-    } 
-    else if (message.mediaType === "adMetaPreview") { // Adicionado para renderizar o componente de preview de anúncio
-      console.log("Entrou no MetaPreview");
-      let [image, sourceUrl, title, body, messageUser] = message.body.split('|');
-      return <AdMetaPreview image={image} sourceUrl={sourceUrl} title={title} body={body} messageUser={messageUser} />;
-  }
-  else if (message.mediaType === "image") {
+    } else
+
+      if (message.mediaType === "image") {
         return <ModalImageCors imageUrl={message.mediaUrl} />;
       } else
 
@@ -862,9 +682,7 @@ const checkMessageMedia = (message) => {
                     startIcon={<GetApp />}
                     variant="outlined"
                     target="_blank"
-                    onClick={() => {
-                      downloadResource(message.mediaUrl || message.body)
-                    }}
+                    href={message.mediaUrl}
                   >
                     Download
                   </Button>
@@ -1210,7 +1028,7 @@ const renderMessages = () => {
                 </div>
               )}
 
-              {(message.mediaUrl || message.mediaType === "locationMessage" || message.mediaType === "contactMessage" || message.mediaType === "pollCreationMessageV3" || message.mediaType === "eventMessage" || message.mediaType === "listMessage" || message.mediaType === "viewOnceMessage" || message.mediaType === "interactiveMessage" || message.mediaType === "adMetaPreview" // Adicionado para aceitar o componente de preview de anúncio
+              {(message.mediaUrl || message.mediaType === "locationMessage" || message.mediaType === "contactMessage"
                 //|| message.mediaType === "multi_vcard" 
               ) && checkMessageMedia(message)}
 
@@ -1225,10 +1043,7 @@ const renderMessages = () => {
                     message.mediaType !== "image" &&
                     message.mediaType !== "video" &&
                     message.mediaType != "reactionMessage" &&
-                    message.mediaType != "locationMessage" && message.mediaType !== "contactMessage" && message.mediaType != "pollCreationMessageV3" && message.mediaType != "eventMessage" &&
-                    message.mediaType != "listMessage" &&
-                    message.mediaType != "viewOnceMessage" &&
-                    message.mediaType != "interactiveMessage" && message.mediaType !== "adMetaPreview") && (
+                    message.mediaType != "locationMessage" && message.mediaType !== "contactMessage") && (
                     <>
                       {xmlRegex.test(message.body) && (
                         <span>{message.body}</span>
@@ -1310,7 +1125,7 @@ const renderMessages = () => {
                   </span>
                 </div>
               )}
-              {(message.mediaUrl || message.mediaType === "locationMessage" || message.mediaType === "contactMessage" || message.mediaType === "pollCreationMessageV3" || message.mediaType === "eventMessage" || message.mediaType === "listMessage" || message.mediaType === "viewOnceMessage" || message.mediaType === "interactiveMessage" || message.mediaType === "adMetaPreview" // Adicionado para aceitar o componente de preview de anúncio
+              {(message.mediaUrl || message.mediaType === "locationMessage" || message.mediaType === "contactMessage"
                 //|| message.mediaType === "multi_vcard" 
               ) && checkMessageMedia(message)}
               <div
@@ -1327,10 +1142,7 @@ const renderMessages = () => {
 
                 {
                   ((message.mediaType === "image" || message.mediaType === "video") && path.basename(message.mediaUrl) === message.body) ||
-                  (message.mediaType !== "audio" && message.mediaType != "reactionMessage" && message.mediaType != "locationMessage" && message.mediaType !== "contactMessage" && message.mediaType != "pollCreationMessageV3" && message.mediaType != "eventMessage" &&
-                    message.mediaType != "listMessage" &&
-                    message.mediaType != "viewOnceMessage" &&
-                    message.mediaType != "interactiveMessage" && message.mediaType !== "adMetaPreview") && (
+                  (message.mediaType !== "audio" && message.mediaType != "reactionMessage" && message.mediaType != "locationMessage" && message.mediaType !== "contactMessage") && (
                     <>
                       {xmlRegex.test(message.body) && (
                         <div>{formatXml(message.body)}</div>

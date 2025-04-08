@@ -168,14 +168,12 @@ const useAuth = () => {
         history.push("/tickets");
         setLoading(false);
       } else {
-        localStorage.setItem("token", JSON.stringify(data.token));
         // localStorage.setItem("companyId", companyId);
         api.defaults.headers.Authorization = `Bearer ${data.token}`;
-        setUser(data.user);
         setIsAuth(true);
         toastError(`Opss! Sua assinatura venceu ${vencimento}.
 Entre em contato com o Suporte para mais informações! `);
-        history.push("/financeiro");
+        history.push("/financeiro-aberto");
         setLoading(false);
       }
 

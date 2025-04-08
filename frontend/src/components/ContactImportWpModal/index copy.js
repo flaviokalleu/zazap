@@ -123,7 +123,7 @@ const ContactImportWpModal = ({ isOpen, handleClose, selectedTags, hideNum, user
     const exportData = allDatas.map((e) => {
       return { name: e.name, number: (hideNum && userProfile === "user" ? e.isGroup ? e.number : e.number.slice(0, -6) + "**-**" + e.number.slice(-2) : e.number), email: e.email, tags: e.tags };
     });
-    console.log({ allDatas });
+    //console.log({ allDatas });
     let wb = XLSX.utils.book_new();
     let ws = XLSX.utils.json_to_sheet(exportData);
     XLSX.utils.book_append_sheet(wb, ws, "Contatos");

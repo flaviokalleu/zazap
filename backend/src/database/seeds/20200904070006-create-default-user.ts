@@ -11,10 +11,10 @@ module.exports = {
       }, ['id']);
 
       if (!userExists) {
-        const passwordHash = await hash("123456", 8);
+        const passwordHash = await hash("mudar@123", 8);
         return queryInterface.bulkInsert('Users', [{
           name: "Admin",
-          email: "admin@admin.com",
+          email: "admin@nexa.chat",
           profile: "admin",
           passwordHash,
           companyId: 1,

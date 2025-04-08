@@ -2,158 +2,137 @@
 <html lang="pt">
 
 <head>
-  <meta charset="UTF-8">
-  <title>Zazap</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com shumë
+	<!-- <title>KMENU</title> -->
+	<!-- <title>%REACT_APP_NAME_SYSTEM%</title> -->
+	<link rel="stylesheet"
+		href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" />
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400&display=swap" />
+	<link rel="stylesheet"
+		href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700&display=swap" />
+	<link rel="apple-touch-icon" href="%PUBLIC_URL%/apple-touch-icon.png" />
+	<link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+	<link rel=”shortcut icon” href=”%PUBLIC_URL%/favicon.ico”>
+	<link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+	<meta name="theme-color" content="#000000" />
+	<meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Expires" content="0">
+	<script src="https://cdn.tailwindcss.com"></script>
+	<style>
+		/* Basic styles for the splash screen */
+		#splash-screen {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			background-color: rgba(240, 240, 240, 0.8); /* Cor e opacidade da camada semi-transparente */
+			/* 50% grey */
+			z-index: 9999;
+		}
 
-/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400&display=swap" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700&display=swap" />
-  <link rel="apple-touch-icon" href="%PUBLIC_URL%/apple-touch-icon.png" />
-  <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-  <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico" />
-  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-  <meta name="theme-color" content="#000000" />
-  <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    /* Estilos atualizados para o splash screen */
-    #splash-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(135deg, #e6f0f5 0%, #d1dbe6 100%);
-      z-index: 9999;
-      transition: opacity 0.5s ease, visibility 0s linear 0.5s;
-    }
+        #splash-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
 
-    #splash-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
+        .loading-text {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #666; /* Cor do texto de carregamento */
+        }
 
-    .loading-text {
-      font-size: 28px;
-      font-family: 'Inter', sans-serif;
-      font-weight: 600;
-      color: #1a3c34;
-      margin-bottom: 20px;
-    }
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #666; /* Cor do spinner */
+            border-top: 4px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
 
-    .loading-spinner {
-      width: 50px;
-      height: 50px;
-      border: 5px solid #e0e0e0;
-      border-top: 5px solid #10aa62;
-      border-radius: 50%;
-      animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-    }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
-    }
 
-    .progress-bar {
-      width: 300px;
-      height: 6px;
-      background-color: #e0e0e0;
-      border-radius: 3px;
-      overflow: hidden;
-      margin-top: 20px;
-    }
+		.progress-bar {
+			width: 80%;
+			height: 10px;
+			background-color: #d3d3d3;
+			/* light grey */
+			border-radius: 10px;
+			overflow: hidden;
+		}
 
-    .progress {
-      height: 100%;
-      background-color: #10aa62;
-      width: 0;
-      transition: width 0.4s ease;
-    }
-
-    /* Responsividade */
-    @media (max-width: 768px) {
-      .loading-text {
-        font-size: 24px;
-      }
-      .loading-spinner {
-        width: 40px;
-        height: 40px;
-      }
-      .progress-bar {
-        width: 80%;
-      }
-    }
-  </style>
-  <script>
-    // Workaround para React v16
-    if (!crossOriginIsolated) SharedArrayBuffer = ArrayBuffer;
-  </script>
+		.progress {
+			height: 100%;
+			background-color: #000000;
+			/* black */
+			width: 0;
+			transition: width 0.2s;
+		}
+	</style>
+	<!-- Issue workaround for React v16. -->
+	<script>
+        // See https://github.com/facebook/react/issues/20829#issuecomment-802088260
+        if (!crossOriginIsolated) SharedArrayBuffer = ArrayBuffer;
+    </script>
 </head>
 
 <body>
-  <div id="splash-screen">
-    <div id="splash-content">
-      <div class="loading-spinner"></div>
-      <div class="loading-text">Carregando...</div>
-      <div class="progress-bar">
-        <div class="progress" id="progress-bar"></div>
-      </div>
-    </div>
-  </div>
-  <div id="root"></div>
-  <noscript>You need to enable JavaScript to run this app.</noscript>
-  <script>
-    // Simulação de progresso
-    let progress = 0;
-    const progressBar = document.getElementById('progress-bar');
-    const interval = setInterval(() => {
-      if (progress < 50) {
-        progress += 10;
-      } else if (progress < 80) {
-        progress += 3;
-      } else if (progress < 99) {
-        progress += ((99 - progress) / 20);
-      }
-      progressBar.style.width = progress + '%';
-
-      if (progress >= 100) {
+	<div id="splash-screen">
+		<div id="splash-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Carregando...</div>
+            <div class="progress-bar">
+                <div class="progress" id="progress-bar"></div>
+            </div>
+        </div>
+	</div>
+	<div id="root"></div>
+	<noscript>You need to enable JavaScript to run this app.</noscript>
+	<div id="root"></div>
+	<script>
+		// Simulate progress update
+		progress = 0;
+		const progressBar = document.getElementById('progress-bar');
+		const interval = setInterval(() => {
+		  if (progress < 50) {
+		    progress += 10;
+		  } else if (progress < 80) {
+		    progress += 3;
+		  } else if (progress < 99) {
+		    progress += ( (99-progress) / 20 );
+		  }
+		  progressBar.style.width = progress + '%';
+		  
+		  if (progress >= 100) {
         clearInterval(interval);
-        setTimeout(() => {
+		    setTimeout(() => {
           const splashScreen = document.getElementById('splash-screen');
-          splashScreen.style.opacity = '0';
-          splashScreen.style.visibility = 'hidden';
-          setTimeout(() => {
-            splashScreen.remove();
-          }, 500);
-        }, 500);
-      }
-    }, 1000);
-
-    window.finishProgress = () => {
+          splashScreen.remove();
+		    }, 500);
+		  }
+		}, 1000);
+    window.finishProgress=() => {
       progress = 100;
-    };
-
-    // Remover a tela de carregamento quando a página estiver carregada
-    window.onload = () => {
-      const splashOverlay = document.getElementById('splash-overlay');
-      // splashOverlay.remove();
-    };
-  </script>
+    }
+	// Remover a tela de carregamento quando todos os elementos terminarem de carregar
+	window.onload = () => {
+            const splashOverlay = document.getElementById('splash-overlay');
+            // splashOverlay.remove();
+        };
+	</script>	
 </body>
 
 </html>

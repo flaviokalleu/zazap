@@ -37,21 +37,43 @@ export const markSeen = async (id: string, token: string): Promise<void> => {
   });
 };
 
+export const showTypingIndicator = async (
+  id: string, 
+  token: string,
+  action: string
+): Promise<void> => {
+
+  try {
+    const { data } = await apiBase(token).post("me/messages", {
+      recipient: {
+        id: id
+      },
+      sender_action: action
+    })
+
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+
+}
+
+
 export const sendText = async (
   id: string | number,
   text: string,
   token: string,
 ): Promise<void> => {
   try {
-      const { data } = await apiBase(token).post("me/messages", {
-        recipient: {
-          id
-        },
-        message: {
-          text: `${text}`,
-        }
-      });
-      return data;
+    const { data } = await apiBase(token).post("me/messages", {
+      recipient: {
+        id
+      },
+      message: {
+        text: `${text}`,
+      }
+    });
+    return data;
   } catch (error) {
     console.log(error);
   }
@@ -204,6 +226,7 @@ export const unsubscribeApp = async (
     throw new Error("ERR_UNSUBSCRIBING_PAGE_TO_MESSAGE_WEBHOOKS");
   }
 };
+
 
 export const getSubscribedApps = async (
   id: string,

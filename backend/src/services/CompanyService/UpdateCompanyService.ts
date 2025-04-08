@@ -2,8 +2,6 @@ import AppError from "../../errors/AppError";
 import Company from "../../models/Company";
 import Setting from "../../models/Setting";
 import User from "../../models/User";
-import Invoices from "../../models/Invoices";
-import Plan from "../../models/Plan";
 
 interface CompanyData {
   name: string;
@@ -42,39 +40,6 @@ const UpdateCompanyService = async (
   if (!company) {
     throw new AppError("ERR_NO_COMPANY_FOUND", 404);
   }
-
-  const openInvoices = await Invoices.findAll({
-    where: {
-      status: "open",
-      companyId: company.id,
-    },
- });
- if (openInvoices.length > 1) {
-   for (const invoice of openInvoices.slice(1)) {
-     await invoice.update({ status: "cancelled" });
-   }
- }
- const plan = await Plan.findByPk(planId);
- 
- if (!plan) {
-   throw new Error("Plano Não Encontrado.");
- }
- // 5. Atualizar a única invoice com status "open" existente, baseada no companyId.
- const openInvoice = openInvoices[0];
- const valuePlan = plan.amount.replace(",", ".");
- if (openInvoice) {
-   await openInvoice.update({
-     value: valuePlan,
-     detail: plan.name,
-     users: plan.users,
-     connections: plan.connections,
-     queues: plan.queues,
-     dueDate: dueDate,
-   });
- 
- } else {
-   throw new Error("Nenhuma fatura em aberto para este cliente!");
- }
 
   const existUser = await User.findOne({
     where: {

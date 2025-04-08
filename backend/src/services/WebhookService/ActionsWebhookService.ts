@@ -16,9 +16,7 @@ import fs from "fs";
 import GetWhatsappWbot from "../../helpers/GetWhatsappWbot";
 import path from "path";
 import SendWhatsAppMedia from "../WbotServices/SendWhatsAppMedia";
-import SendWhatsAppMediaFlow, {
-  typeSimulation
-} from "../WbotServices/SendWhatsAppMediaFlow";
+import SendWhatsAppMediaFlow, { typeSimulation } from "../WbotServices/SendWhatsAppMediaFlow";
 import { randomizarCaminho } from "../../utils/randomizador";
 import { SendMessageFlow } from "../../helpers/SendMessageFlow";
 import formatBody from "../../helpers/Mustache";
@@ -39,11 +37,6 @@ import CreateLogTicketService from "../TicketServices/CreateLogTicketService";
 import CompaniesSettings from "../../models/CompaniesSettings";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import { delay } from "bluebird";
-import typebotListener from "../TypebotServices/typebotListener";
-import { getWbot } from "../../libs/wbot";
-import { proto } from "@whiskeysockets/baileys";
-import { handleOpenAi } from "../IntegrationsServices/OpenAiService";
-import { IOpenAi } from "../../@types/openai";
 
 interface IAddContact {
   companyId: number;
@@ -65,23 +58,14 @@ export const ActionsWebhookService = async (
   hashWebhookId: string,
   pressKey?: string,
   idTicket?: number,
-  numberPhrase: "" | { number: string; name: string; email: string } = "",
-  msg?: proto.IWebMessageInfo
+  numberPhrase: "" | { number: string; name: string; email: string } = ""
 ): Promise<string> => {
   try {
-    const io = getIO();
-
-    // Inicializar next com nextStage ou buscar do ticket se nextStage for null
+    const io = getIO()
     let next = nextStage;
-    if (idTicket && (!next || next === "null")) {
-      const ticket = await Ticket.findOne({ where: { id: idTicket, companyId } });
-      if (ticket) {
-        next = ticket.lastFlowId || ticket.lastFlowId || next;
-      }
-    }
-    
-
+    console.log('ActionWebhookService | 53', idFlowDb, companyId, nodes, connects, nextStage, dataWebhook, details, hashWebhookId, pressKey, idTicket, numberPhrase)
     let createFieldJsonName = "";
+
     const connectStatic = connects;
     if (numberPhrase === "") {
       const nameInput = details.inputs.find(item => item.keyValue === "nome");
@@ -93,17 +77,20 @@ export const ActionsWebhookService = async (
         } else {
           sumRes = constructJsonLine(lineToData, dataWebhook);
         }
-        createFieldJsonName = createFieldJsonName + sumRes;
+        createFieldJsonName = createFieldJsonName + sumRes
       });
     } else {
       createFieldJsonName = numberPhrase.name;
     }
 
+
     let numberClient = "";
+
     if (numberPhrase === "") {
       const numberInput = details.inputs.find(
         item => item.keyValue === "celular"
       );
+
       numberInput.data.split(",").map(dataN => {
         const lineToDataNumber = details.keysFull.find(item => item === dataN);
         let createFieldJsonNumber = "";
@@ -115,13 +102,16 @@ export const ActionsWebhookService = async (
             dataWebhook
           );
         }
+
         numberClient = numberClient + createFieldJsonNumber;
       });
     } else {
       numberClient = numberPhrase.number;
     }
 
+
     numberClient = removerNaoLetrasNumeros(numberClient);
+
     if (numberClient.substring(0, 2) === "55") {
       if (parseInt(numberClient.substring(2, 4)) >= 31) {
         if (numberClient.length === 13) {
@@ -132,39 +122,66 @@ export const ActionsWebhookService = async (
     }
 
     let createFieldJsonEmail = "";
+
     if (numberPhrase === "") {
       const emailInput = details.inputs.find(item => item.keyValue === "email");
       emailInput.data.split(",").map(dataN => {
+
         const lineToDataEmail = details.keysFull.find(item =>
           item.endsWith("email")
         );
+
         let sumRes = "";
         if (!lineToDataEmail) {
           sumRes = dataN;
         } else {
           sumRes = constructJsonLine(lineToDataEmail, dataWebhook);
         }
+
         createFieldJsonEmail = createFieldJsonEmail + sumRes;
       });
     } else {
       createFieldJsonEmail = numberPhrase.email;
     }
 
+
+
     const lengthLoop = nodes.length;
     const whatsapp = await GetDefaultWhatsApp(whatsappId, companyId);
 
     if (whatsapp.status !== "CONNECTED") {
-      return "whatsapp not connected";
+      return;
     }
 
     let execCount = 0;
+
     let execFn = "";
+
     let ticket = null;
+
     let noAlterNext = false;
 
-    for (let i = 0; i < lengthLoop; i++) {
+
+    for (var i = 0; i < lengthLoop; i++) {
       let nodeSelected: any;
       let ticketInit: Ticket;
+      if (idTicket) {
+        console.log("UPDATE1...");
+        ticketInit = await Ticket.findOne({
+          where: { id: idTicket, whatsappId }
+        });
+
+        if (ticketInit.status === "closed") {
+          break;
+        } else {
+          await ticketInit.update({
+            dataWebhook: {
+              status: "process",
+            },
+          });
+        }
+
+      }
 
       if (pressKey) {
         console.log("UPDATE2...");
@@ -175,7 +192,7 @@ export const ActionsWebhookService = async (
             ticketInit = await Ticket.findOne({
               where: { id: idTicket, whatsappId }
             });
-            await ticketInit.update({
+            await ticket.update({
               status: "closed"
             });
           }
@@ -193,39 +210,35 @@ export const ActionsWebhookService = async (
         }
       } else {
         console.log("UPDATE7...");
-        const otherNode = nodes.filter(node => node.id === next)[0];
+        const otherNode = nodes.filter((node) => node.id === next)[0]
         if (otherNode) {
           nodeSelected = otherNode;
-        } else {
-          console.log(`No node found for next: ${next}. Skipping to next iteration.`);
-          const nextConnection = connects.find(connect => connect.source === next);
-          if (nextConnection) {
-            next = nextConnection.target;
-          } else {
-            next = nodes[i + 1]?.id || next;
-          }
-          continue;
         }
       }
 
-      if (!nodeSelected) {
-        console.log(`nodeSelected is undefined for next: ${next}. Skipping.`);
-        continue;
-      }
-
-      console.log(`Processing node: ${nodeSelected.id} of type: ${nodeSelected.type}`);
-
       if (nodeSelected.type === "message") {
         let msg;
-        const webhook = ticket?.dataWebhook;
-
-        if (webhook && webhook.hasOwnProperty("variables")) {
+        if (dataWebhook === "") {
           msg = {
-            body: replaceMessages(webhook.variables, nodeSelected.data.label)
+            body: nodeSelected.data.label,
+            number: numberClient,
+            companyId: companyId
           };
         } else {
+          const dataLocal = {
+            nome: createFieldJsonName,
+            numero: numberClient,
+            email: createFieldJsonEmail
+          };
           msg = {
-            body: nodeSelected.data.label
+            body: replaceMessages(
+              nodeSelected.data.label,
+              details,
+              dataWebhook,
+              dataLocal
+            ),
+            number: numberClient,
+            companyId: companyId
           };
         }
 
@@ -233,131 +246,24 @@ export const ActionsWebhookService = async (
           number: numberClient,
           body: msg.body
         });
+        //TESTE BOTÃO
+        //await SendMessageFlow(whatsapp, {
+        //  number: numberClient,
+        //  body: msg.body
+        //} )
         await intervalWhats("1");
       }
 
-      if (nodeSelected.type === "typebot") {
-        const wbot = getWbot(whatsapp.id);
-        await typebotListener({
-          wbot: wbot,
-          msg,
-          ticket,
-          typebot: nodeSelected.data.typebotIntegration
-        });
-      }
-
-      if (nodeSelected.type === "openai") {
-        let {
-          name,
-          prompt,
-          voice,
-          voiceKey,
-          voiceRegion,
-          maxTokens,
-          temperature,
-          apiKey,
-          queueId,
-          maxMessages
-        } = nodeSelected.data.typebotIntegration as IOpenAi;
-
-        let openAiSettings = {
-          name,
-          prompt,
-          voice,
-          voiceKey,
-          voiceRegion,
-          maxTokens: parseInt(maxTokens),
-          temperature: parseInt(temperature),
-          apiKey,
-          queueId: parseInt(queueId),
-          maxMessages: parseInt(maxMessages)
-        };
-
-        const contact = await Contact.findOne({
-          where: { number: numberClient, companyId }
-        });
-
-        const wbot = getWbot(whatsapp.id);
-
-        const ticketTraking = await FindOrCreateATicketTrakingService({
-          ticketId: ticket.id,
-          companyId,
-          userId: null,
-          whatsappId: whatsapp?.id
-        });
-
-        await handleOpenAi(
-          openAiSettings,
-          msg,
-          wbot,
-          ticket,
-          contact,
-          null,
-          ticketTraking
-        );
-      }
-
-      if (nodeSelected.type === "question") {
-        ticket = ticket || (await Ticket.findOne({ where: { id: idTicket, companyId } }));
-        const webhook = ticket?.dataWebhook || {};
-        const variables = webhook.variables || {};
-        const { message, answerKey } = nodeSelected.data.typebotIntegration;
-        
-        // Verificar se esta pergunta específica já foi respondida
-        if (!variables[answerKey]) {
-          // Esta pergunta ainda não foi respondida, então a enviamos ao usuário
-          const ticketDetails = await ShowTicketService(ticket.id, companyId);
-          const bodyFila = formatBody(`${message}`, ticket.contact);
-      
-          await delay(3000);
-          await typeSimulation(ticket, "composing");
-          await SendWhatsAppMessage({ body: bodyFila, ticket: ticketDetails, quotedMsg: null });
-          SetTicketMessagesAsRead(ticketDetails);
-      
-          await ticketDetails.update({ lastMessage: bodyFila });
-      
-          // Encontrar a próxima conexão, mas não avançar para ela ainda
-          const nextConnection = connects.find(connect => connect.source === nodeSelected.id);
-          const nextNodeId = nextConnection ? nextConnection.target : null;
-      
-          await ticket.update({
-            userId: null,
-            companyId,
-            lastFlowId: nodeSelected.id,
-            nextFlowId: nextNodeId,
-            hashFlowId: hashWebhookId,
-            flowStopped: idFlowDb.toString(),
-            awaitingResponse: true // Marcando que estamos aguardando resposta
-          });
-          
-          // Interromper o processamento aqui para aguardar a resposta do usuário
-          break;
-        } else {
-          // Esta pergunta já foi respondida, podemos prosseguir para o próximo nó
-          const nextConnection = connects.find(connect => connect.source === nodeSelected.id);
-          if (nextConnection) {
-            next = nextConnection.target;
-            // Continuar o processamento para o próximo nó
-          } else {
-            break;
-          }
-        }
-      }
       if (nodeSelected.type === "ticket") {
-        const queueId = nodeSelected.data?.data?.id || nodeSelected.data?.id;
-        const queue = await ShowQueueService(queueId, companyId);
+        const queueId = nodeSelected.data?.data?.id || nodeSelected.data?.id
+        const queue = await ShowQueueService(queueId, companyId)
 
-        ticket = ticket || (await Ticket.findOne({ where: { id: idTicket, companyId } }));
-        if (!ticket) {
-          logger.error(`Ticket não encontrado para id: ${idTicket}`);
-          continue;
-        }
 
         await ticket.update({
-          status: "pending",
+          status: 'pending',
           queueId: queue.id,
           userId: ticket.userId,
-          companyId,
+          companyId: companyId,
           flowWebhook: true,
           lastFlowId: nodeSelected.id,
           hashFlowId: hashWebhookId,
@@ -369,62 +275,129 @@ export const ActionsWebhookService = async (
           companyId,
           whatsappId: ticket.whatsappId,
           userId: ticket.userId
-        });
+        })
+
+
 
         await UpdateTicketService({
-          ticketData: { status: "pending", queueId: queue.id },
+          ticketData: {
+            status: "pending",
+            queueId: queue.id
+          },
           ticketId: ticket.id,
           companyId
+        })
+
+
+        await CreateLogTicketService({
+          ticketId: ticket.id,
+          type: "queue",
+          queueId: queue.id
         });
 
-        await CreateLogTicketService({ ticketId: ticket.id, type: "queue", queueId: queue.id });
+        let settings = await CompaniesSettings.findOne({
+          where: {
+            companyId: companyId
+          }
+        })
 
-        const settings = await CompaniesSettings.findOne({ where: { companyId } });
-        const enableQueuePosition = settings?.sendQueuePosition === "enabled";
+        const { queues, greetingMessage, maxUseBotQueues, timeUseBotQueues } = await ShowWhatsAppService(whatsappId, companyId);
 
-        if (enableQueuePosition) {
-          const count = await Ticket.findAndCountAll({
-            where: { userId: null, status: "pending", companyId, queueId: queue.id, whatsappId: whatsapp.id, isGroup: false }
-          });
-          const qtd = count.count === 0 ? 1 : count.count;
-          const msgFila = `${settings.sendQueuePositionMessage} *${qtd}*`;
+        if (greetingMessage.length > 1) {
+          const body = formatBody(`${greetingMessage}`, ticket);
+
           const ticketDetails = await ShowTicketService(ticket.id, companyId);
-          const bodyFila = formatBody(`${msgFila}`, ticket.contact);
 
-          await delay(3000);
-          await typeSimulation(ticket, "composing");
-          await SendWhatsAppMessage({ body: bodyFila, ticket: ticketDetails, quotedMsg: null });
+          await ticketDetails.update({
+            lastMessage: formatBody(queue.greetingMessage, ticket.contact)
+          });
+
+          await SendWhatsAppMessage({
+            body,
+            ticket: ticketDetails,
+            quotedMsg: null
+          });
+
           SetTicketMessagesAsRead(ticketDetails);
-          await ticketDetails.update({ lastMessage: bodyFila });
         }
+
+
       }
 
+
       if (nodeSelected.type === "singleBlock") {
-        for (let iLoc = 0; iLoc < nodeSelected.data.seq.length; iLoc++) {
+        for (var iLoc = 0; iLoc < nodeSelected.data.seq.length; iLoc++) {
+
           const elementNowSelected = nodeSelected.data.seq[iLoc];
 
-          ticket = await Ticket.findOne({
+          let ticketUpdate = await Ticket.findOne({
             where: { id: idTicket, companyId }
           });
 
+          if (ticketUpdate.status === "open") {
+
+            pressKey = "999";
+            execFn = undefined;
+
+
+            await ticket.update({
+              lastFlowId: null,
+              dataWebhook: null,
+              queueId: null,
+              hashFlowId: null,
+              flowWebhook: false,
+              flowStopped: null
+            });
+            break;
+          }
+
+          if (ticketUpdate.status === "closed") {
+
+            pressKey = "999";
+            execFn = undefined;
+
+            await ticket.reload();
+
+            io.of(String(companyId))
+              // .to(oldStatus)
+              // .to(ticketId.toString())
+              .emit(`company-${ticket.companyId}-ticket`, {
+                action: "delete",
+                ticketId: ticket.id
+              });
+
+            break;
+          }
+
+
           if (elementNowSelected.includes("message")) {
+            // await SendMessageFlow(whatsapp, {
+            //   number: numberClient,
+            //   body: nodeSelected.data.elements.filter(
+            //     item => item.number === elementNowSelected
+            //   )[0].value
+            // });
             const bodyFor = nodeSelected.data.elements.filter(
               item => item.number === elementNowSelected
             )[0].value;
 
-            const ticketDetails = await ShowTicketService(idTicket, companyId);
+            const ticketDetails = await ShowTicketService(ticket.id, companyId);
 
             let msg;
-            const webhook = ticket.dataWebhook;
 
-            if (webhook && webhook.hasOwnProperty("variables")) {
-              msg = replaceMessages(webhook.variables, bodyFor);
-            } else {
+            if (dataWebhook === "") {
               msg = bodyFor;
+            } else {
+              const dataLocal = {
+                nome: createFieldJsonName,
+                numero: numberClient,
+                email: createFieldJsonEmail
+              };
+              msg = replaceMessages(bodyFor, details, dataWebhook, dataLocal);
             }
 
             await delay(3000);
-            await typeSimulation(ticket, "composing");
+            await typeSimulation(ticket, 'composing')
 
             await SendWhatsAppMessage({
               body: msg,
@@ -438,6 +411,7 @@ export const ActionsWebhookService = async (
               lastMessage: formatBody(bodyFor, ticket.contact)
             });
 
+
             await intervalWhats("1");
           }
           if (elementNowSelected.includes("interval")) {
@@ -448,49 +422,45 @@ export const ActionsWebhookService = async (
             );
           }
 
+
           if (elementNowSelected.includes("img")) {
-            await typeSimulation(ticket, "composing");
+
+            await typeSimulation(ticket, 'composing')
 
             await SendMessage(whatsapp, {
               number: numberClient,
               body: "",
               mediaPath:
-                process.env.BACKEND_URL === "https://localhost:8090"
-                  ? `${__dirname.split("src")[0].split("\\").join("/")}public/${
-                      nodeSelected.data.elements.filter(
-                        item => item.number === elementNowSelected
-                      )[0].value
-                    }`
-                  : `${__dirname
-                      .split("dist")[0]
-                      .split("\\")
-                      .join("/")}public/${
-                      nodeSelected.data.elements.filter(
-                        item => item.number === elementNowSelected
-                      )[0].value
-                    }`
+                process.env.BACKEND_URL === "http://localhost:8090"
+                  ? `${__dirname.split("src")[0].split("\\").join("/")}public/${nodeSelected.data.elements.filter(
+                    item => item.number === elementNowSelected
+                  )[0].value
+                  }`
+                  : `${__dirname.split("dist")[0].split("\\").join("/")}public/${nodeSelected.data.elements.filter(
+                    item => item.number === elementNowSelected
+                  )[0].value
+                  }`
             });
             await intervalWhats("1");
           }
 
+
           if (elementNowSelected.includes("audio")) {
             const mediaDirectory =
-              process.env.BACKEND_URL === "https://localhost:8090"
-                ? `${__dirname.split("src")[0].split("\\").join("/")}public/${
-                    nodeSelected.data.elements.filter(
-                      item => item.number === elementNowSelected
-                    )[0].value
-                  }`
-                : `${__dirname.split("dist")[0].split("\\").join("/")}public/${
-                    nodeSelected.data.elements.filter(
-                      item => item.number === elementNowSelected
-                    )[0].value
-                  }`;
+              process.env.BACKEND_URL === "http://localhost:8090"
+                ? `${__dirname.split("src")[0].split("\\").join("/")}public/${nodeSelected.data.elements.filter(
+                  item => item.number === elementNowSelected
+                )[0].value
+                }`
+                : `${__dirname.split("dist")[0].split("\\").join("/")}public/${nodeSelected.data.elements.filter(
+                  item => item.number === elementNowSelected
+                )[0].value
+                }`;
             const ticketInt = await Ticket.findOne({
               where: { id: ticket.id }
             });
 
-            await typeSimulation(ticket, "recording");
+            await typeSimulation(ticket, 'recording');
 
             await SendWhatsAppMediaFlow({
               media: mediaDirectory,
@@ -499,41 +469,40 @@ export const ActionsWebhookService = async (
                 item => item.number === elementNowSelected
               )[0].record
             });
+            //fs.unlinkSync(mediaDirectory.split('.')[0] + 'A.mp3');
             await intervalWhats("1");
           }
           if (elementNowSelected.includes("video")) {
             const mediaDirectory =
-              process.env.BACKEND_URL === "https://localhost:8090"
-                ? `${__dirname.split("src")[0].split("\\").join("/")}public/${
-                    nodeSelected.data.elements.filter(
-                      item => item.number === elementNowSelected
-                    )[0].value
-                  }`
-                : `${__dirname.split("dist")[0].split("\\").join("/")}public/${
-                    nodeSelected.data.elements.filter(
-                      item => item.number === elementNowSelected
-                    )[0].value
-                  }`;
+              process.env.BACKEND_URL === "http://localhost:8090"
+                ? `${__dirname.split("src")[0].split("\\").join("/")}public/${nodeSelected.data.elements.filter(
+                  item => item.number === elementNowSelected
+                )[0].value
+                }`
+                : `${__dirname.split("dist")[0].split("\\").join("/")}public/${nodeSelected.data.elements.filter(
+                  item => item.number === elementNowSelected
+                )[0].value
+                }`;
             const ticketInt = await Ticket.findOne({
               where: { id: ticket.id }
             });
 
-            await typeSimulation(ticket, "recording");
+            await typeSimulation(ticket, 'recording');
 
             await SendWhatsAppMediaFlow({
               media: mediaDirectory,
               ticket: ticketInt
             });
+            //fs.unlinkSync(mediaDirectory.split('.')[0] + 'A.mp3');
             await intervalWhats("1");
           }
         }
       }
 
+
       let isRandomizer: boolean;
       if (nodeSelected.type === "randomizer") {
-        const selectedRandom = randomizarCaminho(
-          nodeSelected.data.percent / 100
-        );
+        const selectedRandom = randomizarCaminho(nodeSelected.data.percent / 100);
 
         const resultConnect = connects.filter(
           connect => connect.source === nodeSelected.id
@@ -553,33 +522,34 @@ export const ActionsWebhookService = async (
       let isMenu: boolean;
 
       if (nodeSelected.type === "menu") {
-        console.log(650, "menu");
+
         if (pressKey) {
-          const filterOne = connectStatic.filter(
-            confil => confil.source === next
-          );
-          const filterTwo = filterOne.filter(
-            filt2 => filt2.sourceHandle === "a" + pressKey
-          );
+
+          const filterOne = connectStatic.filter(confil => confil.source === next)
+          const filterTwo = filterOne.filter(filt2 => filt2.sourceHandle === "a" + pressKey)
           if (filterTwo.length > 0) {
-            execFn = filterTwo[0].target;
+            execFn = filterTwo[0].target
           } else {
-            execFn = undefined;
+            execFn = undefined
           }
+          // execFn =
+          //   connectStatic
+          //     .filter(confil => confil.source === next)
+          //     .filter(filt2 => filt2.sourceHandle === "a" + pressKey)[0]?.target ??
+          //   undefined;
           if (execFn === undefined) {
             break;
           }
           pressKey = "999";
 
           const isNodeExist = nodes.filter(item => item.id === execFn);
-          console.log(674, "menu");
+
           if (isNodeExist.length > 0) {
             isMenu = isNodeExist[0].type === "menu" ? true : false;
           } else {
             isMenu = false;
           }
         } else {
-          console.log(681, "menu");
           let optionsMenu = "";
           nodeSelected.data.arrayOption.map(item => {
             optionsMenu += `[${item.number}] ${item.value}\n`;
@@ -587,18 +557,21 @@ export const ActionsWebhookService = async (
 
           const menuCreate = `${nodeSelected.data.message}\n\n${optionsMenu}`;
 
-          const webhook = ticket.dataWebhook;
-
           let msg;
-          if (webhook && webhook.hasOwnProperty("variables")) {
+          if (dataWebhook === "") {
             msg = {
-              body: replaceMessages(webhook, menuCreate),
+              body: menuCreate,
               number: numberClient,
               companyId: companyId
             };
           } else {
+            const dataLocal = {
+              nome: createFieldJsonName,
+              numero: numberClient,
+              email: createFieldJsonEmail
+            };
             msg = {
-              body: menuCreate,
+              body: replaceMessages(menuCreate, details, dataWebhook, dataLocal),
               number: numberClient,
               companyId: companyId
             };
@@ -614,7 +587,16 @@ export const ActionsWebhookService = async (
             read: true
           };
 
-          await typeSimulation(ticket, "composing");
+          //await CreateMessageService({ messageData: messageData, companyId });
+
+          //await SendWhatsAppMessage({ body: bodyFor, ticket: ticketDetails, quotedMsg: null })
+
+          // await SendMessage(whatsapp, {
+          //   number: numberClient,
+          //   body: msg.body
+          // });
+
+          await typeSimulation(ticket, 'composing')
 
           await SendWhatsAppMessage({
             body: msg.body,
@@ -631,19 +613,11 @@ export const ActionsWebhookService = async (
 
           if (ticket) {
             ticket = await Ticket.findOne({
-              where: {
-                id: ticket.id,
-                whatsappId: whatsappId,
-                companyId: companyId
-              }
+              where: { id: ticket.id, whatsappId: whatsappId, companyId: companyId }
             });
           } else {
             ticket = await Ticket.findOne({
-              where: {
-                id: idTicket,
-                whatsappId: whatsappId,
-                companyId: companyId
-              }
+              where: { id: idTicket, whatsappId: whatsappId, companyId: companyId }
             });
           }
 
@@ -667,7 +641,7 @@ export const ActionsWebhookService = async (
       let isContinue = false;
 
       if (pressKey === "999" && execCount > 0) {
-        console.log(587, "ActionsWebhookService | 587");
+        console.log(587, "ActionsWebhookService | 587")
 
         pressKey = undefined;
         let result = connects.filter(connect => connect.source === execFn)[0];
@@ -689,7 +663,7 @@ export const ActionsWebhookService = async (
           isRandomizer = false;
           result = next;
         } else {
-          result = connects.filter(connect => connect.source === nodeSelected.id)[0];
+          result = connects.filter(connect => connect.source === next)[0];
         }
 
         if (typeof result === "undefined") {
@@ -699,7 +673,7 @@ export const ActionsWebhookService = async (
             next = result.target;
           }
         }
-        console.log(619, "ActionsWebhookService");
+        console.log(619, "ActionsWebhookService")
       }
 
       if (!pressKey && !isContinue) {
@@ -707,16 +681,21 @@ export const ActionsWebhookService = async (
           connect => connect.source === nodeSelected.id
         ).length;
 
-        console.log(626, "ActionsWebhookService");
+        console.log(626, "ActionsWebhookService")
+
 
         if (nextNode === 0) {
-          console.log(654, "ActionsWebhookService");
+
+          console.log(654, "ActionsWebhookService")
 
           await Ticket.findOne({
             where: { id: idTicket, whatsappId, companyId: companyId }
           });
           await ticket.update({
-            lastFlowId: nodeSelected.id,
+            lastFlowId: null,
+            dataWebhook: {
+              status: "process",
+            },
             hashFlowId: null,
             flowWebhook: false,
             flowStopped: idFlowDb.toString()
@@ -727,43 +706,41 @@ export const ActionsWebhookService = async (
 
       isContinue = false;
 
-      if (next === "" || next === null) {
-        if (i + 1 < nodes.length) {
-          next = nodes[i + 1].id;
-        } else {
-          break;
-        }
+      if (next === "") {
+        break;
       }
 
-      console.log(678, "ActionsWebhookService");
+      console.log(678, "ActionsWebhookService")
 
       console.log("UPDATE10...");
       ticket = await Ticket.findOne({
         where: { id: idTicket, whatsappId, companyId: companyId }
       });
 
-      if (ticket && ticket.status === "closed") {
+
+      if (ticket.status === "closed") {
         io.of(String(companyId))
+          // .to(oldStatus)
+          // .to(ticketId.toString())
           .emit(`company-${ticket.companyId}-ticket`, {
             action: "delete",
             ticketId: ticket.id
           });
+
       }
 
       console.log("UPDATE12...");
-      if (ticket) {
-        await ticket.update({
-          whatsappId: whatsappId,
-          queueId: ticket?.queueId,
-          userId: null,
-          companyId: companyId,
-          flowWebhook: true,
-          lastFlowId: nodeSelected.id,
-          nextFlowId: next, // Garante que o próximo nó seja salvo
-          hashFlowId: hashWebhookId,
-          flowStopped: idFlowDb.toString()
-        });
-      }
+      await ticket.update({
+        whatsappId: whatsappId,
+        queueId: ticket?.queueId,
+        userId: null,
+        companyId: companyId,
+        flowWebhook: true,
+        lastFlowId: nodeSelected.id,
+        dataWebhook: dataWebhook,
+        hashFlowId: hashWebhookId,
+        flowStopped: idFlowDb.toString()
+      });
 
       noAlterNext = false;
       execCount++;
@@ -771,26 +748,27 @@ export const ActionsWebhookService = async (
 
     return "ds";
   } catch (error) {
-    logger.error(error);
-    return "error";
+    logger.error(error)
   }
 };
 
 const constructJsonLine = (line: string, json: any) => {
-  let valor = json;
-  const chaves = line.split(".");
+  let valor = json
+  const chaves = line.split(".")
 
   if (chaves.length === 1) {
-    return valor[chaves[0]];
+    return valor[chaves[0]]
   }
 
   for (const chave of chaves) {
-    valor = valor[chave];
+    valor = valor[chave]
   }
-  return valor;
+  return valor
 };
 
+
 function removerNaoLetrasNumeros(texto: string) {
+  // Substitui todos os caracteres que não são letras ou números por vazio
   return texto.replace(/[^a-zA-Z0-9]/g, "");
 }
 
@@ -808,20 +786,16 @@ const intervalWhats = (time: string) => {
   return new Promise(resolve => setTimeout(resolve, seconds));
 };
 
-const replaceMessages = (variables, message) => {
-  return message.replace(
-    /{{\s*([^{}\s]+)\s*}}/g,
-    (match, key) => variables[key] || ""
-  );
-};
 
-const replaceMessagesOld = (
+
+const replaceMessages = (
   message: string,
   details: any,
   dataWebhook: any,
   dataNoWebhook?: any
 ) => {
   const matches = message.match(/\{([^}]+)\}/g);
+
 
   if (dataWebhook) {
     let newTxt = message.replace(/{+nome}+/, dataNoWebhook.nome);
@@ -847,4 +821,7 @@ const replaceMessagesOld = (
   } else {
     return message;
   }
+
+
+
 };

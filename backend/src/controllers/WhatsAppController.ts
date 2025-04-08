@@ -225,7 +225,7 @@ export const storeFacebook = async (
 
     if (data.length === 0) {
       return res.status(400).json({
-        error: "Facebook page not found 1"
+        error: "Facebook page not found"
       });
     }
     const io = getIO();
@@ -325,7 +325,7 @@ export const storeFacebook = async (
   } catch (error) {
     console.log(error);
     return res.status(400).json({
-      error: "Facebook page not found 2"
+      error: "Facebook page not found"
     });
   }
 };
